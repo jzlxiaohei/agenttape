@@ -1,0 +1,5 @@
+/tracelab
+*.jsonl
+/dist/
+/tracelab-data/
+.DS_Store

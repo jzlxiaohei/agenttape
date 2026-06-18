@@ -1,0 +1,114 @@
+{
+  "app": {
+    "title": "tracelab",
+    "subtitle": "Coding-Agent 请求实验室"
+  },
+  "nav": {
+    "sessions": "会话",
+    "search": "搜索",
+    "settings": "设置"
+  },
+  "lang": { "toggle": "EN" },
+  "sessions": {
+    "title": "会话",
+    "empty": "还没有捕获到会话。通过代理启动 cc 或 codex。",
+    "loading": "加载会话中…",
+    "error": "加载会话失败",
+    "events": "{{count}} 个事件",
+    "client": "客户端",
+    "model": "模型",
+    "upstream": "上游"
+  },
+  "client": {
+    "claude_code": "Claude Code",
+    "codex_cli": "Codex"
+  },
+  "search": {
+    "placeholder": "搜索 prompt、消息、工具调用…",
+    "client": "客户端",
+    "provider": "提供方",
+    "tag": "标签",
+    "searching": "搜索中…",
+    "count": "{{count}} 条结果"
+  },
+  "event": { "probe": "控制 / 探测" },
+  "detail": {
+    "pick_session": "请选择一个会话",
+    "pick_event": "请选择一个事件",
+    "empty": "该会话暂无事件",
+    "loading": "加载中…",
+    "error": "加载失败",
+    "event": "事件",
+    "status": "状态",
+    "duration": "耗时",
+    "request": "请求",
+    "response": "响应",
+    "raw": "原始内容",
+    "diff": "对比",
+    "usage": "用量",
+    "composition": "请求构成(近似 token,仅请求)",
+    "expand": "展开",
+    "collapse": "收起",
+    "no_parse": "未规范化"
+  },
+  "filter": {
+    "parts": "显示:",
+    "blocks": "块类型:",
+    "rounds": "按轮次",
+    "markdown": "Markdown"
+  },
+  "round": {
+    "preamble": "前导",
+    "n": "第 {{n}} 轮",
+    "tools": "{{count}} 次工具调用",
+    "exchange": "第 {{n}} 次往返"
+  },
+  "tools": {
+    "show_schema": "schema",
+    "hide_schema": "收起"
+  },
+  "section": {
+    "system": "系统提示",
+    "tools": "工具",
+    "messages": "消息"
+  },
+  "role": {
+    "system": "系统",
+    "user": "用户",
+    "assistant": "助手",
+    "tool": "工具"
+  },
+  "block": {
+    "text": "文本",
+    "reasoning": "推理",
+    "tool_call": "工具调用",
+    "tool_result": "工具结果",
+    "image": "图片",
+    "unknown": "未知块"
+  },
+  "tag": {
+    "suspected": "(疑似)",
+    "tool_call": "工具调用",
+    "reasoning": "推理",
+    "compaction": "上下文压缩",
+    "subagent": "子智能体"
+  },
+  "diff": {
+    "no_prev": "本会话内没有更早的补全可对比。",
+    "earlier": "更早",
+    "current": "本次请求",
+    "text": "文本",
+    "semantic": "语义",
+    "added": "新增",
+    "removed": "删除",
+    "unchanged": "{{count}} 条未变"
+  },
+  "raw": {
+    "request_body": "请求",
+    "response_body": "响应",
+    "loading": "加载原始内容…",
+    "fold_all": "全部折叠",
+    "unfold_all": "全部展开",
+    "download": "下载"
+  }
+}

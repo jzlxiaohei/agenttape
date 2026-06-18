@@ -1,0 +1,114 @@
+{
+  "app": {
+    "title": "tracelab",
+    "subtitle": "coding-agent request lab"
+  },
+  "nav": {
+    "sessions": "Sessions",
+    "search": "Search",
+    "settings": "Settings"
+  },
+  "lang": { "toggle": "中文" },
+  "sessions": {
+    "title": "Sessions",
+    "empty": "No sessions captured yet. Launch cc or codex through the proxy.",
+    "loading": "Loading sessions…",
+    "error": "Failed to load sessions",
+    "events": "{{count}} events",
+    "client": "Client",
+    "model": "Model",
+    "upstream": "Upstream"
+  },
+  "client": {
+    "claude_code": "Claude Code",
+    "codex_cli": "Codex"
+  },
+  "search": {
+    "placeholder": "Search prompts, messages, tool calls…",
+    "client": "Client",
+    "provider": "Provider",
+    "tag": "Tag",
+    "searching": "Searching…",
+    "count": "{{count}} results"
+  },
+  "event": { "probe": "control / probe" },
+  "detail": {
+    "pick_session": "Select a session",
+    "pick_event": "Select an event",
+    "empty": "No events in this session",
+    "loading": "Loading…",
+    "error": "Failed to load",
+    "event": "Event",
+    "status": "Status",
+    "duration": "Duration",
+    "request": "Request",
+    "response": "Response",
+    "raw": "Raw",
+    "diff": "Diff",
+    "usage": "usage",
+    "composition": "Request composition (approx tokens, request only)",
+    "expand": "Show more",
+    "collapse": "Show less",
+    "no_parse": "Not normalized"
+  },
+  "filter": {
+    "parts": "Show:",
+    "blocks": "Blocks:",
+    "rounds": "Group rounds",
+    "markdown": "Markdown"
+  },
+  "round": {
+    "preamble": "Preamble",
+    "n": "Round {{n}}",
+    "tools": "{{count}} tool calls",
+    "exchange": "exchange {{n}}"
+  },
+  "tools": {
+    "show_schema": "schema",
+    "hide_schema": "hide"
+  },
+  "section": {
+    "system": "System",
+    "tools": "Tools",
+    "messages": "Messages"
+  },
+  "role": {
+    "system": "System",
+    "user": "User",
+    "assistant": "Assistant",
+    "tool": "Tool"
+  },
+  "block": {
+    "text": "Text",
+    "reasoning": "Reasoning",
+    "tool_call": "Tool call",
+    "tool_result": "Tool result",
+    "image": "image",
+    "unknown": "unknown block"
+  },
+  "tag": {
+    "suspected": "(suspected)",
+    "tool_call": "tool call",
+    "reasoning": "reasoning",
+    "compaction": "compaction",
+    "subagent": "subagent"
+  },
+  "diff": {
+    "no_prev": "No earlier completion in this session to compare against.",
+    "earlier": "Earlier",
+    "current": "This request",
+    "text": "Text",
+    "semantic": "Semantic",
+    "added": "added",
+    "removed": "removed",
+    "unchanged": "{{count}} unchanged"
+  },
+  "raw": {
+    "request_body": "Request",
+    "response_body": "Response",
+    "loading": "Loading raw…",
+    "fold_all": "Fold all",
+    "unfold_all": "Unfold all",
+    "download": "Download"
+  }
+}

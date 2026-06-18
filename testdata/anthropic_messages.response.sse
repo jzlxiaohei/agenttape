@@ -1,0 +1,45 @@
+event: message_start
+data: {"type":"message_start","message":{"model":"claude-opus-4-8","id":"msg_01D3AN9VAc11J1of8FM7YsXC","type":"message","role":"assistant","content":[],"stop_reason":null,"stop_sequence":null,"stop_details":null,"usage":{"input_tokens":6846,"cache_creation_input_tokens":177,"cache_read_input_tokens":36508,"cache_creation":{"ephemeral_5m_input_tokens":177,"ephemeral_1h_input_tokens":0},"output_tokens":1,"service_tier":"standard","inference_geo":"global"}}         }
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}   }
+
+event: ping
+data: {"type": "ping"}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"我"}           }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"是 Claude Code，Anthropic 官方的命令行编程助手。基于 Cla"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"ude Opus 4.8 模型运行。\n\n我可以帮你处理这个"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"仓库（**aethertrace** —— 一个代理捕获工具）里的各种软件工"}            }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"程任务，比如：\n\n- 读懂、解释代码\n- 写新功"}      }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"能、改 bug\n- 重构、写测试\n- 跑命"}        }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"令、查 git 历史等\n\n我看到你当前有一些未提交的改"}              }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"动（`forward_proxy.go`、`reverse_proxy.go`、`viewer.go` 等），以及新增"}          }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"的 `viewer.html` 和 `test_guide/claude/`。\n\n有什么需要我帮忙的吗？"}             }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0               }
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null,"stop_details":null},"usage":{"input_tokens":6846,"cache_creation_input_tokens":177,"cache_read_input_tokens":36508,"output_tokens":235,"output_tokens_details":{"thinking_tokens":0},"iterations":[{"input_tokens":6846,"output_tokens":235,"cache_read_input_tokens":36508,"cache_creation_input_tokens":177,"cache_creation":{"ephemeral_5m_input_tokens":177,"ephemeral_1h_input_tokens":0},"type":"message"}]},"context_management":{"applied_edits":[]}   }
+
+event: message_stop
+data: {"type":"message_stop"    }
+
