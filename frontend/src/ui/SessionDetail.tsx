@@ -3,6 +3,8 @@ import { useUIStore } from "@/store/ui";
 import { useSessionEventsView } from "@/viewmodel/detail";
 import { EventTimeline } from "./EventTimeline";
 import { EventDetailPanel } from "./EventDetailPanel";
+import { HookDetailPanel } from "./HookDetailPanel";
+import { DetailLinksProvider } from "./DetailLinks";
 
 // Main pane: the selected session's event timeline + the selected event detail.
 // Selection defaults to the latest completion (computed in the viewmodel), with
@@ -21,6 +23,8 @@ export function SessionDetail() {
   if (events.length === 0) return <Centered>{t("detail.empty")}</Centered>;
 
   const effectiveId = selectedEventId ?? defaultEventId;
+  const selected = events.find((e) => e.id === effectiveId);
+  const isHook = selected?.kind === "hook_event";
 
   return (
     <div className="flex h-full">
@@ -28,11 +32,15 @@ export function SessionDetail() {
         <EventTimeline events={events} selectedId={effectiveId} onSelect={selectEvent} />
       </div>
       <div className="min-w-0 flex-1 overflow-y-auto">
-        {effectiveId ? (
-          <EventDetailPanel eventId={effectiveId} />
-        ) : (
-          <Centered>{t("detail.pick_event")}</Centered>
-        )}
+        <DetailLinksProvider events={events}>
+          {!effectiveId ? (
+            <Centered>{t("detail.pick_event")}</Centered>
+          ) : isHook ? (
+            <HookDetailPanel eventId={effectiveId} />
+          ) : (
+            <EventDetailPanel eventId={effectiveId} />
+          )}
+        </DetailLinksProvider>
       </div>
     </div>
   );

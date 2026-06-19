@@ -1,7 +1,9 @@
 import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
+import { ArrowUpRight } from "lucide-react";
 import type { ContentBlock } from "@/api/events";
 import { useUIStore } from "@/store/ui";
+import { useDetailLinks } from "./DetailLinks";
 import { Expandable } from "./Expandable";
 
 const Markdown = lazy(() => import("./Markdown"));
@@ -36,14 +38,7 @@ function BlockView({ block }: { block: ContentBlock }) {
         </div>
       );
     case "tool_call":
-      return (
-        <div className="rounded-lg border border-toolcall/30 bg-toolcall/5 px-3 py-2">
-          <div className="mb-1 text-xs font-medium text-toolcall">
-            {t("block.tool_call")}: <span className="mono">{block.tool_call?.name}</span>
-          </div>
-          <JsonPreview value={block.tool_call?.arguments} />
-        </div>
-      );
+      return <ToolCallBlock block={block} />;
     case "tool_result":
       return (
         <div className="rounded-lg border border-toolresult/30 bg-toolresult/5 px-3 py-2">
@@ -59,6 +54,34 @@ function BlockView({ block }: { block: ContentBlock }) {
     default:
       return <div className="text-xs italic text-muted-foreground">[{t("block.unknown")}]</div>;
   }
+}
+
+// A tool_call block, with a jump to its harness hook (PreToolUse) if one exists
+// in the session — connecting the request layer to the orchestration layer.
+function ToolCallBlock({ block }: { block: ContentBlock }) {
+  const { t } = useTranslation();
+  const links = useDetailLinks();
+  const selectEvent = useUIStore((s) => s.selectEvent);
+  const hook = links.hookForToolCall(block.tool_call?.id);
+  return (
+    <div className="rounded-lg border border-toolcall/30 bg-toolcall/5 px-3 py-2">
+      <div className="mb-1 flex items-center justify-between gap-2 text-xs font-medium text-toolcall">
+        <span>
+          {t("block.tool_call")}: <span className="mono">{block.tool_call?.name}</span>
+        </span>
+        {hook && (
+          <button
+            onClick={() => selectEvent(hook.id)}
+            className="inline-flex items-center gap-1 rounded-md border border-accent/40 px-1.5 py-0.5 text-accent hover:bg-accent/10"
+          >
+            <ArrowUpRight size={12} />
+            {t("link.to_hook")}
+          </button>
+        )}
+      </div>
+      <JsonPreview value={block.tool_call?.arguments} />
+    </div>
+  );
 }
 
 function Text({ text, muted }: { text: string; muted?: boolean }) {

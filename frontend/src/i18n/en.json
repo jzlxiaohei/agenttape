@@ -32,6 +32,26 @@
     "count": "{{count}} results"
   },
   "event": { "probe": "control / probe" },
+  "timeline": {
+    "requests": "Requests",
+    "timeline": "Timeline"
+  },
+  "turn": {
+    "session": "Session start",
+    "n": "Turn {{n}}",
+    "summary": "{{http}} calls · {{hooks}} hooks"
+  },
+  "link": {
+    "to_hook": "hook",
+    "to_request": "Triggering request"
+  },
+  "hook": {
+    "label": "hook",
+    "event": "Hook event",
+    "tool_call_id": "Tool call id",
+    "fields": "Key fields",
+    "payload": "Payload"
+  },
   "detail": {
     "pick_session": "Select a session",
     "pick_event": "Select an event",

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildSectionBars, filterBlocks, filterMessages, groupIntoRounds, orderEvents } from "./detail";
+import { buildSectionBars, filterBlocks, filterMessages, groupIntoRounds, groupIntoTurns, orderEvents } from "./detail";
 import type { BlockKind } from "@/store/ui";
 import type { ContentBlock, EventSummary, Message } from "@/api/events";
 
@@ -15,8 +15,37 @@ function ev(id: string, started_at: string, is_completion: boolean): EventSummar
     is_completion,
     response_status: 200,
     total_tokens: 0,
+    hook_event: "",
+    tool_call_id: "",
   };
 }
+
+function hookEv(id: string, started_at: string, name: string): EventSummary {
+  return { ...ev(id, started_at, false), kind: "hook_event", hook_event: name };
+}
+
+describe("groupIntoTurns", () => {
+  it("returns null when there are no prompt markers (fall back to flat)", () => {
+    expect(groupIntoTurns([ev("a", "2026-06-19T10:00:00Z", true)])).toBeNull();
+  });
+
+  it("splits at UserPromptSubmit with a pre-prompt session group", () => {
+    const events = [
+      hookEv("s", "2026-06-19T10:00:00Z", "SessionStart"),
+      hookEv("p1", "2026-06-19T10:01:00Z", "UserPromptSubmit"),
+      ev("h1", "2026-06-19T10:01:30Z", true),
+      hookEv("pt", "2026-06-19T10:01:40Z", "PreToolUse"),
+      hookEv("p2", "2026-06-19T10:05:00Z", "UserPromptSubmit"),
+      ev("h2", "2026-06-19T10:05:30Z", true),
+    ];
+    const turns = groupIntoTurns(events)!;
+    expect(turns.map((t) => t.index)).toEqual([0, 1, 2]);
+    expect(turns[0].events.map((e) => e.id)).toEqual(["s"]); // session start
+    expect(turns[1].httpCount).toBe(1);
+    expect(turns[1].hookCount).toBe(2); // UserPromptSubmit + PreToolUse
+    expect(turns[2].events.map((e) => e.id)).toEqual(["p2", "h2"]);
+  });
+});
 
 describe("orderEvents", () => {
   it("sorts newest-first and defaults to the newest completion", () => {

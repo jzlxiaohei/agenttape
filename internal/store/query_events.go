@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-// EventSummary is a row in a session's event timeline.
+// EventSummary is a row in a session's event timeline (http or hook).
 type EventSummary struct {
 	ID             string `json:"id"`
 	Kind           string `json:"kind"`
@@ -18,6 +18,8 @@ type EventSummary struct {
 	IsCompletion   bool   `json:"is_completion"`
 	ResponseStatus int    `json:"response_status"`
 	TotalTokens    int64  `json:"total_tokens"`
+	HookEvent      string `json:"hook_event"`   // event_name for hook events
+	ToolCallID     string `json:"tool_call_id"` // links a tool hook to a tool_call
 }
 
 // ListEvents returns a session's events in chronological order (http + hook
@@ -27,8 +29,11 @@ func (s *Store) ListEvents(sessionID string) ([]EventSummary, error) {
 		`SELECT e.id, e.kind, e.started_at,
 		   COALESCE(h.method,''), COALESCE(h.target,''), COALESCE(h.provider,''),
 		   COALESCE(h.model,''), COALESCE(h.is_completion,0),
-		   COALESCE(h.response_status,0), COALESCE(h.total_tokens,0)
-		 FROM events e LEFT JOIN http_exchanges h ON h.event_id = e.id
+		   COALESCE(h.response_status,0), COALESCE(h.total_tokens,0),
+		   COALESCE(hk.event_name,''), COALESCE(hk.tool_call_id,'')
+		 FROM events e
+		   LEFT JOIN http_exchanges h ON h.event_id = e.id
+		   LEFT JOIN hook_events hk ON hk.event_id = e.id
 		 WHERE e.session_id = ? ORDER BY e.started_at, e.created_at`, sessionID)
 	if err != nil {
 		return nil, err
@@ -39,7 +44,7 @@ func (s *Store) ListEvents(sessionID string) ([]EventSummary, error) {
 		var e EventSummary
 		var isComp int
 		if err := rows.Scan(&e.ID, &e.Kind, &e.StartedAt, &e.Method, &e.Target,
-			&e.Provider, &e.Model, &isComp, &e.ResponseStatus, &e.TotalTokens); err != nil {
+			&e.Provider, &e.Model, &isComp, &e.ResponseStatus, &e.TotalTokens, &e.HookEvent, &e.ToolCallID); err != nil {
 			return nil, err
 		}
 		e.IsCompletion = isComp == 1
@@ -81,6 +86,10 @@ type EventDetail struct {
 	Normalized     json.RawMessage `json:"normalized,omitempty"`
 	Tags           []TagInfo       `json:"tags"`
 	RawFiles       []RawFileInfo   `json:"raw_files"`
+	// hook-only fields
+	Runtime    string `json:"runtime,omitempty"`
+	EventName  string `json:"event_name,omitempty"`
+	ToolCallID string `json:"tool_call_id,omitempty"`
 }
 
 // GetEvent assembles the full detail for one event. Returns sql.ErrNoRows if the
@@ -93,12 +102,15 @@ func (s *Store) GetEvent(id string) (*EventDetail, error) {
 		`SELECT e.id, e.kind, e.session_id, e.started_at, e.completed_at, e.duration_ms,
 		   COALESCE(h.method,''), COALESCE(h.target,''), COALESCE(h.response_status,0),
 		   COALESCE(h.provider,''), COALESCE(h.model,''), COALESCE(h.is_completion,0),
-		   COALESCE(h.normalize_error,''), COALESCE(h.normalized_json,'')
-		 FROM events e LEFT JOIN http_exchanges h ON h.event_id = e.id
+		   COALESCE(h.normalize_error,''), COALESCE(h.normalized_json,''),
+		   COALESCE(hk.runtime,''), COALESCE(hk.event_name,''), COALESCE(hk.tool_call_id,'')
+		 FROM events e
+		   LEFT JOIN http_exchanges h ON h.event_id = e.id
+		   LEFT JOIN hook_events hk ON hk.event_id = e.id
 		 WHERE e.id = ?`, id).Scan(
 		&d.ID, &d.Kind, &d.SessionID, &d.StartedAt, &d.CompletedAt, &d.DurationMS,
 		&d.Method, &d.Target, &d.ResponseStatus, &d.Provider, &d.Model, &isComp,
-		&d.NormalizeError, &normJSON)
+		&d.NormalizeError, &normJSON, &d.Runtime, &d.EventName, &d.ToolCallID)
 	if err != nil {
 		return nil, err
 	}

@@ -32,6 +32,26 @@
     "count": "{{count}} 条结果"
   },
   "event": { "probe": "控制 / 探测" },
+  "timeline": {
+    "requests": "请求",
+    "timeline": "时间线"
+  },
+  "turn": {
+    "session": "会话开始",
+    "n": "第 {{n}} 回合",
+    "summary": "{{http}} 次调用 · {{hooks}} 个 hook"
+  },
+  "link": {
+    "to_hook": "hook",
+    "to_request": "触发的请求"
+  },
+  "hook": {
+    "label": "hook",
+    "event": "Hook 事件",
+    "tool_call_id": "工具调用 id",
+    "fields": "关键字段",
+    "payload": "Payload"
+  },
   "detail": {
     "pick_session": "请选择一个会话",
     "pick_event": "请选择一个事件",

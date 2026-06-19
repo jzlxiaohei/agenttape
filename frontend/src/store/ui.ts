@@ -33,12 +33,14 @@ interface UIState {
   searchTag: string;
   searchProvider: string;
   searchClient: string;
+  timelineMode: "requests" | "timeline";
 
   selectSession: (id: string | null) => void;
   selectEvent: (id: string | null) => void;
   openEvent: (sessionId: string, eventId: string) => void;
   setSearchQuery: (q: string) => void;
   setSearchFilter: (key: "searchTag" | "searchProvider" | "searchClient", value: string) => void;
+  setTimelineMode: (m: "requests" | "timeline") => void;
   setDetailTab: (t: DetailTab) => void;
   togglePart: (p: DetailPart) => void;
   toggleBlock: (b: BlockKind) => void;
@@ -60,12 +62,14 @@ export const useUIStore = create<UIState>((set) => ({
   searchTag: "",
   searchProvider: "",
   searchClient: "",
+  timelineMode: "requests",
 
   selectSession: (id) => set({ selectedSessionId: id, selectedEventId: null }),
   selectEvent: (id) => set({ selectedEventId: id }),
   openEvent: (sessionId, eventId) => set({ selectedSessionId: sessionId, selectedEventId: eventId }),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setSearchFilter: (key, value) => set({ [key]: value } as Partial<UIState>),
+  setTimelineMode: (m) => set({ timelineMode: m }),
   setDetailTab: (t) => set({ detailTab: t }),
   togglePart: (p) => set((s) => ({ parts: { ...s.parts, [p]: !s.parts[p] } })),
   toggleBlock: (b) => set((s) => ({ blocks: { ...s.blocks, [b]: !s.blocks[b] } })),

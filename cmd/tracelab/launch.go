@@ -27,11 +27,11 @@ func runLaunch(args []string) error {
 		*upstream = defUpstream
 	}
 
-	token, err := register(*serverURL, client, *upstream)
+	token, sessionID, err := register(*serverURL, client, *upstream)
 	if err != nil {
 		return fmt.Errorf("register session: %w", err)
 	}
-	sess := &httpcap.Session{Token: token}
+	sess := &httpcap.Session{ID: sessionID, Token: token}
 
 	cmd := chooseLauncher(*kind, *serverURL, sess, fs.Args())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
@@ -59,21 +59,22 @@ func chooseLauncher(kind, serverURL string, sess *httpcap.Session, args []string
 	return httpcap.LaunchClaudeCode(serverURL, sess, args...)
 }
 
-func register(serverURL, client, upstream string) (string, error) {
+func register(serverURL, client, upstream string) (token, sessionID string, err error) {
 	body, _ := json.Marshal(map[string]string{"client": client, "upstream": upstream})
 	resp, err := http.Post(serverURL+"/_register", "application/json", bytes.NewReader(body))
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("server returned %d", resp.StatusCode)
+		return "", "", fmt.Errorf("server returned %d", resp.StatusCode)
 	}
 	var out struct {
-		Token string `json:"token"`
+		Token     string `json:"token"`
+		SessionID string `json:"session_id"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
-		return "", err
+		return "", "", err
 	}
-	return out.Token, nil
+	return out.Token, out.SessionID, nil
 }

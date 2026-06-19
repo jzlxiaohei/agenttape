@@ -16,6 +16,48 @@ export function useSessionEventsView(sessionId: string | null): SessionEventsVie
   return { events: ordered, defaultEventId, isLoading, isError };
 }
 
+// A session-level Turn: one user prompt and everything (http calls + hooks) it
+// triggered, up to the next prompt. Index 0 is the pre-prompt session start.
+// This is a level ABOVE the request-internal "rounds" in the detail view.
+export interface Turn {
+  key: string;
+  index: number;
+  events: EventSummary[];
+  httpCount: number;
+  hookCount: number;
+  startedAt: string;
+}
+
+// groupIntoTurns splits a session's events into turns at each UserPromptSubmit
+// hook. Returns null when there are no prompt markers (e.g. an http-only or
+// codex session) so the caller can fall back to a flat list. Turns are
+// chronological; events within a turn are chronological too.
+export function groupIntoTurns(events: EventSummary[]): Turn[] | null {
+  const hasPrompt = events.some((e) => e.kind === "hook_event" && e.hook_event === "UserPromptSubmit");
+  if (!hasPrompt) return null;
+
+  const asc = [...events].sort((a, b) => a.started_at.localeCompare(b.started_at));
+  const turns: Turn[] = [];
+  let idx = 0;
+  let cur: Turn | null = null;
+  const start = (e: EventSummary) => {
+    cur = { key: `t-${e.id}`, index: idx, events: [], httpCount: 0, hookCount: 0, startedAt: e.started_at };
+    turns.push(cur);
+  };
+  for (const e of asc) {
+    if (e.kind === "hook_event" && e.hook_event === "UserPromptSubmit") {
+      idx++;
+      start(e);
+    } else if (!cur) {
+      start(e); // session-start group (index 0)
+    }
+    cur!.events.push(e);
+    if (e.kind === "hook_event") cur!.hookCount++;
+    else cur!.httpCount++;
+  }
+  return turns;
+}
+
 // orderEvents sorts events newest-first and picks the newest completion as the
 // default selection. Pure for testability.
 export function orderEvents(events: EventSummary[]): {

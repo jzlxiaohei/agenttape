@@ -68,6 +68,8 @@ export interface EventSummary {
   is_completion: boolean;
   response_status: number;
   total_tokens: number;
+  hook_event: string;
+  tool_call_id: string;
 }
 export interface TagInfo {
   tag: string;
@@ -98,6 +100,10 @@ export interface EventDetail {
   normalized?: NormalizedEnvelope;
   tags: TagInfo[];
   raw_files: RawFileInfo[];
+  // hook-only
+  runtime?: string;
+  event_name?: string;
+  tool_call_id?: string;
 }
 
 export function fetchSessionEvents(sessionId: string): Promise<EventSummary[]> {

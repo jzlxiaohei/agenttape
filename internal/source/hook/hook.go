@@ -5,6 +5,7 @@
 package hook
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 
@@ -48,6 +49,20 @@ func (a *Adapter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ev := event.NewHookEvent(source.RandomID(), runtime, eventName, payload)
 	if sid := q.Get("session"); sid != "" {
 		ev.Correlation.SessionID = sid
+	}
+	// Best-effort: lift the tool id from the payload so a hook can be correlated
+	// with the tool_call in its session's HTTP captures.
+	if ev.Hook != nil {
+		var p struct {
+			ToolUseID  string `json:"tool_use_id"`
+			ToolCallID string `json:"tool_call_id"`
+		}
+		if json.Unmarshal(payload, &p) == nil {
+			ev.Hook.ToolCallID = orDefault(p.ToolUseID, p.ToolCallID)
+			if ev.Hook.ToolCallID == "unknown" {
+				ev.Hook.ToolCallID = ""
+			}
+		}
 	}
 	if a.emit != nil {
 		a.emit(&ev)

@@ -10,15 +10,29 @@ import (
 // var on the child process — the parent env and global config are untouched
 // (next.md 1.1).
 func TestLaunchClaudeCode_NonInvasive(t *testing.T) {
-	sess := &Session{Token: "tok123"}
+	sess := &Session{ID: "sess9", Token: "tok123"}
 	cmd := LaunchClaudeCode("http://127.0.0.1:8787", sess, "--help")
 
 	want := "ANTHROPIC_BASE_URL=http://127.0.0.1:8787/s/tok123"
 	if !slices.Contains(cmd.Env, want) {
 		t.Errorf("missing %q in child env", want)
 	}
-	if !strings.HasSuffix(cmd.Path, "claude") && cmd.Args[0] != "claude" {
+	if cmd.Args[0] != "claude" {
 		t.Errorf("unexpected command: %v", cmd.Args)
+	}
+	// Hooks are injected via --settings (a JSON string), never a global file.
+	joined := strings.Join(cmd.Args, " ")
+	if !strings.Contains(joined, "--settings") {
+		t.Fatalf("expected --settings injection, got %v", cmd.Args)
+	}
+	if !strings.Contains(joined, "/_hook") || !strings.Contains(joined, "session=sess9") {
+		t.Errorf("hook settings missing endpoint/session: %s", joined)
+	}
+	// Lifecycle events we care about are present.
+	for _, ev := range []string{"PreToolUse", "PostToolUse", "SubagentStop", "PreCompact", "PostCompact", "Notification", "PermissionRequest", "TaskCreated"} {
+		if !strings.Contains(joined, "event="+ev) {
+			t.Errorf("missing hook for %s", ev)
+		}
 	}
 }
 
