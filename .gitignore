@@ -2,4 +2,5 @@
 *.jsonl
 /dist/
 /tracelab-data/
+/.cache/
 .DS_Store

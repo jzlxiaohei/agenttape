@@ -61,7 +61,8 @@ CREATE TABLE IF NOT EXISTS hook_events (
   event_id   TEXT PRIMARY KEY REFERENCES events(id),
   runtime    TEXT,
   event_name TEXT,
-  tool_call_id TEXT
+  tool_call_id TEXT,
+  tool_name  TEXT                  -- tool a Pre/PostToolUse hook refers to
 );
 
 -- Pointers to raw bytes on disk (filesystem storage, kept as a feature).

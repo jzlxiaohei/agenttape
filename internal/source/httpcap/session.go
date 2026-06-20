@@ -22,6 +22,12 @@ type Session struct {
 	Upstream string `json:"upstream"` // e.g. "https://api.anthropic.com"
 }
 
+// SessionBaseURL is the per-session proxy entrypoint a client should be pointed
+// at: <proxyBase>/s/<token>.
+func SessionBaseURL(proxyBase string, sess *Session) string {
+	return strings.TrimRight(proxyBase, "/") + "/s/" + sess.Token
+}
+
 // Sessions is a concurrency-safe registry of active capture sessions.
 type Sessions struct {
 	mu      sync.RWMutex

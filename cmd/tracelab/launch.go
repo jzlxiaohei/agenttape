@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 
+	"tracelab/internal/launcher"
 	"tracelab/internal/source/httpcap"
 )
 
@@ -54,9 +55,9 @@ func clientDefaults(kind string) (client, upstream string, err error) {
 
 func chooseLauncher(kind, serverURL string, sess *httpcap.Session, args []string) *exec.Cmd {
 	if kind == "codex" {
-		return httpcap.LaunchCodex(serverURL, sess, args...)
+		return launcher.LaunchCodex(serverURL, sess, args...)
 	}
-	return httpcap.LaunchClaudeCode(serverURL, sess, args...)
+	return launcher.LaunchClaudeCode(serverURL, sess, args...)
 }
 
 func register(serverURL, client, upstream string) (token, sessionID string, err error) {

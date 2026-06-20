@@ -20,6 +20,7 @@ type EventSummary struct {
 	TotalTokens    int64  `json:"total_tokens"`
 	HookEvent      string `json:"hook_event"`   // event_name for hook events
 	ToolCallID     string `json:"tool_call_id"` // links a tool hook to a tool_call
+	ToolName       string `json:"tool_name"`    // tool a Pre/PostToolUse hook refers to
 }
 
 // ListEvents returns a session's events in chronological order (http + hook
@@ -30,7 +31,7 @@ func (s *Store) ListEvents(sessionID string) ([]EventSummary, error) {
 		   COALESCE(h.method,''), COALESCE(h.target,''), COALESCE(h.provider,''),
 		   COALESCE(h.model,''), COALESCE(h.is_completion,0),
 		   COALESCE(h.response_status,0), COALESCE(h.total_tokens,0),
-		   COALESCE(hk.event_name,''), COALESCE(hk.tool_call_id,'')
+		   COALESCE(hk.event_name,''), COALESCE(hk.tool_call_id,''), COALESCE(hk.tool_name,'')
 		 FROM events e
 		   LEFT JOIN http_exchanges h ON h.event_id = e.id
 		   LEFT JOIN hook_events hk ON hk.event_id = e.id
@@ -44,7 +45,7 @@ func (s *Store) ListEvents(sessionID string) ([]EventSummary, error) {
 		var e EventSummary
 		var isComp int
 		if err := rows.Scan(&e.ID, &e.Kind, &e.StartedAt, &e.Method, &e.Target,
-			&e.Provider, &e.Model, &isComp, &e.ResponseStatus, &e.TotalTokens, &e.HookEvent, &e.ToolCallID); err != nil {
+			&e.Provider, &e.Model, &isComp, &e.ResponseStatus, &e.TotalTokens, &e.HookEvent, &e.ToolCallID, &e.ToolName); err != nil {
 			return nil, err
 		}
 		e.IsCompletion = isComp == 1

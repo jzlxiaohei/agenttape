@@ -12,6 +12,7 @@ type HookEvent struct {
 	SessionID         string          `json:"session_id,omitempty"`
 	TurnID            string          `json:"turn_id,omitempty"`
 	ToolCallID        string          `json:"tool_call_id,omitempty"`
+	ToolName          string          `json:"tool_name,omitempty"` // tool a Pre/PostToolUse hook refers to
 	PayloadArtifactID string          `json:"payload_artifact_id,omitempty"`
 	Payload           json.RawMessage `json:"payload,omitempty"`
 	Metadata          map[string]any  `json:"metadata,omitempty"`

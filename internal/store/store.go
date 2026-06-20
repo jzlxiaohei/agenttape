@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	_ "modernc.org/sqlite"
@@ -49,6 +50,10 @@ func Open(dataDir string) (*Store, error) {
 		db.Close()
 		return nil, fmt.Errorf("apply schema: %w", err)
 	}
+	if err := migrate(db); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("migrate: %w", err)
+	}
 	if _, err := db.Exec(
 		`INSERT INTO schema_meta(key,value) VALUES('version',?)
 		 ON CONFLICT(key) DO UPDATE SET value=excluded.value`, SchemaVersion); err != nil {
@@ -63,3 +68,26 @@ func (s *Store) Close() error { return s.db.Close() }
 
 // DB exposes the underlying handle for read queries and tests.
 func (s *Store) DB() *sql.DB { return s.db }
+
+// migrate applies additive, idempotent schema upgrades for databases created by
+// an earlier version (CREATE TABLE IF NOT EXISTS never alters an existing table).
+// Each step ignores the "duplicate column" error so re-running is safe.
+func migrate(db *sql.DB) error {
+	adds := []string{
+		`ALTER TABLE hook_events ADD COLUMN tool_name TEXT`,
+	}
+	for _, stmt := range adds {
+		if _, err := db.Exec(stmt); err != nil && !strings.Contains(err.Error(), "duplicate column") {
+			return err
+		}
+	}
+	// Heal hook events captured before they were stamped with a receipt time:
+	// fall back to created_at (write time ≈ receipt time) so they interleave on the
+	// timeline instead of all sorting before the http events. Idempotent.
+	if _, err := db.Exec(
+		`UPDATE events SET started_at = created_at
+		 WHERE kind = 'hook_event' AND (started_at IS NULL OR started_at = '')`); err != nil {
+		return err
+	}
+	return nil
+}

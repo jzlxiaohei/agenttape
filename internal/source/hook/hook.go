@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"tracelab/internal/event"
 	"tracelab/internal/source"
@@ -47,6 +48,13 @@ func (a *Adapter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	eventName := orDefault(q.Get("event"), "unknown")
 
 	ev := event.NewHookEvent(source.RandomID(), runtime, eventName, payload)
+	// A hook is an instantaneous event; stamp it with the receipt time (same
+	// RFC3339Nano format the HTTP capture uses) so it interleaves correctly on the
+	// shared timeline and the hook↔request association can compare timestamps.
+	// Without this, started_at is empty and every hook sorts before all http.
+	now := time.Now().UTC().Format(time.RFC3339Nano)
+	ev.Timing.StartedAt = now
+	ev.Timing.CompletedAt = now
 	if sid := q.Get("session"); sid != "" {
 		ev.Correlation.SessionID = sid
 	}
@@ -56,12 +64,14 @@ func (a *Adapter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		var p struct {
 			ToolUseID  string `json:"tool_use_id"`
 			ToolCallID string `json:"tool_call_id"`
+			ToolName   string `json:"tool_name"`
 		}
 		if json.Unmarshal(payload, &p) == nil {
 			ev.Hook.ToolCallID = orDefault(p.ToolUseID, p.ToolCallID)
 			if ev.Hook.ToolCallID == "unknown" {
 				ev.Hook.ToolCallID = ""
 			}
+			ev.Hook.ToolName = p.ToolName
 		}
 	}
 	if a.emit != nil {
