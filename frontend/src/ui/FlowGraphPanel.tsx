@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Webhook, Cpu } from "lucide-react";
+import { Webhook, Cpu, ChevronRight, ChevronDown } from "lucide-react";
 import type { EventSummary } from "@/api/events";
 import { groupIntoTurns, buildTurnFlow, type Turn, type FlowHookNode } from "@/viewmodel/detail";
 import { useRawFile } from "@/query/events";
@@ -52,6 +53,7 @@ export function FlowGraphPanel({
 
 function HookFlowCard({ node, onOpenHttp }: { node: FlowHookNode; onOpenHttp: (id: string) => void }) {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
   const ev = node.event;
   const raw = useRawFile(ev.id, "hook_payload", true);
   const fields = extractFields(raw.data);
@@ -85,6 +87,8 @@ function HookFlowCard({ node, onOpenHttp }: { node: FlowHookNode; onOpenHttp: (i
         </div>
       )}
 
+      {raw.isLoading && <p className="mt-2 text-[11px] text-muted-foreground">{t("raw.loading")}</p>}
+
       {fields.length > 0 && (
         <dl className="mt-2 grid grid-cols-[max-content_1fr] gap-x-3 gap-y-0.5 text-xs">
           {fields.map(([k, v]) => (
@@ -97,16 +101,29 @@ function HookFlowCard({ node, onOpenHttp }: { node: FlowHookNode; onOpenHttp: (i
       )}
 
       {pretty && (
-        <pre className="mt-2 max-h-56 overflow-auto rounded-md bg-muted px-2.5 py-2 text-[11px] leading-relaxed mono">
-          {pretty}
-        </pre>
+        <div className="mt-2">
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground"
+          >
+            {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+            {t("hook.payload")}
+          </button>
+          {open && (
+            <pre className="mt-1 max-h-72 overflow-auto rounded-md bg-muted px-2.5 py-2 text-[11px] leading-relaxed mono">
+              {pretty}
+            </pre>
+          )}
+        </div>
       )}
     </div>
   );
 }
 
-// extractFields pulls a few human-useful fields out of the hook payload for an
-// at-a-glance summary above the full payload.
+// extractFields pulls the most useful fields out of a hook payload for an
+// always-visible summary above the (folded) full payload. It digs into the
+// nested tool_input (where Codex/cc put the actual command/args) and previews
+// tool_response, so a tool hook shows what it did without expanding.
 function extractFields(payload?: string): [string, string][] {
   if (!payload) return [];
   let obj: Record<string, unknown>;
@@ -115,11 +132,24 @@ function extractFields(payload?: string): [string, string][] {
   } catch {
     return [];
   }
-  const keys = ["prompt", "tool_name", "command", "permission_mode", "trigger", "stop_hook_active", "cwd"];
   const out: [string, string][] = [];
-  for (const k of keys) {
-    if (obj[k] != null) out.push([k, truncate(String(obj[k]), 240)]);
+  const push = (k: string, v: unknown) => {
+    if (v == null || v === "") return;
+    out.push([k, truncate(typeof v === "string" ? v : JSON.stringify(v), 240)]);
+  };
+
+  push("prompt", obj.prompt);
+  const ti = obj.tool_input;
+  if (ti && typeof ti === "object") {
+    const cmd = (ti as Record<string, unknown>).command;
+    if (cmd != null) push("command", cmd);
+    else push("input", ti);
+  } else if (ti != null) {
+    push("input", ti);
   }
+  push("response", obj.tool_response);
+  push("trigger", obj.trigger);
+  push("permission_mode", obj.permission_mode);
   return out;
 }
 
