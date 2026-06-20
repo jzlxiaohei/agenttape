@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildSectionBars, filterBlocks, filterMessages, groupIntoRounds, groupIntoTurns, orderEvents } from "./detail";
+import { buildSectionBars, buildTurnFlow, filterBlocks, filterMessages, groupIntoRounds, groupIntoTurns, orderEvents } from "./detail";
 import type { BlockKind } from "@/store/ui";
 import type { ContentBlock, EventSummary, Message } from "@/api/events";
 
@@ -17,12 +17,57 @@ function ev(id: string, started_at: string, is_completion: boolean): EventSummar
     total_tokens: 0,
     hook_event: "",
     tool_call_id: "",
+    tool_name: "",
   };
 }
 
 function hookEv(id: string, started_at: string, name: string): EventSummary {
   return { ...ev(id, started_at, false), kind: "hook_event", hook_event: name };
 }
+
+function toolHook(id: string, at: string, name: string, callId: string, toolName = ""): EventSummary {
+  return { ...hookEv(id, at, name), tool_call_id: callId, tool_name: toolName };
+}
+
+describe("buildTurnFlow", () => {
+  it("makes hooks the first layer; several tool hooks point to the producing completion", () => {
+    // completion #1 produces call_A + call_B → their Pre/Post hooks all ref #1
+    const events = [
+      ev("c1", "2026-06-19T10:00:00Z", true),
+      toolHook("preA", "2026-06-19T10:00:01Z", "PreToolUse", "call_A", "shell"),
+      toolHook("postA", "2026-06-19T10:00:02Z", "PostToolUse", "call_A", "shell"),
+      toolHook("preB", "2026-06-19T10:00:02Z", "PreToolUse", "call_B", "read"),
+      ev("c2", "2026-06-19T10:00:05Z", true),
+    ];
+    const flow = buildTurnFlow(events);
+    // only hooks are nodes; http is not a first-layer node
+    expect(flow.nodes.map((nd) => nd.event.id)).toEqual(["preA", "postA", "preB"]);
+    expect(flow.nodes.every((nd) => nd.httpRef?.index === 1)).toBe(true);
+  });
+
+  it("links UserPromptSubmit to the request it triggered; id-less Stop has no ref", () => {
+    const events = [
+      hookEv("u", "2026-06-19T10:00:00Z", "UserPromptSubmit"),
+      ev("c1", "2026-06-19T10:00:01Z", true),
+      hookEv("stop", "2026-06-19T10:00:09Z", "Stop"),
+    ];
+    const flow = buildTurnFlow(events);
+    expect(flow.nodes.find((nd) => nd.event.id === "u")?.httpRef?.index).toBe(1);
+    expect(flow.nodes.find((nd) => nd.event.id === "stop")?.httpRef).toBeNull();
+  });
+
+  it("ignores control/probe requests (is_completion=false) when associating", () => {
+    const events = [
+      ev("c1", "2026-06-19T10:00:01Z", true), // real completion #1
+      ev("probe", "2026-06-19T10:00:02Z", false), // probe after it — must be ignored
+      toolHook("pre", "2026-06-19T10:00:03Z", "PreToolUse", "call_A", "shell"),
+    ];
+    const flow = buildTurnFlow(events);
+    const node = flow.nodes.find((nd) => nd.event.id === "pre");
+    expect(node?.httpRef?.id).toBe("c1"); // not "probe"
+    expect(node?.httpRef?.index).toBe(1);
+  });
+});
 
 describe("groupIntoTurns", () => {
   it("returns null when there are no prompt markers (fall back to flat)", () => {

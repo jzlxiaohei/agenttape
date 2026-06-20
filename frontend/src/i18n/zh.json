@@ -34,12 +34,22 @@
   "event": { "probe": "控制 / 探测" },
   "timeline": {
     "requests": "请求",
-    "timeline": "时间线"
+    "timeline": "流程",
+    "requests_hint": "最新模型请求优先",
+    "timeline_hint": "最新回合在上; 回合内按从上到下的因果顺序阅读",
+    "llm": "LLM",
+    "hook": "Hook",
+    "llm_request": "模型请求"
   },
   "turn": {
     "session": "会话开始",
     "n": "第 {{n}} 回合",
     "summary": "{{http}} 次调用 · {{hooks}} 个 hook"
+  },
+  "flow": {
+    "empty": "该回合暂无 hook 事件",
+    "hint": "harness 的 hook 事件时间线。关联到请求的 hook 带一个标记, 点开看对应的 LLM 往返。",
+    "view_request": "请求 #{{n}}"
   },
   "link": {
     "to_hook": "hook",

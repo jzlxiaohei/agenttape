@@ -21,6 +21,7 @@ const allBlocks: Record<BlockKind, boolean> = {
 interface UIState {
   selectedSessionId: string | null;
   selectedEventId: string | null;
+  sheetEventId: string | null; // event shown in the flow detail side sheet (null = closed)
   detailTab: DetailTab;
   // detail filters
   parts: Record<DetailPart, boolean>;
@@ -38,6 +39,8 @@ interface UIState {
   selectSession: (id: string | null) => void;
   selectEvent: (id: string | null) => void;
   openEvent: (sessionId: string, eventId: string) => void;
+  openSheet: (eventId: string) => void;
+  closeSheet: () => void;
   setSearchQuery: (q: string) => void;
   setSearchFilter: (key: "searchTag" | "searchProvider" | "searchClient", value: string) => void;
   setTimelineMode: (m: "requests" | "timeline") => void;
@@ -52,6 +55,7 @@ interface UIState {
 export const useUIStore = create<UIState>((set) => ({
   selectedSessionId: null,
   selectedEventId: null,
+  sheetEventId: null,
   detailTab: "request",
   parts: { ...allParts },
   blocks: { ...allBlocks },
@@ -64,9 +68,11 @@ export const useUIStore = create<UIState>((set) => ({
   searchClient: "",
   timelineMode: "requests",
 
-  selectSession: (id) => set({ selectedSessionId: id, selectedEventId: null }),
+  selectSession: (id) => set({ selectedSessionId: id, selectedEventId: null, sheetEventId: null }),
   selectEvent: (id) => set({ selectedEventId: id }),
   openEvent: (sessionId, eventId) => set({ selectedSessionId: sessionId, selectedEventId: eventId }),
+  openSheet: (eventId) => set({ sheetEventId: eventId }),
+  closeSheet: () => set({ sheetEventId: null }),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setSearchFilter: (key, value) => set({ [key]: value } as Partial<UIState>),
   setTimelineMode: (m) => set({ timelineMode: m }),

@@ -58,6 +58,63 @@ export function groupIntoTurns(events: EventSummary[]): Turn[] | null {
   return turns;
 }
 
+// --- flow graph (hook events as the first layer; http as a 2nd-layer ref) ---
+// The flow's spine is the harness HOOK timeline (orchestration). Each hook node
+// carries a reference to the ONE http completion it relates to — so several hook
+// events (e.g. the Pre/Post pairs of two tool calls from the same response) point
+// to the same request. http itself is not a first-layer node; its detail opens in
+// a side sheet. The association uses the strict causal ordering of the lifecycle,
+// so it's exact, not a time-based guess:
+//   • a tool hook (has tool_call_id) → the completion that PRODUCED it
+//     (the last completion at/before the hook)
+//   • UserPromptSubmit → the request it TRIGGERED (first completion at/after it)
+export interface HttpRef {
+  id: string;
+  index: number; // 1-based ordinal of the completion within the turn
+}
+
+export interface FlowHookNode {
+  event: EventSummary;
+  httpRef: HttpRef | null;
+}
+
+export interface TurnFlow {
+  nodes: FlowHookNode[];
+}
+
+// buildTurnFlow turns one turn's flat events into the hook-first node list the
+// flow graph renders. Pure for testability.
+export function buildTurnFlow(events: EventSummary[]): TurnFlow {
+  const asc = [...events].sort((a, b) => a.started_at.localeCompare(b.started_at));
+  // Only real LLM round-trips are association targets — control/probe requests
+  // (is_completion=false, e.g. codex's GET probes) must not be picked as a hook's
+  // producing/triggering request, nor consume a request ordinal.
+  const completions = asc.filter((e) => e.kind === "http_exchange" && e.is_completion);
+  const ordinal = new Map<string, number>();
+  let n = 0;
+  for (const c of completions) ordinal.set(c.id, ++n);
+  const ref = (c: EventSummary): HttpRef => ({ id: c.id, index: ordinal.get(c.id)! });
+
+  const nodes: FlowHookNode[] = [];
+  for (const e of asc) {
+    if (e.kind !== "hook_event") continue;
+    let httpRef: HttpRef | null = null;
+    if (e.tool_call_id) {
+      let producer: EventSummary | null = null;
+      for (const c of completions) {
+        if (c.started_at <= e.started_at) producer = c;
+        else break;
+      }
+      if (producer) httpRef = ref(producer);
+    } else if (e.hook_event === "UserPromptSubmit") {
+      const trig = completions.find((c) => c.started_at >= e.started_at);
+      if (trig) httpRef = ref(trig);
+    }
+    nodes.push({ event: e, httpRef });
+  }
+  return { nodes };
+}
+
 // orderEvents sorts events newest-first and picks the newest completion as the
 // default selection. Pure for testability.
 export function orderEvents(events: EventSummary[]): {

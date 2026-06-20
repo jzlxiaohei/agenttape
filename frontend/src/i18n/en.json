@@ -34,12 +34,22 @@
   "event": { "probe": "control / probe" },
   "timeline": {
     "requests": "Requests",
-    "timeline": "Timeline"
+    "timeline": "Flow",
+    "requests_hint": "Latest model calls first",
+    "timeline_hint": "Newest turns first; events inside each turn read top to bottom",
+    "llm": "LLM",
+    "hook": "Hook",
+    "llm_request": "LLM request"
   },
   "turn": {
     "session": "Session start",
     "n": "Turn {{n}}",
     "summary": "{{http}} calls · {{hooks}} hooks"
+  },
+  "flow": {
+    "empty": "No hook events in this turn",
+    "hint": "The harness hook timeline. Hooks tied to a request show a chip — open it for the LLM exchange.",
+    "view_request": "request #{{n}}"
   },
   "link": {
     "to_hook": "hook",

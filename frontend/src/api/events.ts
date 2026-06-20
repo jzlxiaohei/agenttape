@@ -70,6 +70,7 @@ export interface EventSummary {
   total_tokens: number;
   hook_event: string;
   tool_call_id: string;
+  tool_name: string;
 }
 export interface TagInfo {
   tag: string;
