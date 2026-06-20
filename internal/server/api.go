@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"tracelab/internal/store"
@@ -90,10 +91,19 @@ func (s *Server) EnableViewer(distDir string) bool {
 		return false
 	}
 	fs := http.FileServer(http.Dir(distDir))
+	index := filepath.Join(distDir, "index.html")
 	s.mux.HandleFunc("/viewer/", func(w http.ResponseWriter, r *http.Request) {
 		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/viewer")
-		if r.URL.Path == "" || r.URL.Path == "/" {
-			http.ServeFile(w, r, distDir+"/index.html")
+		// SPA fallback: serve real files (assets) as-is, but route paths like
+		// /sessions/:id — which have no file on disk — get index.html so client
+		// routing can take over on deep links and reloads.
+		rel := strings.TrimPrefix(filepath.Clean(r.URL.Path), "/")
+		if rel == "" || rel == "." {
+			http.ServeFile(w, r, index)
+			return
+		}
+		if st, err := os.Stat(filepath.Join(distDir, rel)); err != nil || st.IsDir() {
+			http.ServeFile(w, r, index)
 			return
 		}
 		fs.ServeHTTP(w, r)

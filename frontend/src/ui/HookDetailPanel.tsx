@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { Webhook, ArrowUpRight } from "lucide-react";
 import { useEventDetail, useRawFile } from "@/query/events";
-import { useUIStore } from "@/store/ui";
+import { useSessionRoute } from "@/viewmodel/route";
 import { useDetailLinks } from "./DetailLinks";
 import { TagList } from "./TagList";
 
@@ -16,7 +16,7 @@ export function HookDetailPanel({ eventId }: { eventId: string }) {
   const { data, isLoading } = useEventDetail(eventId);
   const raw = useRawFile(eventId, "hook_payload", true);
   const links = useDetailLinks();
-  const selectEvent = useUIStore((s) => s.selectEvent);
+  const selectRequest = useSessionRoute().selectRequest;
   const request = links.requestBeforeHook(eventId);
 
   if (isLoading || !data) return <p className="p-6 text-muted-foreground">{t("detail.loading")}</p>;
@@ -39,7 +39,7 @@ export function HookDetailPanel({ eventId }: { eventId: string }) {
         )}
         {request && (
           <button
-            onClick={() => selectEvent(request.id)}
+            onClick={() => selectRequest(request.id)}
             className="inline-flex items-center gap-1 rounded-md border border-accent/40 px-2 py-0.5 text-xs text-accent hover:bg-accent/10"
           >
             <ArrowUpRight size={12} />

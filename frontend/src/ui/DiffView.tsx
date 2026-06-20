@@ -5,7 +5,7 @@ import { MergeView } from "@codemirror/merge";
 import { EditorView, lineNumbers } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { json } from "@codemirror/lang-json";
-import { useUIStore } from "@/store/ui";
+import { useSessionRoute } from "@/viewmodel/route";
 import { useSessionEventsView } from "@/viewmodel/detail";
 import { useRawFile } from "@/query/events";
 import { SemanticDiff } from "./SemanticDiff";
@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 // reader sees exactly what the harness changed turn-to-turn (next.md 5.1).
 export default function DiffView({ eventId }: { eventId: string }) {
   const { t } = useTranslation();
-  const sessionId = useUIStore((s) => s.selectedSessionId);
+  const sessionId = useSessionRoute().sessionId;
   const { events } = useSessionEventsView(sessionId);
 
   // events are newest-first; completions only.

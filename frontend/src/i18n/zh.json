@@ -35,8 +35,10 @@
   "timeline": {
     "requests": "请求",
     "timeline": "流程",
+    "flow": "流程",
     "requests_hint": "最新模型请求优先",
     "timeline_hint": "最新回合在上; 回合内按从上到下的因果顺序阅读",
+    "flow_hint": "最新回合在上; 回合内按从上到下的因果顺序阅读",
     "llm": "LLM",
     "hook": "Hook",
     "llm_request": "模型请求"

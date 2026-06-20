@@ -1,5 +1,5 @@
 import { useSessions } from "@/query/sessions";
-import { useUIStore } from "@/store/ui";
+import { useSessionRoute } from "@/viewmodel/route";
 import type { SessionDTO } from "@/api/sessions";
 
 export interface SessionVM extends SessionDTO {
@@ -12,11 +12,11 @@ export interface SessionsView {
   isError: boolean;
 }
 
-// ViewModel: combines server state (query) + UI state (store) into view-ready
-// data. All derivation lives here, not in components (frontend-mvvm §4).
+// ViewModel: combines server state (query) + route state into view-ready data.
+// All derivation lives here, not in components (frontend-mvvm §4).
 export function useSessionsView(): SessionsView {
   const { data, isLoading, isError } = useSessions();
-  const selectedId = useUIStore((s) => s.selectedSessionId);
+  const selectedId = useSessionRoute().sessionId;
 
   const sessions = (data ?? []).map<SessionVM>((s) => ({
     ...s,

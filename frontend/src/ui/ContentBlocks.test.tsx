@@ -1,10 +1,15 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import { ContentBlocks } from "./ContentBlocks";
 import { useUIStore } from "@/store/ui";
 import type { ContentBlock } from "@/api/events";
 
 afterEach(() => useUIStore.setState({ renderMarkdown: false }));
+
+// ContentBlocks reads navigation state via the route hook, so it needs a Router.
+const renderCB = (blocks: ContentBlock[]) =>
+  render(<ContentBlocks blocks={blocks} />, { wrapper: MemoryRouter });
 
 describe("ContentBlocks", () => {
   it("renders text, reasoning, tool_call, and tool_result distinctly by type", () => {
@@ -17,7 +22,7 @@ describe("ContentBlocks", () => {
         tool_result: { content: [{ type: "text", text: "result text" }], is_error: false },
       },
     ];
-    render(<ContentBlocks blocks={blocks} />);
+    renderCB(blocks);
 
     expect(screen.getByText("plain answer")).toBeInTheDocument();
     expect(screen.getByText("thinking hard")).toBeInTheDocument();
@@ -29,13 +34,13 @@ describe("ContentBlocks", () => {
   });
 
   it("renders nothing for empty blocks", () => {
-    const { container } = render(<ContentBlocks blocks={[]} />);
+    const { container } = renderCB([]);
     expect(container).toBeEmptyDOMElement();
   });
 
   it("renders markdown (lazy) when the toggle is on, keeping raw as fallback", async () => {
     useUIStore.setState({ renderMarkdown: true });
-    render(<ContentBlocks blocks={[{ type: "text", text: "**bold** word" }]} />);
+    renderCB([{ type: "text", text: "**bold** word" }]);
     const strong = await screen.findByText("bold");
     expect(strong.tagName).toBe("STRONG");
   });

@@ -12,9 +12,10 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter basename="/viewer">
         <Routes>
-          <Route path="/" element={<SessionsPage />} />
+          <Route path="/sessions" element={<SessionsPage />} />
+          <Route path="/sessions/:id" element={<SessionsPage />} />
           <Route path="/search" element={<SearchPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/sessions" replace />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

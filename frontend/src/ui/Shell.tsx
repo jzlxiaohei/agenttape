@@ -17,7 +17,7 @@ function IconRail() {
   const nav = useNavigate();
   const { pathname } = useLocation();
   const items = [
-    { icon: MessagesSquare, to: "/", match: (p: string) => p === "/" },
+    { icon: MessagesSquare, to: "/sessions", match: (p: string) => p === "/" || p.startsWith("/sessions") },
     { icon: Search, to: "/search", match: (p: string) => p.startsWith("/search") },
   ];
   return (

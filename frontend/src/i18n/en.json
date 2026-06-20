@@ -35,8 +35,10 @@
   "timeline": {
     "requests": "Requests",
     "timeline": "Flow",
+    "flow": "Flow",
     "requests_hint": "Latest model calls first",
     "timeline_hint": "Newest turns first; events inside each turn read top to bottom",
+    "flow_hint": "Newest turns first; events inside each turn read top to bottom",
     "llm": "LLM",
     "hook": "Hook",
     "llm_request": "LLM request"

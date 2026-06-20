@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowUpRight } from "lucide-react";
 import type { ContentBlock } from "@/api/events";
 import { useUIStore } from "@/store/ui";
+import { useSessionRoute } from "@/viewmodel/route";
 import { useDetailLinks } from "./DetailLinks";
 import { Expandable } from "./Expandable";
 
@@ -61,7 +62,7 @@ function BlockView({ block }: { block: ContentBlock }) {
 function ToolCallBlock({ block }: { block: ContentBlock }) {
   const { t } = useTranslation();
   const links = useDetailLinks();
-  const selectEvent = useUIStore((s) => s.selectEvent);
+  const selectRequest = useSessionRoute().selectRequest;
   const hook = links.hookForToolCall(block.tool_call?.id);
   return (
     <div className="rounded-lg border border-toolcall/30 bg-toolcall/5 px-3 py-2">
@@ -71,7 +72,7 @@ function ToolCallBlock({ block }: { block: ContentBlock }) {
         </span>
         {hook && (
           <button
-            onClick={() => selectEvent(hook.id)}
+            onClick={() => selectRequest(hook.id)}
             className="inline-flex items-center gap-1 rounded-md border border-accent/40 px-1.5 py-0.5 text-accent hover:bg-accent/10"
           >
             <ArrowUpRight size={12} />

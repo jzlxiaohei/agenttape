@@ -1,13 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { useSessionsView, type SessionVM } from "@/viewmodel/sessions";
-import { useUIStore } from "@/store/ui";
+import { useSessionRoute } from "@/viewmodel/route";
 import { cn } from "@/lib/utils";
 
-// Container: reads the viewmodel + store, renders. No fetch, no derivation.
+// Container: reads the viewmodel + route, renders. No fetch, no derivation.
 export function SessionList() {
   const { t } = useTranslation();
   const { sessions, isLoading, isError } = useSessionsView();
-  const select = useUIStore((s) => s.selectSession);
+  const select = useSessionRoute().openSession;
 
   if (isLoading) return <p className="p-4 text-muted-foreground">{t("sessions.loading")}</p>;
   if (isError) return <p className="p-4 text-error">{t("sessions.error")}</p>;

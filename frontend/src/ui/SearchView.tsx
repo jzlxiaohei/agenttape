@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { Search as SearchIcon } from "lucide-react";
 import { useUIStore } from "@/store/ui";
+import { useSessionRoute } from "@/viewmodel/route";
 import { useSearch, useFacets } from "@/query/search";
 import type { SearchResult } from "@/api/search";
 import { cn } from "@/lib/utils";
@@ -81,12 +81,8 @@ function FacetSelect({
 
 function ResultRow({ result }: { result: SearchResult }) {
   const { t } = useTranslation();
-  const nav = useNavigate();
-  const openEvent = useUIStore((s) => s.openEvent);
-  const go = () => {
-    openEvent(result.session_id, result.event_id);
-    nav("/");
-  };
+  const openEvent = useSessionRoute().openEvent;
+  const go = () => openEvent(result.session_id, result.event_id);
   return (
     <button
       onClick={go}

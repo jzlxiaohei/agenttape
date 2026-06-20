@@ -16,12 +16,11 @@ const allBlocks: Record<BlockKind, boolean> = {
   tool_result: true,
 };
 
-// Cross-component UI/business state (frontend-mvvm §1). Components never hold
-// this in useState.
+// Cross-component UI state that is NOT navigation (frontend-mvvm §1). Navigation
+// state — selected session, tab, focused request/turn — lives in the URL
+// (viewmodel/route.ts), so it is shareable and survives reload. Components never
+// hold any of this in useState.
 interface UIState {
-  selectedSessionId: string | null;
-  selectedEventId: string | null;
-  sheetEventId: string | null; // event shown in the flow detail side sheet (null = closed)
   detailTab: DetailTab;
   // detail filters
   parts: Record<DetailPart, boolean>;
@@ -34,16 +33,9 @@ interface UIState {
   searchTag: string;
   searchProvider: string;
   searchClient: string;
-  timelineMode: "requests" | "timeline";
 
-  selectSession: (id: string | null) => void;
-  selectEvent: (id: string | null) => void;
-  openEvent: (sessionId: string, eventId: string) => void;
-  openSheet: (eventId: string) => void;
-  closeSheet: () => void;
   setSearchQuery: (q: string) => void;
   setSearchFilter: (key: "searchTag" | "searchProvider" | "searchClient", value: string) => void;
-  setTimelineMode: (m: "requests" | "timeline") => void;
   setDetailTab: (t: DetailTab) => void;
   togglePart: (p: DetailPart) => void;
   toggleBlock: (b: BlockKind) => void;
@@ -53,9 +45,6 @@ interface UIState {
 }
 
 export const useUIStore = create<UIState>((set) => ({
-  selectedSessionId: null,
-  selectedEventId: null,
-  sheetEventId: null,
   detailTab: "request",
   parts: { ...allParts },
   blocks: { ...allBlocks },
@@ -66,16 +55,9 @@ export const useUIStore = create<UIState>((set) => ({
   searchTag: "",
   searchProvider: "",
   searchClient: "",
-  timelineMode: "requests",
 
-  selectSession: (id) => set({ selectedSessionId: id, selectedEventId: null, sheetEventId: null }),
-  selectEvent: (id) => set({ selectedEventId: id }),
-  openEvent: (sessionId, eventId) => set({ selectedSessionId: sessionId, selectedEventId: eventId }),
-  openSheet: (eventId) => set({ sheetEventId: eventId }),
-  closeSheet: () => set({ sheetEventId: null }),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setSearchFilter: (key, value) => set({ [key]: value } as Partial<UIState>),
-  setTimelineMode: (m) => set({ timelineMode: m }),
   setDetailTab: (t) => set({ detailTab: t }),
   togglePart: (p) => set((s) => ({ parts: { ...s.parts, [p]: !s.parts[p] } })),
   toggleBlock: (b) => set((s) => ({ blocks: { ...s.blocks, [b]: !s.blocks[b] } })),

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { useUIStore } from "@/store/ui";
+import { useSessionRoute } from "@/viewmodel/route";
 import { useSessionEventsView } from "@/viewmodel/detail";
 import { EventTimeline } from "./EventTimeline";
 import { EventDetailPanel } from "./EventDetailPanel";
@@ -8,57 +8,56 @@ import { DetailLinksProvider } from "./DetailLinks";
 import { FlowGraphPanel } from "./FlowGraphPanel";
 import { Sheet, SheetContent, SheetA11y } from "@/components/ui/sheet";
 
-// Main pane: the selected session's event timeline + the selected event detail.
-// In Flow mode the right pane is the turn's causal flow graph, and node detail
-// opens in a side sheet (no fixed detail column) so the graph gets full width.
+// Main pane: a session's timeline + detail, all driven by the URL (see route.ts).
+// requests tab → inline detail of req_id; flow tab → the turn graph, with req_id
+// (if any) opening the http exchange in a side sheet.
 export function SessionDetail() {
   const { t } = useTranslation();
-  const sessionId = useUIStore((s) => s.selectedSessionId);
-  const selectedEventId = useUIStore((s) => s.selectedEventId);
-  const sheetEventId = useUIStore((s) => s.sheetEventId);
-  const timelineMode = useUIStore((s) => s.timelineMode);
-  const selectEvent = useUIStore((s) => s.selectEvent);
-  const openSheet = useUIStore((s) => s.openSheet);
-  const closeSheet = useUIStore((s) => s.closeSheet);
-  const { events, defaultEventId, isLoading, isError } = useSessionEventsView(sessionId);
+  const route = useSessionRoute();
+  const { events, defaultEventId, isLoading, isError } = useSessionEventsView(route.sessionId);
 
-  if (!sessionId) return <Centered>{t("detail.pick_session")}</Centered>;
+  if (!route.sessionId) return <Centered>{t("detail.pick_session")}</Centered>;
   if (isLoading) return <Centered>{t("detail.loading")}</Centered>;
   if (isError) return <Centered className="text-error">{t("detail.error")}</Centered>;
   if (events.length === 0) return <Centered>{t("detail.empty")}</Centered>;
 
-  const effectiveId = selectedEventId ?? defaultEventId;
-  const selected = events.find((e) => e.id === effectiveId);
-  const isHook = selected?.kind === "hook_event";
-  const showFlowGraph = timelineMode === "timeline" && events.some((e) => e.kind === "hook_event");
-  const sheetEvent = events.find((e) => e.id === sheetEventId);
+  const hasHooks = events.some((e) => e.kind === "hook_event");
+  const showFlow = route.tab === "flow" && hasHooks;
+
+  // requests tab: the inline-focused event (falls back to latest completion)
+  const reqEventId = route.reqId ?? defaultEventId;
+  const reqEvent = events.find((e) => e.id === reqEventId);
+
+  // flow tab: req_id (if present) is the request open in the side sheet
+  const sheetOpen = showFlow && !!route.reqId;
+  const sheetEvent = events.find((e) => e.id === route.reqId);
 
   return (
     <div className="flex h-full">
       <div className="w-64 shrink-0 overflow-y-auto border-r bg-surface">
-        <EventTimeline events={events} selectedId={effectiveId} onSelect={selectEvent} />
+        <EventTimeline events={events} />
       </div>
       <div className="min-w-0 flex-1 overflow-y-auto">
         <DetailLinksProvider events={events}>
-          {showFlowGraph ? (
-            <FlowGraphPanel events={events} selectedId={effectiveId} onOpenDetail={openSheet} />
-          ) : !effectiveId ? (
+          {showFlow ? (
+            <FlowGraphPanel events={events} selectedId={route.turnId} onOpenDetail={route.selectRequest} />
+          ) : !reqEventId ? (
             <Centered>{t("detail.pick_event")}</Centered>
-          ) : isHook ? (
-            <HookDetailPanel eventId={effectiveId} />
+          ) : reqEvent?.kind === "hook_event" ? (
+            <HookDetailPanel eventId={reqEventId} />
           ) : (
-            <EventDetailPanel eventId={effectiveId} />
+            <EventDetailPanel eventId={reqEventId} />
           )}
 
-          <Sheet open={!!sheetEventId} onOpenChange={(o: boolean) => !o && closeSheet()}>
+          <Sheet open={sheetOpen} onOpenChange={(o: boolean) => !o && route.closeSheet()}>
             <SheetContent>
               <SheetA11y title={t("detail.request")} />
               <div className="h-full overflow-y-auto">
-                {sheetEventId &&
+                {route.reqId &&
                   (sheetEvent?.kind === "hook_event" ? (
-                    <HookDetailPanel eventId={sheetEventId} />
+                    <HookDetailPanel eventId={route.reqId} />
                   ) : (
-                    <EventDetailPanel eventId={sheetEventId} />
+                    <EventDetailPanel eventId={route.reqId} />
                   ))}
               </div>
             </SheetContent>
