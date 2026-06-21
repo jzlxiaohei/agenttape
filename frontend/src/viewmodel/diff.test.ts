@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { diffMessages, messageKey } from "./diff";
+import { diffMessages, messageKey, summarizeDiff } from "./diff";
 import type { Message } from "@/api/events";
 
 const msg = (role: string, text: string): Message => ({ role, content: [{ type: "text", text }] });
@@ -25,5 +25,23 @@ describe("diffMessages", () => {
   it("messageKey distinguishes role and content", () => {
     expect(messageKey(msg("user", "x"))).not.toBe(messageKey(msg("assistant", "x")));
     expect(messageKey(msg("user", "x"))).toBe(messageKey(msg("user", "x")));
+  });
+});
+
+describe("summarizeDiff", () => {
+  it("counts appended tool results and flags a system change", () => {
+    const left = [msg("system", "s1"), msg("user", "a")];
+    const right = [msg("system", "s2"), msg("user", "a"), msg("tool", "result")];
+    const sum = summarizeDiff(diffMessages(left, right));
+    expect(sum.toolResultsAdded).toBe(1);
+    expect(sum.systemChanged).toBe(true);
+    expect(sum.compactionSuspected).toBe(false);
+  });
+
+  it("suspects compaction when a long run is removed", () => {
+    const left = [msg("user", "a"), msg("assistant", "b"), msg("tool", "c"), msg("assistant", "d")];
+    const right = [msg("system", "summary"), msg("user", "e")];
+    const sum = summarizeDiff(diffMessages(left, right));
+    expect(sum.compactionSuspected).toBe(true);
   });
 });

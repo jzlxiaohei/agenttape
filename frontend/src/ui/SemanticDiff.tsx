@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useEventDetail } from "@/query/events";
-import { diffMessages, requestSequence, type DiffOp } from "@/viewmodel/diff";
+import { diffMessages, requestSequence, summarizeDiff, type DiffOp } from "@/viewmodel/diff";
 import { ContentBlocks } from "./ContentBlocks";
 import { Collapsible } from "./Collapsible";
 import { cn } from "@/lib/utils";
@@ -19,12 +19,26 @@ export function SemanticDiff({ leftId, rightId }: { leftId: string; rightId: str
   const ops = diffMessages(requestSequence(left.data), requestSequence(right.data));
   const added = ops.filter((o) => o.kind === "added").length;
   const removed = ops.filter((o) => o.kind === "removed").length;
+  const sum = summarizeDiff(ops);
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-3 text-xs">
+      <div className="flex flex-wrap items-center gap-2 text-xs">
         <span className="font-medium text-toolcall">+{added} {t("diff.added")}</span>
         <span className="font-medium text-error">-{removed} {t("diff.removed")}</span>
+        {sum.toolResultsAdded > 0 && (
+          <span className="rounded-md bg-toolresult/10 px-2 py-0.5 text-toolresult">
+            {t("diff.tool_results", { count: sum.toolResultsAdded })}
+          </span>
+        )}
+        {sum.systemChanged && (
+          <span className="rounded-md bg-accent/10 px-2 py-0.5 text-accent">{t("diff.system_changed")}</span>
+        )}
+        {sum.compactionSuspected && (
+          <span className="rounded-md border border-dashed border-suspected/50 px-2 py-0.5 italic text-suspected">
+            {t("diff.compaction_suspected")}
+          </span>
+        )}
       </div>
       <div className="space-y-2">
         {groupOps(ops).map((g) =>

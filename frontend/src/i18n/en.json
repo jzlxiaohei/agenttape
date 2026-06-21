@@ -51,7 +51,8 @@
   "flow": {
     "empty": "No hook events in this turn",
     "hint": "The harness hook timeline. Hooks tied to a request show a chip — open it for the LLM exchange.",
-    "view_request": "request #{{n}}"
+    "view_request": "request #{{n}}",
+    "context_diff": "Compare context vs the previous request"
   },
   "link": {
     "to_hook": "hook",
@@ -77,6 +78,7 @@
     "response": "Response",
     "raw": "Raw",
     "diff": "Diff",
+    "replay": "Replay",
     "usage": "usage",
     "composition": "Request composition (approx tokens, request only)",
     "expand": "Show more",
@@ -133,7 +135,23 @@
     "semantic": "Semantic",
     "added": "added",
     "removed": "removed",
-    "unchanged": "{{count}} unchanged"
+    "unchanged": "{{count}} unchanged",
+    "tool_results": "+{{count}} tool results",
+    "system_changed": "system changed",
+    "compaction_suspected": "compaction? suspected"
+  },
+  "replay": {
+    "warning": "Replay sends a real, billed request to the upstream API.",
+    "body": "Request body",
+    "edited": "edited",
+    "invalid_json": "Not valid JSON",
+    "reset": "reset",
+    "send": "Replay to upstream",
+    "confirm": "Click again to confirm",
+    "cancel": "cancel",
+    "sending": "Sending…",
+    "original": "Original",
+    "result": "Replay"
   },
   "raw": {
     "request_body": "Request",

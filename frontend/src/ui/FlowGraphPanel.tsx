@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Webhook, Cpu, ChevronRight, ChevronDown } from "lucide-react";
+import { Webhook, Cpu, ChevronRight, ChevronDown, GitCompare } from "lucide-react";
 import type { EventSummary } from "@/api/events";
 import { groupIntoTurns, buildTurnFlow, type Turn, type FlowHookNode } from "@/viewmodel/detail";
 import { useRawFile } from "@/query/events";
@@ -13,10 +13,12 @@ export function FlowGraphPanel({
   events,
   selectedId,
   onOpenDetail,
+  onOpenDiff,
 }: {
   events: EventSummary[];
   selectedId: string | null;
   onOpenDetail: (id: string) => void;
+  onOpenDiff: (id: string) => void;
 }) {
   const { t } = useTranslation();
   const turns = flowTurns(events);
@@ -43,7 +45,7 @@ export function FlowGraphPanel({
           <div className="text-muted-foreground">{t("flow.empty")}</div>
         ) : (
           flow.nodes.map((node) => (
-            <HookFlowCard key={node.event.id} node={node} onOpenHttp={onOpenDetail} />
+            <HookFlowCard key={node.event.id} node={node} onOpenHttp={onOpenDetail} onOpenDiff={onOpenDiff} />
           ))
         )}
       </div>
@@ -51,7 +53,15 @@ export function FlowGraphPanel({
   );
 }
 
-function HookFlowCard({ node, onOpenHttp }: { node: FlowHookNode; onOpenHttp: (id: string) => void }) {
+function HookFlowCard({
+  node,
+  onOpenHttp,
+  onOpenDiff,
+}: {
+  node: FlowHookNode;
+  onOpenHttp: (id: string) => void;
+  onOpenDiff: (id: string) => void;
+}) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ev = node.event;
@@ -70,13 +80,23 @@ function HookFlowCard({ node, onOpenHttp }: { node: FlowHookNode; onOpenHttp: (i
           </span>
         )}
         {node.httpRef && (
-          <button
-            onClick={() => onOpenHttp(node.httpRef!.id)}
-            className="inline-flex items-center gap-1 rounded-md border border-toolcall/40 bg-toolcall/5 px-2 py-0.5 text-xs text-toolcall hover:bg-toolcall/10"
-          >
-            <Cpu size={12} />
-            {t("flow.view_request", { n: node.httpRef.index })}
-          </button>
+          <span className="inline-flex items-center gap-1">
+            <button
+              onClick={() => onOpenHttp(node.httpRef!.id)}
+              className="inline-flex items-center gap-1 rounded-md border border-toolcall/40 bg-toolcall/5 px-2 py-0.5 text-xs text-toolcall hover:bg-toolcall/10"
+            >
+              <Cpu size={12} />
+              {t("flow.view_request", { n: node.httpRef.index })}
+            </button>
+            <button
+              onClick={() => onOpenDiff(node.httpRef!.id)}
+              title={t("flow.context_diff")}
+              aria-label={t("flow.context_diff")}
+              className="inline-flex items-center rounded-md border border-reasoning/40 bg-reasoning/5 px-1.5 py-0.5 text-reasoning hover:bg-reasoning/10"
+            >
+              <GitCompare size={12} />
+            </button>
+          </span>
         )}
         <span className="ml-auto shrink-0 text-xs text-muted-foreground mono">{formatTime(ev.started_at)}</span>
       </div>

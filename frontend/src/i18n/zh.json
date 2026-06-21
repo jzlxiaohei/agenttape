@@ -51,7 +51,8 @@
   "flow": {
     "empty": "该回合暂无 hook 事件",
     "hint": "harness 的 hook 事件时间线。关联到请求的 hook 带一个标记, 点开看对应的 LLM 往返。",
-    "view_request": "请求 #{{n}}"
+    "view_request": "请求 #{{n}}",
+    "context_diff": "对比上一轮的上下文"
   },
   "link": {
     "to_hook": "hook",
@@ -77,6 +78,7 @@
     "response": "响应",
     "raw": "原始内容",
     "diff": "对比",
+    "replay": "重放",
     "usage": "用量",
     "composition": "请求构成(近似 token,仅请求)",
     "expand": "展开",
@@ -133,7 +135,23 @@
     "semantic": "语义",
     "added": "新增",
     "removed": "删除",
-    "unchanged": "{{count}} 条未变"
+    "unchanged": "{{count}} 条未变",
+    "tool_results": "+{{count}} 条工具结果",
+    "system_changed": "system 变化",
+    "compaction_suspected": "疑似上下文压缩"
+  },
+  "replay": {
+    "warning": "重放会向上游 API 发送一次真实的、计费的请求。",
+    "body": "请求体",
+    "edited": "已修改",
+    "invalid_json": "JSON 格式无效",
+    "reset": "重置",
+    "send": "重放到上游",
+    "confirm": "再点一次确认",
+    "cancel": "取消",
+    "sending": "发送中…",
+    "original": "原始",
+    "result": "重放结果"
   },
   "raw": {
     "request_body": "请求",

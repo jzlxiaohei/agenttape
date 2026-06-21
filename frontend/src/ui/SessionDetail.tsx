@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useSessionRoute } from "@/viewmodel/route";
+import { useUIStore } from "@/store/ui";
 import { useSessionEventsView } from "@/viewmodel/detail";
 import { EventTimeline } from "./EventTimeline";
 import { EventDetailPanel } from "./EventDetailPanel";
@@ -14,7 +15,12 @@ import { Sheet, SheetContent, SheetA11y } from "@/components/ui/sheet";
 export function SessionDetail() {
   const { t } = useTranslation();
   const route = useSessionRoute();
+  const setDetailTab = useUIStore((s) => s.setDetailTab);
   const { events, defaultEventId, isLoading, isError } = useSessionEventsView(route.sessionId);
+  const openDiff = (id: string) => {
+    setDetailTab("diff");
+    route.selectRequest(id);
+  };
 
   if (!route.sessionId) return <Centered>{t("detail.pick_session")}</Centered>;
   if (isLoading) return <Centered>{t("detail.loading")}</Centered>;
@@ -40,7 +46,12 @@ export function SessionDetail() {
       <div className="min-w-0 flex-1 overflow-y-auto">
         <DetailLinksProvider events={events}>
           {showFlow ? (
-            <FlowGraphPanel events={events} selectedId={route.turnId} onOpenDetail={route.selectRequest} />
+            <FlowGraphPanel
+              events={events}
+              selectedId={route.turnId}
+              onOpenDetail={route.selectRequest}
+              onOpenDiff={openDiff}
+            />
           ) : !reqEventId ? (
             <Centered>{t("detail.pick_event")}</Centered>
           ) : reqEvent?.kind === "hook_event" ? (

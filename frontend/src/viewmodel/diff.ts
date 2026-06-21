@@ -7,6 +7,38 @@ export interface DiffOp {
   message: Message;
 }
 
+// DiffSummary classifies what the harness did to the context this turn, so the
+// reader gets the gist without scanning every row. compactionSuspected is a
+// heuristic (a long removed run) — shown as 疑似, never asserted (next.md 3.3).
+export interface DiffSummary {
+  toolResultsAdded: number;
+  systemChanged: boolean;
+  compactionSuspected: boolean;
+}
+
+export function summarizeDiff(ops: DiffOp[]): DiffSummary {
+  let toolResultsAdded = 0;
+  let systemChanged = false;
+  let maxRemovedRun = 0;
+  let run = 0;
+  for (const o of ops) {
+    if (o.kind === "removed") {
+      run += 1;
+      maxRemovedRun = Math.max(maxRemovedRun, run);
+    } else {
+      run = 0;
+    }
+    if (o.kind !== "unchanged" && o.message.role === "system") systemChanged = true;
+    if (
+      o.kind === "added" &&
+      (o.message.role === "tool" || (o.message.content ?? []).some((b) => b.type === "tool_result"))
+    ) {
+      toolResultsAdded += 1;
+    }
+  }
+  return { toolResultsAdded, systemChanged, compactionSuspected: maxRemovedRun >= 3 };
+}
+
 // requestSequence is the comparable input sequence of a completion: its system
 // (as one message) followed by the request messages.
 export function requestSequence(detail: EventDetail | undefined): Message[] {
