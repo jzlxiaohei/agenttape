@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 export type DetailPart = "system" | "tools" | "messages";
-export type DetailTab = "request" | "response" | "raw" | "diff";
+export type DetailTab = "request" | "response" | "raw" | "diff" | "replay";
 export type BlockKind = "text" | "reasoning" | "tool_call" | "tool_result";
 
 const allParts: Record<DetailPart, boolean> = {

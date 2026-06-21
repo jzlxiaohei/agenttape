@@ -5,6 +5,7 @@
 package httpcap
 
 import (
+	"net/http"
 	"strings"
 	"sync"
 
@@ -32,10 +33,33 @@ func SessionBaseURL(proxyBase string, sess *Session) string {
 type Sessions struct {
 	mu      sync.RWMutex
 	byToken map[string]*Session
+	// headers holds the latest real request headers per session id, kept ONLY in
+	// process memory (never persisted). Replay reuses them to re-send to upstream
+	// with the original auth; they vanish when the process exits — credentials are
+	// never written to disk.
+	headers map[string]http.Header
 }
 
 // NewSessions builds an empty registry.
-func NewSessions() *Sessions { return &Sessions{byToken: map[string]*Session{}} }
+func NewSessions() *Sessions {
+	return &Sessions{byToken: map[string]*Session{}, headers: map[string]http.Header{}}
+}
+
+// RememberHeaders stores (in memory only) the latest request headers for a
+// session so replay can reuse the original auth.
+func (s *Sessions) RememberHeaders(sessionID string, h http.Header) {
+	s.mu.Lock()
+	s.headers[sessionID] = h.Clone()
+	s.mu.Unlock()
+}
+
+// Headers returns the in-memory request headers for a session, or nil if none
+// were captured in this process (e.g. the session predates a restart).
+func (s *Sessions) Headers(sessionID string) http.Header {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.headers[sessionID]
+}
 
 // Register creates and stores a session for the given client and upstream.
 func (s *Sessions) Register(client, upstream string) *Session {

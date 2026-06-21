@@ -122,3 +122,18 @@ export function rawUrl(eventId: string, role: string): string {
 export function fetchRaw(eventId: string, role: string): Promise<string> {
   return api.getText(rawUrl(eventId, role));
 }
+
+// --- replay ---
+export interface ReplayResult {
+  status: number;
+  duration_ms: number;
+  normalized?: NormalizedEnvelope;
+  normalize_error?: string;
+}
+
+// replayEvent re-sends a captured completion to upstream (optionally with an
+// edited body) and returns the freshly normalized result. body undefined =
+// resend the original verbatim.
+export function replayEvent(eventId: string, body?: string): Promise<ReplayResult> {
+  return api.postJSON<ReplayResult>(`/api/events/${eventId}/replay`, body === undefined ? {} : { body });
+}

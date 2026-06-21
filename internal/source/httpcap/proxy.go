@@ -75,6 +75,10 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	respBody := streamCopy(w, resp.Body)
 	completed := time.Now().UTC()
 
+	// Keep this session's real request headers in memory (auth included) so the
+	// exchange can be replayed to upstream later. Memory only — never persisted.
+	p.sessions.RememberHeaders(sess.ID, r.Header)
+
 	p.emit(p.buildEvent(sess, r, upURL, reqBody, resp, respBody, started, completed))
 }
 

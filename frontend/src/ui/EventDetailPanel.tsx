@@ -15,6 +15,7 @@ import { Tabs } from "./Tabs";
 
 const RawView = lazy(() => import("./RawView").then((m) => ({ default: m.RawView })));
 const DiffView = lazy(() => import("./DiffView"));
+const ReplayView = lazy(() => import("./ReplayView"));
 
 const BIG = 20;
 
@@ -61,6 +62,7 @@ export function EventDetailPanel({ eventId }: { eventId: string }) {
             { key: "response", label: t("detail.response"), count: c.responseMessages },
             { key: "raw", label: t("detail.raw") },
             { key: "diff", label: t("detail.diff") },
+            { key: "replay", label: t("detail.replay") },
           ]}
           active={tab}
           onChange={(k) => setTab(k as typeof tab)}
@@ -84,6 +86,13 @@ export function EventDetailPanel({ eventId }: { eventId: string }) {
         <div className="p-6">
           <Suspense fallback={<p className="text-xs text-muted-foreground">{t("raw.loading")}</p>}>
             <DiffView eventId={eventId} />
+          </Suspense>
+        </div>
+      )}
+      {tab === "replay" && (
+        <div className="p-6">
+          <Suspense fallback={<p className="text-xs text-muted-foreground">{t("raw.loading")}</p>}>
+            <ReplayView eventId={eventId} />
           </Suspense>
         </div>
       )}

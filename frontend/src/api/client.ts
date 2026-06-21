@@ -16,4 +16,17 @@ async function getText(path: string): Promise<string> {
   return res.text();
 }
 
-export const api = { getJSON, getText };
+async function postJSON<T>(path: string, body?: unknown): Promise<T> {
+  const res = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!res.ok) {
+    // surface the server's plain-text error message (e.g. the 409 credentials note)
+    throw new Error((await res.text().catch(() => "")) || `${res.status} ${res.statusText}`);
+  }
+  return (await res.json()) as T;
+}
+
+export const api = { getJSON, getText, postJSON };

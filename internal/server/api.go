@@ -50,6 +50,9 @@ func (s *Server) EnableAPI(st *store.Store) {
 		}
 		writeJSON(w, map[string]any{"tags": counts})
 	})
+	s.mux.HandleFunc("POST /api/events/{id}/replay", func(w http.ResponseWriter, r *http.Request) {
+		s.handleReplay(st, w, r)
+	})
 	s.mux.HandleFunc("GET /api/sessions/{id}/events", func(w http.ResponseWriter, r *http.Request) {
 		events, err := st.ListEvents(r.PathValue("id"))
 		if err != nil {
