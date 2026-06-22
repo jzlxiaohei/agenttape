@@ -53,6 +53,15 @@ func (s *Server) EnableAPI(st *store.Store) {
 	s.mux.HandleFunc("POST /api/events/{id}/replay", func(w http.ResponseWriter, r *http.Request) {
 		s.handleReplay(st, w, r)
 	})
+	s.mux.HandleFunc("POST /api/launch", s.handleLaunch)
+	s.mux.HandleFunc("GET /api/terminals", s.handleTerminals)
+	// In-memory sessions = the ones still replayable in this process (have creds).
+	s.mux.HandleFunc("GET /api/active-sessions", func(w http.ResponseWriter, _ *http.Request) {
+		writeJSON(w, s.Sessions.List())
+	})
+	s.mux.HandleFunc("GET /api/cases", func(w http.ResponseWriter, r *http.Request) { s.handleListCases(st, w, r) })
+	s.mux.HandleFunc("POST /api/cases", func(w http.ResponseWriter, r *http.Request) { s.handleAddCase(st, w, r) })
+	s.mux.HandleFunc("POST /api/cases/{id}/run", func(w http.ResponseWriter, r *http.Request) { s.handleRunCase(st, w, r) })
 	s.mux.HandleFunc("GET /api/sessions/{id}/events", func(w http.ResponseWriter, r *http.Request) {
 		events, err := st.ListEvents(r.PathValue("id"))
 		if err != nil {

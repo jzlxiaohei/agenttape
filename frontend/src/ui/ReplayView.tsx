@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, Play, Loader2 } from "lucide-react";
 import { useEventDetail, useRawFile, useReplay } from "@/query/events";
+import { useAddCase } from "@/query/cases";
 import { cn } from "@/lib/utils";
 import CodeEditor from "./CodeEditor";
 
@@ -13,6 +14,7 @@ export default function ReplayView({ eventId }: { eventId: string }) {
   const original = useEventDetail(eventId);
   const raw = useRawFile(eventId, "request_body", true);
   const replay = useReplay(eventId);
+  const addCase = useAddCase();
   const [draft, setDraft] = useState<string | null>(null);
   const [armed, setArmed] = useState(false);
 
@@ -46,11 +48,20 @@ export default function ReplayView({ eventId }: { eventId: string }) {
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t("replay.body")} {edited && <span className="text-accent">· {t("replay.edited")}</span>}
           </h3>
-          {draft !== null && (
-            <button onClick={() => setDraft(null)} className="text-xs text-muted-foreground hover:text-foreground">
-              {t("replay.reset")}
+          <div className="flex items-center gap-3">
+            {draft !== null && (
+              <button onClick={() => setDraft(null)} className="text-xs text-muted-foreground hover:text-foreground">
+                {t("replay.reset")}
+              </button>
+            )}
+            <button
+              onClick={() => addCase.mutate({ eventId })}
+              disabled={addCase.isPending}
+              className="text-xs text-accent hover:underline disabled:opacity-50"
+            >
+              {addCase.isSuccess ? t("replay.save_done") : t("replay.save_case")}
             </button>
-          )}
+          </div>
         </div>
         {raw.isLoading ? (
           <p className="text-xs text-muted-foreground">{t("raw.loading")}</p>

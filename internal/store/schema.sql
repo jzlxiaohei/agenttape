@@ -90,6 +90,21 @@ CREATE TABLE IF NOT EXISTS tags (
   created_at TEXT
 );
 
+-- Replay library: saved, re-sendable requests (predefined seeds + ones the user
+-- adds from captured traffic). A case is provider-neutral request material; it is
+-- run against a chosen session that supplies the credentials (next.md module 4).
+CREATE TABLE IF NOT EXISTS replay_cases (
+  id         TEXT PRIMARY KEY,
+  name       TEXT,
+  tags       TEXT,                -- comma-separated scenario labels
+  provider   TEXT,                -- best-effort label (anthropic / openai-responses…)
+  method     TEXT,
+  target     TEXT,                -- absolute upstream URL
+  body       TEXT,                -- request body
+  source     TEXT,                -- seed | captured
+  created_at TEXT
+);
+
 -- Per-section token stats (http only) for queries like "tools > 50% of tokens".
 CREATE TABLE IF NOT EXISTS sections (
   event_id      TEXT REFERENCES events(id),

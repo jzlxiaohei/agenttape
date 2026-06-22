@@ -18,6 +18,8 @@ func runLaunch(args []string) error {
 	kind := fs.String("kind", "", "client kind: cc | codex")
 	serverURL := fs.String("server", "http://127.0.0.1:8787", "running tracelab server")
 	upstream := fs.String("upstream", "", "upstream base URL (defaults by kind)")
+	token := fs.String("token", "", "use a pre-registered session token (skip register)")
+	session := fs.String("session", "", "pre-registered session id (use with -token)")
 	_ = fs.Parse(args)
 
 	client, defUpstream, err := clientDefaults(*kind)
@@ -28,11 +30,13 @@ func runLaunch(args []string) error {
 		*upstream = defUpstream
 	}
 
-	token, sessionID, err := register(*serverURL, client, *upstream)
-	if err != nil {
-		return fmt.Errorf("register session: %w", err)
+	tok, sessionID := *token, *session
+	if tok == "" {
+		if tok, sessionID, err = register(*serverURL, client, *upstream); err != nil {
+			return fmt.Errorf("register session: %w", err)
+		}
 	}
-	sess := &httpcap.Session{ID: sessionID, Token: token}
+	sess := &httpcap.Session{ID: sessionID, Token: tok}
 
 	cmd := chooseLauncher(*kind, *serverURL, sess, fs.Args())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr

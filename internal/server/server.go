@@ -21,6 +21,10 @@ type Server struct {
 	mux      *http.ServeMux
 	sink     sink.Sink
 	reg      *normalize.Registry
+	// AllowLaunch gates the server-side "launch in a terminal" action. Off by
+	// default: the server executes nothing unless the operator opts in with
+	// -allow-launch. The Launch page still shows a copy-paste command regardless.
+	AllowLaunch bool
 }
 
 // New builds the server. emit normalizes each event and writes it to the sink.

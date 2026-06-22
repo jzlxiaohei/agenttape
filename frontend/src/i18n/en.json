@@ -9,6 +9,40 @@
     "settings": "Settings"
   },
   "lang": { "toggle": "中文" },
+  "launch": {
+    "title": "Launch",
+    "subtitle": "Start a coding agent through the proxy — its session is captured automatically.",
+    "client": "Client",
+    "credential": "Credentials",
+    "mode_subscription": "Subscription",
+    "mode_key": "API key",
+    "mode_subscription_note": "Uses the account you're already logged into (claude / codex login). Nothing global is touched.",
+    "mode_key_note": "The key stays in server memory only — the proxy injects it on forward, so the agent and disk never see it.",
+    "api_key": "API key",
+    "terminal": "Terminal app",
+    "workdir": "Working directory",
+    "workdir_hint": "defaults to your home directory",
+    "button": "Launch in new terminal",
+    "launching": "Launching…",
+    "started": "Started in a new terminal. The session will appear in Sessions once it makes a request.",
+    "view_sessions": "Go to Sessions",
+    "run_yourself": "Run it yourself",
+    "run_yourself_note": "Recommended — the server runs nothing. In key mode your key stays in your own shell and never reaches tracelab.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "disabled_note": "Server launch is off. Copy the command above, or restart serve with -allow-launch."
+  },
+  "cases": {
+    "title": "Replay library",
+    "subtitle": "Pick a case to run.",
+    "empty": "No cases yet.",
+    "source_seed": "seed",
+    "source_captured": "saved",
+    "warning": "Running a case sends a real, billed request to upstream.",
+    "session": "Run with session (supplies credentials)",
+    "none_active": "No live session in this process. Start one:",
+    "run": "Run"
+  },
   "sessions": {
     "title": "Sessions",
     "empty": "No sessions captured yet. Launch cc or codex through the proxy.",
@@ -151,7 +185,9 @@
     "cancel": "cancel",
     "sending": "Sending…",
     "original": "Original",
-    "result": "Replay"
+    "result": "Replay",
+    "save_case": "Save as case",
+    "save_done": "Saved ✓"
   },
   "raw": {
     "request_body": "Request",

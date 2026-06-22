@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { MessagesSquare, Search, BarChart3, Settings } from "lucide-react";
+import { MessagesSquare, Search, Rocket, FlaskConical, BarChart3, Settings } from "lucide-react";
 import { LanguageToggle } from "./LanguageToggle";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,8 @@ function IconRail() {
   const { pathname } = useLocation();
   const items = [
     { icon: MessagesSquare, to: "/sessions", match: (p: string) => p === "/" || p.startsWith("/sessions") },
+    { icon: Rocket, to: "/launch", match: (p: string) => p.startsWith("/launch") },
+    { icon: FlaskConical, to: "/cases", match: (p: string) => p.startsWith("/cases") },
     { icon: Search, to: "/search", match: (p: string) => p.startsWith("/search") },
   ];
   return (

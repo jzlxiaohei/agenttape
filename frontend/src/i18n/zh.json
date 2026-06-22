@@ -9,6 +9,40 @@
     "settings": "设置"
   },
   "lang": { "toggle": "EN" },
+  "launch": {
+    "title": "启动",
+    "subtitle": "通过代理启动一个 coding agent —— 会话会被自动捕获。",
+    "client": "客户端",
+    "credential": "凭证",
+    "mode_subscription": "订阅",
+    "mode_key": "API key",
+    "mode_subscription_note": "用你已登录的账号(claude / codex login),不改任何全局配置。",
+    "mode_key_note": "key 只留在服务进程内存里 —— 由代理转发时注入,agent 和磁盘都看不到。",
+    "api_key": "API key",
+    "terminal": "终端 App",
+    "workdir": "工作目录",
+    "workdir_hint": "默认你的 home 目录",
+    "button": "在新终端启动",
+    "launching": "启动中…",
+    "started": "已在新终端启动。会话发出请求后会出现在「会话」里。",
+    "view_sessions": "去看会话",
+    "run_yourself": "自己运行",
+    "run_yourself_note": "推荐 —— 服务端不执行任何东西。key 模式下你的 key 只留在自己的 shell 里,永不经过 tracelab。",
+    "copy": "复制",
+    "copied": "已复制",
+    "disabled_note": "服务端启动已关闭。复制上面的命令自己跑,或用 -allow-launch 重启 serve。"
+  },
+  "cases": {
+    "title": "素材库",
+    "subtitle": "选一个 case 运行。",
+    "empty": "还没有 case。",
+    "source_seed": "预置",
+    "source_captured": "已保存",
+    "warning": "运行 case 会向上游发送一次真实的、计费的请求。",
+    "session": "用哪个会话运行(提供凭证)",
+    "none_active": "本进程内没有活跃会话。去启动一个:",
+    "run": "运行"
+  },
   "sessions": {
     "title": "会话",
     "empty": "还没有捕获到会话。通过代理启动 cc 或 codex。",
@@ -151,7 +185,9 @@
     "cancel": "取消",
     "sending": "发送中…",
     "original": "原始",
-    "result": "重放结果"
+    "result": "重放结果",
+    "save_case": "加入素材库",
+    "save_done": "已保存 ✓"
   },
   "raw": {
     "request_body": "请求",

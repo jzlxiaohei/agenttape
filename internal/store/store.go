@@ -54,13 +54,18 @@ func Open(dataDir string) (*Store, error) {
 		db.Close()
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
+	st := &Store{db: db, dataDir: dataDir, rawDir: rawDir}
+	if err := st.seedCases(); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("seed cases: %w", err)
+	}
 	if _, err := db.Exec(
 		`INSERT INTO schema_meta(key,value) VALUES('version',?)
 		 ON CONFLICT(key) DO UPDATE SET value=excluded.value`, SchemaVersion); err != nil {
 		db.Close()
 		return nil, fmt.Errorf("record schema version: %w", err)
 	}
-	return &Store{db: db, dataDir: dataDir, rawDir: rawDir}, nil
+	return st, nil
 }
 
 // Close closes the database.

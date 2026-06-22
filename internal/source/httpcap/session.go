@@ -33,16 +33,23 @@ func SessionBaseURL(proxyBase string, sess *Session) string {
 type Sessions struct {
 	mu      sync.RWMutex
 	byToken map[string]*Session
-	// headers holds the latest real request headers per session id, kept ONLY in
-	// process memory (never persisted). Replay reuses them to re-send to upstream
-	// with the original auth; they vanish when the process exits — credentials are
-	// never written to disk.
+	byID    map[string]*Session
+	// headers holds the latest real request headers per session id, captured from
+	// proxied traffic. inject holds auth headers the proxy should ADD on forward
+	// (API-key launch mode, so the agent never sees the real key). Both live ONLY
+	// in process memory — credentials are never written to disk and die on exit.
 	headers map[string]http.Header
+	inject  map[string]http.Header
 }
 
 // NewSessions builds an empty registry.
 func NewSessions() *Sessions {
-	return &Sessions{byToken: map[string]*Session{}, headers: map[string]http.Header{}}
+	return &Sessions{
+		byToken: map[string]*Session{},
+		byID:    map[string]*Session{},
+		headers: map[string]http.Header{},
+		inject:  map[string]http.Header{},
+	}
 }
 
 // RememberHeaders stores (in memory only) the latest request headers for a
@@ -71,6 +78,7 @@ func (s *Sessions) Register(client, upstream string) *Session {
 	}
 	s.mu.Lock()
 	s.byToken[sess.Token] = sess
+	s.byID[sess.ID] = sess
 	s.mu.Unlock()
 	return sess
 }
@@ -80,6 +88,40 @@ func (s *Sessions) Lookup(token string) *Session {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.byToken[token]
+}
+
+// Get returns the session for an id, or nil.
+func (s *Sessions) Get(sessionID string) *Session {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.byID[sessionID]
+}
+
+// RememberInject stores auth headers the proxy will inject on forward for this
+// session (API-key launch mode). Memory only.
+func (s *Sessions) RememberInject(sessionID string, h http.Header) {
+	s.mu.Lock()
+	s.inject[sessionID] = h.Clone()
+	s.mu.Unlock()
+}
+
+// InjectFor returns the proxy-inject auth headers for a session, or nil.
+func (s *Sessions) InjectFor(sessionID string) http.Header {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.inject[sessionID]
+}
+
+// AuthFor returns the best auth headers for replaying a session's requests:
+// the proxy-injected key if set (API-key mode), else the captured request
+// headers (subscription/captured mode). nil if neither is in memory.
+func (s *Sessions) AuthFor(sessionID string) http.Header {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if h := s.inject[sessionID]; h != nil {
+		return h
+	}
+	return s.headers[sessionID]
 }
 
 // List returns a snapshot of all sessions.

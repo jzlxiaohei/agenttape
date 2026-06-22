@@ -58,6 +58,16 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	copyHeaders(upReq.Header, r.Header)
+	// API-key launch mode: the agent sent a placeholder key; swap in the real auth
+	// held only in memory for this session, so the key never reaches the agent.
+	if inject := p.sessions.InjectFor(sess.ID); inject != nil {
+		for k, vs := range inject {
+			upReq.Header.Del(k)
+			for _, v := range vs {
+				upReq.Header.Add(k, v)
+			}
+		}
+	}
 	// Force identity so upstream returns uncompressed bodies — no decompression
 	// dependency, and captured bytes are directly readable.
 	upReq.Header.Set("Accept-Encoding", "identity")
