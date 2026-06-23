@@ -1,0 +1,90 @@
+{
+  "model": "claude-opus-4-8",
+  "max_tokens": 32000,
+  "system": [
+    {
+      "type": "text",
+      "text": "x-anthropic-billing-header: cc_version=2.1.185.ecf; cc_entrypoint=cli;"
+    },
+    {
+      "type": "text",
+      "text": "You are Claude Code, Anthropic's official CLI for Claude."
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "在 reporter.go 里，把 JSON reporter 输出的字段名从 camelCase 改成 snake_case，先改 errorRate → error_rate。改完简单说一句。"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "type": "text",
+          "text": "我用 Edit 把 reporter.go 里的 errorRate 字段名改成 error_rate。"
+        },
+        {
+          "type": "tool_use",
+          "id": "toolu_edit_demo01",
+          "name": "Edit",
+          "input": {
+            "file_path": "/workspace/reporter.go",
+            "old_string": "\t\t\"errorRate\": window.ErrorRate,",
+            "new_string": "\t\t\"error_rate\": window.ErrorRate,"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "toolu_edit_demo01",
+          "content": "The file /workspace/reporter.go has been updated. Here's the result of running `cat -n` on a snippet of the edited file:\n    41\t\tout := map[string]any{\n    42\t\t\t\"window_start\": window.Start.Unix(),\n    43\t\t\t\"count\":        window.Count,\n    44\t\t\t\"error_rate\":   window.ErrorRate,\n    45\t\t\t\"p50_ms\":       window.P50,\n    46\t\t\t\"p95_ms\":       window.P95,\n    47\t\t}"
+        }
+      ]
+    }
+  ],
+  "stream": true,
+  "tools": [
+    {
+      "name": "Edit",
+      "description": "Performs exact string replacement in a file.\n\n- You must Read the file in this conversation before editing, or the call will fail.\n- `old_string` must match the file exactly, including indentation, and be unique — the edit fails otherwise. Strip the Read line prefix (line number + tab) before matching.\n- `replace_all: true` replaces every occurrence instead.",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "additionalProperties": false,
+        "properties": {
+          "file_path": {
+            "description": "The absolute path to the file to modify",
+            "type": "string"
+          },
+          "old_string": {
+            "description": "The text to replace",
+            "type": "string"
+          },
+          "new_string": {
+            "description": "The text to replace it with (must be different from old_string)",
+            "type": "string"
+          },
+          "replace_all": {
+            "default": false,
+            "description": "Replace all occurrences of old_string (default false)",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "file_path",
+          "old_string",
+          "new_string"
+        ],
+        "type": "object"
+      }
+    }
+  ]
+}

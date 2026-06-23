@@ -4,6 +4,7 @@ import { SessionsPage } from "@/routes/Sessions";
 import { SearchPage } from "@/routes/Search";
 import { LaunchPage } from "@/routes/Launch";
 import { CasesPage } from "@/routes/Cases";
+import { HooksPage } from "@/routes/Hooks";
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 2000 } },
@@ -18,6 +19,7 @@ export function App() {
           <Route path="/sessions/:id" element={<SessionsPage />} />
           <Route path="/launch" element={<LaunchPage />} />
           <Route path="/cases" element={<CasesPage />} />
+          <Route path="/hooks" element={<HooksPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="*" element={<Navigate to="/sessions" replace />} />
         </Routes>

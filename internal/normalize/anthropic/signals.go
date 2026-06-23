@@ -1,15 +1,17 @@
 package anthropic
 
 import (
-	"slices"
-	"strings"
-
 	"tracelab/internal/normalize"
 )
 
-// deriveSignals emits structural tag hints. Things we can read from the typed
-// structure (tool calls, reasoning) are high-confidence facts. Things we can
-// only guess (compaction) are marked Suspected so the UI shows them as 疑似.
+// deriveSignals emits structural tag hints we can read from the typed structure
+// (tool calls, reasoning) — high-confidence facts only.
+//
+// Compaction is deliberately NOT signaled here: it can't be judged from a single
+// request (keyword-matching the injected /compact prompt false-positives on any
+// conversation that merely discusses compaction). It's a cross-event judgment —
+// see internal/server/compaction.go (graded episodes), decided once the request
+// after the boundary has arrived.
 func deriveSignals(env *normalize.NormalizedEnvelope) []normalize.TagSignal {
 	var sigs []normalize.TagSignal
 
@@ -18,9 +20,6 @@ func deriveSignals(env *normalize.NormalizedEnvelope) []normalize.TagSignal {
 	}
 	if hasReasoning(env) {
 		sigs = append(sigs, normalize.TagSignal{Tag: "reasoning", Confidence: 1, Evidence: "typed thinking blocks present"})
-	}
-	if ev, ok := compactionMarker(env); ok {
-		sigs = append(sigs, normalize.TagSignal{Tag: "compaction", Confidence: 0.5, Suspected: true, Evidence: ev})
 	}
 	return sigs
 }
@@ -56,29 +55,4 @@ func hasReasoning(env *normalize.NormalizedEnvelope) bool {
 		return true
 	}
 	return env.Request != nil && check(env.Request.Messages)
-}
-
-// compactionMarker is a deliberately conservative, documented heuristic. It is
-// keyword-based and therefore only ever yields a SUSPECTED signal — never a
-// fact. See next.md 3.3.
-var compactionMarkers = []string{
-	"This session is being continued from a previous conversation",
-	"conversation is summarized",
-}
-
-func compactionMarker(env *normalize.NormalizedEnvelope) (string, bool) {
-	if env.Request == nil {
-		return "", false
-	}
-	for _, m := range env.Request.Messages {
-		for _, b := range m.Content {
-			if b.Type != normalize.BlockText {
-				continue
-			}
-			if i := slices.IndexFunc(compactionMarkers, func(m string) bool { return strings.Contains(b.Text, m) }); i >= 0 {
-				return "matched marker: " + compactionMarkers[i], true
-			}
-		}
-	}
-	return "", false
 }

@@ -21,9 +21,10 @@ type Server struct {
 	mux      *http.ServeMux
 	sink     sink.Sink
 	reg      *normalize.Registry
-	// AllowLaunch gates the server-side "launch in a terminal" action. Off by
-	// default: the server executes nothing unless the operator opts in with
-	// -allow-launch. The Launch page still shows a copy-paste command regardless.
+	// AllowLaunch gates the server-side "launch in a terminal" action. On by
+	// default (serve sets it); pass -allow-launch=false to disable, after which the
+	// server executes nothing. The Launch page still shows a copy-paste command
+	// regardless.
 	AllowLaunch bool
 }
 

@@ -1,9 +1,12 @@
 import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { useEventDetailView } from "@/viewmodel/detail";
+import { useCompactionEpisodes } from "@/query/events";
 import { useUIStore } from "@/store/ui";
 import { TokenBars } from "./TokenBars";
 import { TagList } from "./TagList";
+import { CompactionPanel } from "./CompactionPanel";
+import { CopyButton } from "./CopyButton";
 import { MessageThread } from "./MessageThread";
 import { ContentBlocks } from "./ContentBlocks";
 import { ToolsView } from "./ToolsView";
@@ -27,6 +30,10 @@ export function EventDetailPanel({ eventId }: { eventId: string }) {
   const vm = useEventDetailView(eventId);
   const tab = useUIStore((s) => s.detailTab);
   const setTab = useUIStore((s) => s.setDetailTab);
+  // Compaction is a cross-event judgment: this event shows the panel only if it's
+  // the "before" (summarize-trigger) of a detected episode.
+  const { data: episodes } = useCompactionEpisodes(vm.sessionId || null);
+  const episode = (episodes ?? []).find((e) => e.before_event === eventId);
 
   if (vm.isLoading) return <p className="p-6 text-muted-foreground">{t("detail.loading")}</p>;
   if (vm.isError || !vm.found || !vm.header)
@@ -52,8 +59,22 @@ export function EventDetailPanel({ eventId }: { eventId: string }) {
             </span>
           )}
         </div>
+        {h.target && (
+          <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="mono min-w-0 truncate" title={`${h.method} ${h.target}`}>
+              {h.method} {h.target}
+            </span>
+            <CopyButton text={h.target} />
+          </div>
+        )}
         <TagList tags={vm.tags} />
       </header>
+
+      {episode && vm.compactionMetrics && (
+        <div className="px-6 pb-2">
+          <CompactionPanel grade={episode.grade} evidence={episode.evidence} data={vm.compactionMetrics} />
+        </div>
+      )}
 
       <div className="px-6">
         <Tabs

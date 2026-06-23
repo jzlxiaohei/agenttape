@@ -54,14 +54,65 @@ func (s *Server) EnableAPI(st *store.Store) {
 		s.handleReplay(st, w, r)
 	})
 	s.mux.HandleFunc("POST /api/launch", s.handleLaunch)
+	s.mux.HandleFunc("POST /api/launch/manual", s.handleManualCommand)
 	s.mux.HandleFunc("GET /api/terminals", s.handleTerminals)
+	s.mux.HandleFunc("GET /api/codex-desktop/status", func(w http.ResponseWriter, r *http.Request) { s.handleCodexDesktopStatus(w, r) })
+	s.mux.HandleFunc("POST /api/codex-desktop/install", func(w http.ResponseWriter, r *http.Request) { s.handleCodexDesktopInstall(st, w, r) })
+	s.mux.HandleFunc("POST /api/codex-desktop/restore", s.handleCodexDesktopRestore)
 	// In-memory sessions = the ones still replayable in this process (have creds).
 	s.mux.HandleFunc("GET /api/active-sessions", func(w http.ResponseWriter, _ *http.Request) {
-		writeJSON(w, s.Sessions.List())
+		// credential_kind lets the replay UI tell apart same-client sessions that
+		// carry genuinely different auth: "key" = a proxy-injected API key, else
+		// "subscription" = captured login headers (same derivation as case curl).
+		type dto struct {
+			ID             string `json:"id"`
+			Client         string `json:"client"`
+			Upstream       string `json:"upstream"`
+			CredentialKind string `json:"credential_kind"`
+		}
+		list := s.Sessions.List()
+		out := make([]dto, 0, len(list))
+		for _, ss := range list {
+			kind := "subscription"
+			if s.Sessions.InjectFor(ss.ID) != nil {
+				kind = "key"
+			}
+			out = append(out, dto{ID: ss.ID, Client: ss.Client, Upstream: ss.Upstream, CredentialKind: kind})
+		}
+		writeJSON(w, out)
+	})
+	// Close a live session: forget it from the in-memory proxy registry (and drop
+	// its creds). Does not kill the agent process — see Sessions.Remove.
+	s.mux.HandleFunc("DELETE /api/active-sessions/{id}", func(w http.ResponseWriter, r *http.Request) {
+		if !s.Sessions.Remove(r.PathValue("id")) {
+			http.Error(w, "session not found", http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
 	})
 	s.mux.HandleFunc("GET /api/cases", func(w http.ResponseWriter, r *http.Request) { s.handleListCases(st, w, r) })
 	s.mux.HandleFunc("POST /api/cases", func(w http.ResponseWriter, r *http.Request) { s.handleAddCase(st, w, r) })
 	s.mux.HandleFunc("POST /api/cases/{id}/run", func(w http.ResponseWriter, r *http.Request) { s.handleRunCase(st, w, r) })
+	s.mux.HandleFunc("POST /api/cases/{id}/snapshot", func(w http.ResponseWriter, r *http.Request) { s.handleSnapshotCase(st, w, r) })
+	s.mux.HandleFunc("POST /api/cases/{id}/overwrite", func(w http.ResponseWriter, r *http.Request) { s.handleOverwriteCase(st, w, r) })
+	s.mux.HandleFunc("POST /api/cases/{id}/curl", func(w http.ResponseWriter, r *http.Request) { s.handleCaseCurl(st, w, r) })
+	s.mux.HandleFunc("DELETE /api/cases/{id}", func(w http.ResponseWriter, r *http.Request) { s.handleDeleteCase(st, w, r) })
+	s.mux.HandleFunc("GET /api/hook-events", func(w http.ResponseWriter, r *http.Request) { s.handleListHookEvents(st, w, r) })
+	s.mux.HandleFunc("POST /api/hook-events", func(w http.ResponseWriter, r *http.Request) { s.handleAddHookEvent(st, w, r) })
+	s.mux.HandleFunc("PATCH /api/hook-events", func(w http.ResponseWriter, r *http.Request) { s.handleSetHookEventEnabled(st, w, r) })
+	s.mux.HandleFunc("DELETE /api/hook-events", func(w http.ResponseWriter, r *http.Request) { s.handleDeleteHookEvent(st, w, r) })
+	s.mux.HandleFunc("GET /api/sessions/{id}/compaction-episodes", func(w http.ResponseWriter, r *http.Request) {
+		comps, hooks, err := st.CompactionInputs(r.PathValue("id"))
+		if err != nil {
+			httpError(w, err)
+			return
+		}
+		eps := detectCompactionEpisodes(comps, hooks)
+		if eps == nil {
+			eps = []CompactionEpisode{}
+		}
+		writeJSON(w, eps)
+	})
 	s.mux.HandleFunc("GET /api/sessions/{id}/events", func(w http.ResponseWriter, r *http.Request) {
 		events, err := st.ListEvents(r.PathValue("id"))
 		if err != nil {
@@ -70,6 +121,7 @@ func (s *Server) EnableAPI(st *store.Store) {
 		}
 		writeJSON(w, events)
 	})
+	s.mux.HandleFunc("DELETE /api/sessions/{id}", func(w http.ResponseWriter, r *http.Request) { s.handleDeleteSession(st, w, r) })
 	s.mux.HandleFunc("GET /api/events/{id}", func(w http.ResponseWriter, r *http.Request) {
 		detail, err := st.GetEvent(r.PathValue("id"))
 		if err == store.ErrNoRows {

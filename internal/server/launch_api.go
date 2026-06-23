@@ -32,20 +32,109 @@ func sameOriginOK(r *http.Request) bool {
 	return false
 }
 
-// manualCommand is the copy-paste command a user can run themselves instead of
-// letting the server spawn anything. In key mode the key stays in the user's own
-// shell env and never reaches tracelab's server.
-func manualCommand(exe, wd, serverURL, kind, mode string) string {
-	prefix := ""
+// manualCommand is the FULL-CAPTURE copy-paste command (http + hooks): it runs the
+// agent through `tracelab launch`, which injects hooks too. In key mode the key
+// stays in the user's own shell env and never reaches tracelab's server. Extra
+// args (e.g. --resume) are forwarded to the underlying client after `--`.
+func manualCommand(exe, wd, serverURL, kind, mode, args string) string {
+	prefix, suffix := "", ""
 	if mode == "key" {
 		if kind == "cc" {
 			prefix = "ANTHROPIC_API_KEY=<YOUR_KEY> "
 		} else {
 			prefix = "OPENAI_API_KEY=<YOUR_KEY> "
+			// codex defaults to the ChatGPT backend (subscription); an API key needs
+			// the platform API instead, so pin the upstream explicitly.
+			suffix = " -upstream https://api.openai.com/v1"
 		}
 	}
-	return fmt.Sprintf("cd %s && %s%s launch -kind %s -server %s",
-		shellQuote(wd), prefix, shellQuote(exe), kind, shellQuote(serverURL))
+	if a := strings.TrimSpace(args); a != "" {
+		// `--` stops tracelab's flag parser; everything after is handed to the client.
+		suffix += " -- " + a
+	}
+	return fmt.Sprintf("cd %s && %s%s launch -kind %s -server %s%s",
+		shellQuote(wd), prefix, shellQuote(exe), kind, shellQuote(serverURL), suffix)
+}
+
+// buildManualEnvCommand is the LIGHTWEIGHT "run it yourself" command: point the
+// native client at the per-session proxy and run it directly. HTTP-only (no hooks),
+// but the user keeps full control — any native flag (--resume, -m, …) can be
+// appended. Only cc has a clean base-url env var; codex needs `-c` provider
+// overrides. token may be a "<TOKEN>" placeholder for display before a session is
+// registered.
+func buildManualEnvCommand(kind, mode, serverURL, token, args string) string {
+	base := strings.TrimRight(serverURL, "/") + "/s/" + token
+	extra := strings.TrimSpace(args)
+	var b strings.Builder
+
+	if kind == "cc" {
+		b.WriteString("export ANTHROPIC_BASE_URL=" + shellQuote(base) + "\n")
+		if mode == "key" {
+			b.WriteString("export ANTHROPIC_API_KEY='<YOUR_KEY>'\n")
+		}
+		b.WriteString("claude")
+		if extra != "" {
+			b.WriteString(" " + extra)
+		}
+		return b.String()
+	}
+
+	// codex: no base-url env var — route via `-c model_providers.*`. Each `-c` value
+	// is single-quoted so the inner TOML double-quotes survive the shell.
+	if mode == "key" {
+		b.WriteString("export OPENAI_API_KEY='<YOUR_KEY>'\n")
+	}
+	b.WriteString("codex \\\n")
+	b.WriteString("  -c 'model_provider=\"tracelab\"' \\\n")
+	b.WriteString("  -c 'model_providers.tracelab.name=\"tracelab\"' \\\n")
+	b.WriteString("  -c 'model_providers.tracelab.base_url=\"" + base + "\"' \\\n")
+	b.WriteString("  -c 'model_providers.tracelab.wire_api=\"responses\"' \\\n")
+	b.WriteString("  -c 'model_providers.tracelab.requires_openai_auth=true'")
+	if extra != "" {
+		b.WriteString(" " + extra)
+	}
+	return b.String()
+}
+
+// handleManualCommand returns the lightweight env/-c "run it yourself" command for
+// a client. With register=true it first registers a session (so the proxy will
+// accept the baked-in token) and returns its id; otherwise it returns a command
+// with a "<TOKEN>" placeholder for display. No credentials are injected — in key
+// mode the user supplies the key in their own shell, which the proxy forwards.
+func (s *Server) handleManualCommand(w http.ResponseWriter, r *http.Request) {
+	if !sameOriginOK(r) {
+		http.Error(w, "cross-origin blocked", http.StatusForbidden)
+		return
+	}
+	var req struct {
+		Kind     string `json:"kind"`
+		Mode     string `json:"mode"`
+		Args     string `json:"args"`
+		Upstream string `json:"upstream"`
+		Register bool   `json:"register"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || !launchKinds[req.Kind] {
+		http.Error(w, "invalid request (kind must be cc | codex)", http.StatusBadRequest)
+		return
+	}
+	serverURL := "http://" + r.Host
+	token, sessionID := "<TOKEN>", ""
+	if req.Register {
+		upstream := req.Upstream
+		if upstream == "" {
+			upstream = defaultUpstream(req.Kind, req.Mode)
+		}
+		client := "codex_cli"
+		if req.Kind == "cc" {
+			client = "claude_code"
+		}
+		sess := s.Sessions.Register(client, upstream)
+		token, sessionID = sess.Token, sess.ID
+	}
+	writeJSON(w, map[string]any{
+		"command":    buildManualEnvCommand(req.Kind, req.Mode, serverURL, token, req.Args),
+		"session_id": sessionID,
+	})
 }
 
 // handleLaunch starts a coding agent in a NEW terminal window (so its TUI has a
@@ -69,6 +158,7 @@ func (s *Server) handleLaunch(w http.ResponseWriter, r *http.Request) {
 		Upstream string `json:"upstream"` // optional override
 		APIKey   string `json:"api_key"`
 		Terminal string `json:"terminal"` // terminal app name (default Terminal)
+		Args     string `json:"args"`     // extra native client args, forwarded after `--`
 		Preview  bool   `json:"preview"`  // return the command without running anything
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || !launchKinds[req.Kind] {
@@ -89,13 +179,13 @@ func (s *Server) handleLaunch(w http.ResponseWriter, r *http.Request) {
 	serverURL := "http://" + r.Host
 	upstream := req.Upstream
 	if upstream == "" {
-		upstream = defaultUpstream(req.Kind)
+		upstream = defaultUpstream(req.Kind, req.Mode)
 	}
 
 	// Preview: just hand back the copy-paste command (no exec, no session). Always
 	// available, even when server launch is disabled.
 	if req.Preview {
-		writeJSON(w, map[string]any{"command": manualCommand(exe, wd, serverURL, req.Kind, req.Mode), "enabled": s.AllowLaunch})
+		writeJSON(w, map[string]any{"command": manualCommand(exe, wd, serverURL, req.Kind, req.Mode, req.Args), "enabled": s.AllowLaunch})
 		return
 	}
 
@@ -136,6 +226,11 @@ func (s *Server) handleLaunch(w http.ResponseWriter, r *http.Request) {
 		} else {
 			env = "export OPENAI_API_KEY=tracelab-proxy-placeholder\n"
 		}
+	}
+	if a := strings.TrimSpace(req.Args); a != "" {
+		// `--` stops tracelab's flag parser; the rest is forwarded to the client. The
+		// args run in the user's own local shell (their machine), like the workdir.
+		cmd += " -- " + a
 	}
 
 	script := fmt.Sprintf("#!/bin/bash\n%scd %s || exit 1\nexec %s\n", env, shellQuote(wd), cmd)
@@ -193,11 +288,18 @@ func appInstalled(name string) bool {
 	return false
 }
 
-func defaultUpstream(kind string) string {
+// defaultUpstream picks the upstream by client and credential mode. codex splits
+// by mode: a ChatGPT-subscription token only works against the Codex backend,
+// while a real OpenAI API key only works against the platform API. Getting this
+// wrong surfaces as a 401 "missing scopes: api.responses.write".
+func defaultUpstream(kind, mode string) string {
 	if kind == "cc" {
 		return "https://api.anthropic.com"
 	}
-	return "https://api.openai.com/v1"
+	if mode == "key" {
+		return "https://api.openai.com/v1"
+	}
+	return "https://chatgpt.com/backend-api/codex"
 }
 
 // providerAuth builds the auth headers to inject for an API key, by wire format.

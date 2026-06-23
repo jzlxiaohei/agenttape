@@ -6,6 +6,7 @@ import { foldAll, unfoldAll, forceParsing } from "@codemirror/language";
 import type { EditorView } from "@codemirror/view";
 import { useRawFile } from "@/query/events";
 import { cn } from "@/lib/utils";
+import { CopyButton } from "./CopyButton";
 
 type Role = "request_body" | "response_body";
 
@@ -45,6 +46,7 @@ export function RawView({ eventId }: { eventId: string }) {
             <button className="text-muted-foreground hover:text-foreground" onClick={() => ref.current?.view && unfoldAll(ref.current.view)}>
               {t("raw.unfold_all")}
             </button>
+            <CopyButton text={pretty} />
             <button className="text-accent hover:underline" onClick={() => download(`${eventId}.${role}.txt`, raw)}>
               {t("raw.download")}
             </button>

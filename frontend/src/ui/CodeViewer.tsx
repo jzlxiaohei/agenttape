@@ -4,6 +4,7 @@ import CodeMirror, { type ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import { json } from "@codemirror/lang-json";
 import { foldAll, unfoldAll, forceParsing } from "@codemirror/language";
 import type { EditorView } from "@codemirror/view";
+import { CopyButton } from "./CopyButton";
 
 // Default export so it can be lazy-loaded (CodeMirror is heavy). Read-only JSON
 // viewer: pretty-printed, foldable by field, downloadable. Shared by the hook
@@ -30,6 +31,7 @@ export default function CodeViewer({
         <button className="text-muted-foreground hover:text-foreground" onClick={() => ref.current?.view && unfoldAll(ref.current.view)}>
           {t("raw.unfold_all")}
         </button>
+        <CopyButton text={pretty} />
         <button className="text-accent hover:underline" onClick={() => download(filename, text)}>
           {t("raw.download")}
         </button>

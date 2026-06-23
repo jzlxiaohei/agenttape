@@ -33,7 +33,10 @@ interface UIState {
   searchTag: string;
   searchProvider: string;
   searchClient: string;
+  // replay library
+  casesProvider: string; // "" = all providers
 
+  setCasesProvider: (p: string) => void;
   setSearchQuery: (q: string) => void;
   setSearchFilter: (key: "searchTag" | "searchProvider" | "searchClient", value: string) => void;
   setDetailTab: (t: DetailTab) => void;
@@ -55,7 +58,9 @@ export const useUIStore = create<UIState>((set) => ({
   searchTag: "",
   searchProvider: "",
   searchClient: "",
+  casesProvider: "",
 
+  setCasesProvider: (p) => set({ casesProvider: p }),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setSearchFilter: (key, value) => set({ [key]: value } as Partial<UIState>),
   setDetailTab: (t) => set({ detailTab: t }),

@@ -162,6 +162,15 @@ export interface DetailCounts {
   responseMessages: number;
 }
 
+// CompactionView surfaces option-A's req↔res comparison for a /compact request:
+// how big the context that went in was vs the summary that came out, plus the
+// summary text itself. null when the event isn't a compaction.
+export interface CompactionView {
+  contextIn: number; // full input context incl. cache (input + cache_read + cache_creation)
+  summaryOut: number; // output tokens = the produced summary
+  summaryText: string; // the model's summary (response text blocks)
+}
+
 export interface EventDetailView {
   isLoading: boolean;
   isError: boolean;
@@ -169,6 +178,8 @@ export interface EventDetailView {
   header: {
     provider: string;
     model: string;
+    method: string;
+    target: string;
     status: number;
     durationMs: number;
     isCompletion: boolean;
@@ -179,6 +190,11 @@ export interface EventDetailView {
   sectionBars: SectionBar[];
   tags: TagInfo[];
   usage: Usage | null;
+  sessionId: string;
+  // Compaction is decided cross-event (episodes from the API), not from this
+  // event's tags/text. These are just the numbers/summary to render IF the
+  // event turns out to be a compaction trigger.
+  compactionMetrics: CompactionView | null;
   hasRawRequest: boolean;
   hasRawResponse: boolean;
 }
@@ -213,6 +229,8 @@ export function useEventDetailView(eventId: string | null): EventDetailView {
       sectionBars: [],
       tags: [],
       usage: null,
+      sessionId: "",
+      compactionMetrics: null,
       hasRawRequest: false,
       hasRawResponse: false,
     };
@@ -231,6 +249,8 @@ export function useEventDetailView(eventId: string | null): EventDetailView {
     header: {
       provider: data.provider,
       model: data.model,
+      method: data.method,
+      target: data.target,
       status: data.response_status,
       durationMs: data.duration_ms,
       isCompletion: data.is_completion,
@@ -252,9 +272,31 @@ export function useEventDetailView(eventId: string | null): EventDetailView {
     sectionBars: buildSectionBars(env?.request?.sections ?? []),
     tags: data.tags,
     usage: env?.response?.usage ?? null,
+    sessionId: data.session_id,
+    compactionMetrics: extractCompactionMetrics(env),
     hasRawRequest: data.raw_files.some((f) => f.role === "request_body"),
     hasRawResponse: data.raw_files.some((f) => f.role === "response_body"),
   };
+}
+
+// extractCompactionMetrics pulls the numbers + summary text the compaction panel
+// renders. It does NOT decide whether the event IS a compaction — that's the
+// cross-event episode call (useCompactionEpisodes). Returns null when there's no
+// response to summarize.
+function extractCompactionMetrics(
+  env: { response?: { output?: Message[]; usage?: Usage } } | undefined,
+): CompactionView | null {
+  if (!env?.response) return null;
+  const u = env.response.usage;
+  const n = (v: unknown): number => (typeof v === "number" ? v : 0);
+  const extra = u?.extra ?? {};
+  const contextIn = n(u?.input_tokens) + n(extra.cache_read_input_tokens) + n(extra.cache_creation_input_tokens);
+  const summaryText = (env.response.output ?? [])
+    .flatMap((m) => m.content ?? [])
+    .filter((b) => b.type === "text")
+    .map((b) => b.text ?? "")
+    .join("");
+  return { contextIn, summaryOut: n(u?.output_tokens), summaryText };
 }
 
 // filterBlocks keeps only blocks whose type is enabled.

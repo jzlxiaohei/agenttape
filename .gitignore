@@ -3,4 +3,5 @@
 /dist/
 /tracelab-data/
 /.cache/
+/.pnpm-store/
 .DS_Store

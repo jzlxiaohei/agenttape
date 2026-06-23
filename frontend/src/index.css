@@ -23,6 +23,10 @@
   --color-error: hsl(0 65% 55%);
   --color-suspected: hsl(35 80% 48%);
 
+  /* client brand identity (Claude Code vs Codex) */
+  --color-claude: hsl(24 85% 55%);
+  --color-codex: hsl(160 50% 42%);
+
   --radius: 0.75rem;
 }
 
@@ -77,6 +81,16 @@ pre,
 }
 .md table { border-collapse: collapse; margin: 0.5em 0; }
 .md th, .md td { border: 1px solid var(--color-border); padding: 0.3em 0.6em; }
+
+/* CodeMirror should occupy the available panel width, never shrink to content. */
+.tracelab-code-editor,
+.tracelab-code-editor .cm-editor {
+  width: 100%;
+  max-width: 100%;
+}
+.tracelab-code-editor .cm-scroller {
+  width: 100%;
+}
 
 /* Side sheet (Radix Dialog) — slide-in/out + overlay fade. Radix Presence keeps
    the node mounted through the [data-state=closed] animation, so exits animate. */

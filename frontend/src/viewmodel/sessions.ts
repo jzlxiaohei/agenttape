@@ -25,3 +25,32 @@ export function useSessionsView(): SessionsView {
 
   return { sessions, isLoading, isError };
 }
+
+export interface SessionGroup {
+  client: string;
+  sessions: SessionVM[];
+}
+
+// Sessions grouped by client (claude_code, codex_cli, then any others), newest
+// first within each group — for the sidebar's collapsible per-client sections.
+const CLIENT_ORDER = ["claude_code", "codex_cli"];
+
+export function useSessionGroupsView(): { groups: SessionGroup[]; isLoading: boolean; isError: boolean } {
+  const { sessions, isLoading, isError } = useSessionsView();
+
+  const byClient = new Map<string, SessionVM[]>();
+  for (const s of sessions) {
+    const arr = byClient.get(s.client) ?? [];
+    arr.push(s);
+    byClient.set(s.client, arr);
+  }
+  const order = [...CLIENT_ORDER, ...[...byClient.keys()].filter((c) => !CLIENT_ORDER.includes(c))];
+  const groups: SessionGroup[] = [];
+  for (const client of order) {
+    const arr = byClient.get(client);
+    if (!arr) continue;
+    arr.sort((a, b) => (a.started_at < b.started_at ? 1 : -1));
+    groups.push({ client, sessions: arr });
+  }
+  return { groups, isLoading, isError };
+}

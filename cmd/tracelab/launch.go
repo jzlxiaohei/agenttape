@@ -10,6 +10,7 @@ import (
 	"os/exec"
 
 	"tracelab/internal/launcher"
+	"tracelab/internal/source/hook"
 	"tracelab/internal/source/httpcap"
 )
 
@@ -38,7 +39,13 @@ func runLaunch(args []string) error {
 	}
 	sess := &httpcap.Session{ID: sessionID, Token: tok}
 
-	cmd := chooseLauncher(*kind, *serverURL, sess, fs.Args())
+	// The hook event set is user-editable in the store; pull the enabled events
+	// from the running server so a launch honors live config without rebuilding.
+	// If the server can't answer (older server, no store), fall back to the
+	// built-in defaults so capture still works.
+	events := fetchHookEvents(*serverURL, hookClient(*kind))
+
+	cmd := chooseLauncher(*kind, *serverURL, sess, events, fs.Args())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 
 	fmt.Fprintf(os.Stderr, "tracelab: launching %s via %s (no global config modified)\n",
@@ -51,17 +58,67 @@ func clientDefaults(kind string) (client, upstream string, err error) {
 	case "cc":
 		return "claude_code", "https://api.anthropic.com", nil
 	case "codex":
-		return "codex_cli", "https://api.openai.com/v1", nil
+		// Subscription (codex login / ChatGPT) is the common CLI path: its token is
+		// scoped for the Codex backend, NOT the platform API. Routing to
+		// api.openai.com yields a 401 "missing scopes: api.responses.write". API-key
+		// users must pass -upstream https://api.openai.com/v1 explicitly.
+		return "codex_cli", "https://chatgpt.com/backend-api/codex", nil
 	default:
 		return "", "", fmt.Errorf("unknown -kind %q (want cc | codex)", kind)
 	}
 }
 
-func chooseLauncher(kind, serverURL string, sess *httpcap.Session, args []string) *exec.Cmd {
+func chooseLauncher(kind, serverURL string, sess *httpcap.Session, events, args []string) *exec.Cmd {
 	if kind == "codex" {
-		return launcher.LaunchCodex(serverURL, sess, args...)
+		return launcher.LaunchCodex(serverURL, sess, events, args...)
 	}
-	return launcher.LaunchClaudeCode(serverURL, sess, args...)
+	return launcher.LaunchClaudeCode(serverURL, sess, events, args...)
+}
+
+// hookClient maps a launch kind to the client key used in the hook event store
+// (both codex CLI and desktop share "codex").
+func hookClient(kind string) string {
+	if kind == "codex" {
+		return "codex"
+	}
+	return "claude_code"
+}
+
+// fetchHookEvents asks the server for the user's enabled hook events for a
+// client. On any failure it falls back to the built-in defaults so a launch
+// never silently captures nothing because the registry endpoint was unavailable.
+func fetchHookEvents(serverURL, client string) []string {
+	fallback := func() []string {
+		if client == "codex" {
+			return hook.DefaultCodexEvents()
+		}
+		return hook.DefaultClaudeEvents()
+	}
+	resp, err := http.Get(serverURL + "/api/hook-events")
+	if err != nil {
+		return fallback()
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fallback()
+	}
+	var defs []struct {
+		Client  string `json:"client"`
+		Event   string `json:"event"`
+		Enabled bool   `json:"enabled"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&defs); err != nil {
+		return fallback()
+	}
+	out := []string{}
+	for _, d := range defs {
+		if d.Client == client && d.Enabled {
+			out = append(out, d.Event)
+		}
+	}
+	// An empty list is a legitimate "capture nothing" choice and is respected;
+	// only a transport/parse failure (handled above) falls back to defaults.
+	return out
 }
 
 func register(serverURL, client, upstream string) (token, sessionID string, err error) {

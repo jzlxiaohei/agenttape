@@ -1,6 +1,8 @@
 package server_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +15,7 @@ import (
 	"tracelab/internal/normalize/providers"
 	"tracelab/internal/server"
 	"tracelab/internal/sink"
+	"tracelab/internal/store"
 )
 
 type memSink struct {
@@ -75,6 +78,29 @@ func registerSession(t *testing.T, base, client, upstream string) string {
 	}
 	rest := string(b)[i+len(key):]
 	return rest[:strings.IndexByte(rest, '"')]
+}
+
+type registeredSession struct {
+	SessionID string `json:"session_id"`
+	Token     string `json:"token"`
+}
+
+func registerSessionInfo(t *testing.T, base, client, upstream string) registeredSession {
+	t.Helper()
+	resp, err := http.Post(base+"/_register", "application/json",
+		strings.NewReader(`{"client":"`+client+`","upstream":"`+upstream+`"}`))
+	if err != nil {
+		t.Fatalf("register: %v", err)
+	}
+	defer resp.Body.Close()
+	var out registeredSession
+	if err := json.NewDecoder(resp.Body).Decode(&out); err != nil {
+		t.Fatalf("decode register: %v", err)
+	}
+	if out.SessionID == "" || out.Token == "" {
+		t.Fatalf("bad register response: %+v", out)
+	}
+	return out
 }
 
 func proxyPOST(t *testing.T, base, token, path, body string) string {
@@ -144,5 +170,53 @@ func TestEndToEnd_ConcurrentSessionsStayIsolated(t *testing.T) {
 				t.Errorf("authorization not redacted: %v", vals)
 			}
 		}
+	}
+}
+
+func TestCaseRunUsesLaunchSessionProxy(t *testing.T) {
+	up := fakeUpstream(t)
+	defer up.Close()
+
+	st, err := store.Open(t.TempDir())
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer st.Close()
+
+	ms := &memSink{}
+	srv := server.New(ms, providers.Registry())
+	srv.EnableAPI(st)
+	ts := httptest.NewServer(srv.Handler())
+	defer ts.Close()
+
+	sess := registerSessionInfo(t, ts.URL, "codex_cli", up.URL)
+	if resp := proxyPOST(t, ts.URL, sess.Token, "responses", fixture(t, "openai_responses.request.json")); !strings.Contains(resp, "response.completed") {
+		t.Fatalf("warmup proxy response missing completion: %s", resp)
+	}
+
+	body, _ := json.Marshal(map[string]string{"session_id": sess.SessionID})
+	resp, err := http.Post(ts.URL+"/api/cases/seed:codex-pure-text/run", "application/json", bytes.NewReader(body))
+	if err != nil {
+		t.Fatalf("run case: %v", err)
+	}
+	defer resp.Body.Close()
+	b, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("run case status=%d body=%s", resp.StatusCode, b)
+	}
+	if !strings.Contains(string(b), `"status":200`) || !strings.Contains(string(b), `"openai-responses"`) {
+		t.Fatalf("run case did not normalize fake upstream response: %s", b)
+	}
+
+	recs := ms.records()
+	if len(recs) != 2 {
+		t.Fatalf("expected warmup + case run captures, got %d", len(recs))
+	}
+	last := recs[len(recs)-1]
+	if last.Event.Correlation.SessionID != sess.SessionID {
+		t.Fatalf("case run captured on session %q, want %q", last.Event.Correlation.SessionID, sess.SessionID)
+	}
+	if last.Event.Capture == nil || last.Event.Capture.Target != up.URL+"/responses" {
+		t.Fatalf("case run target = %#v, want %s/responses", last.Event.Capture, up.URL)
 	}
 }

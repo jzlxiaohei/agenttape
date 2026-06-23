@@ -115,6 +115,22 @@ export function fetchEventDetail(eventId: string): Promise<EventDetail> {
   return api.getJSON<EventDetail>(`/api/events/${eventId}`);
 }
 
+// --- compaction episodes (cross-event, graded) ---
+export type CompactionGrade = "confirmed" | "strong_suspected" | "weak_suspected";
+
+export interface CompactionEpisode {
+  grade: CompactionGrade;
+  before_event: string; // A — request whose response is the summary
+  after_event: string; // B — first request after the boundary
+  evidence: string;
+  context_in: number;
+  summary_out: number;
+}
+
+export function fetchCompactionEpisodes(sessionId: string): Promise<CompactionEpisode[]> {
+  return api.getJSON<CompactionEpisode[]>(`/api/sessions/${sessionId}/compaction-episodes`).then((e) => e ?? []);
+}
+
 export function rawUrl(eventId: string, role: string): string {
   return `/api/events/${eventId}/raw/${role}`;
 }
@@ -129,6 +145,8 @@ export interface ReplayResult {
   duration_ms: number;
   normalized?: NormalizedEnvelope;
   normalize_error?: string;
+  response_body?: string; // raw upstream body (capped), so non-2xx errors are visible
+  truncated?: boolean;
 }
 
 // replayEvent re-sends a captured completion to upstream (optionally with an

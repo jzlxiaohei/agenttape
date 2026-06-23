@@ -100,9 +100,24 @@ CREATE TABLE IF NOT EXISTS replay_cases (
   provider   TEXT,                -- best-effort label (anthropic / openai-responses…)
   method     TEXT,
   target     TEXT,                -- absolute upstream URL
+  endpoint   TEXT,                -- session-relative path, e.g. /responses or /v1/messages
   body       TEXT,                -- request body
   source     TEXT,                -- seed | captured
   created_at TEXT
+);
+
+-- Per-client hook event registry: which lifecycle/tool events tracelab wires
+-- when it launches each coding agent. Seeded with the built-in defaults (one row
+-- per event, source='seed', kept current against each runtime's docs); the
+-- launcher reads the ENABLED rows here, so users can add a newly-shipped event
+-- (source='user') or disable a noisy one (enabled=0) from the UI without waiting
+-- for a tracelab release. Distinct from hook_events, which stores CAPTURED hooks.
+CREATE TABLE IF NOT EXISTS client_hook_events (
+  client  TEXT NOT NULL,        -- claude_code | codex
+  event   TEXT NOT NULL,        -- PreToolUse, SessionStart, …
+  enabled INTEGER NOT NULL DEFAULT 1,
+  source  TEXT NOT NULL,        -- seed | user
+  PRIMARY KEY(client, event)
 );
 
 -- Per-section token stats (http only) for queries like "tools > 50% of tokens".

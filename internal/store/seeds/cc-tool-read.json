@@ -1,0 +1,89 @@
+{
+  "model": "claude-opus-4-8",
+  "max_tokens": 32000,
+  "system": [
+    {
+      "type": "text",
+      "text": "x-anthropic-billing-header: cc_version=2.1.185.ecf; cc_entrypoint=cli;"
+    },
+    {
+      "type": "text",
+      "text": "You are Claude Code, Anthropic's official CLI for Claude."
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "读取 README.md，然后用三到四句话总结这个项目：它解决什么问题、现在处于什么阶段、接下来计划做什么。不要逐段复述，要提炼。"
+        }
+      ]
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "type": "text",
+          "text": "我先读取 README.md，再做提炼总结。"
+        },
+        {
+          "type": "tool_use",
+          "id": "toolu_read_demo01",
+          "name": "Read",
+          "input": {
+            "file_path": "/workspace/README.md"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "toolu_read_demo01",
+          "content": "# Tideline\n\nTideline is a small command-line tool for exploring time-series logs. It reads newline-delimited JSON from stdin or a file, groups events into fixed time windows, and prints compact per-window summaries — counts, error rates, and p50/p95 latencies — without requiring a database, an agent, or a hosted dashboard.\n\n## Why it exists\n\nMost log tooling assumes you first ship everything to a central store and query it there. Tideline is for the in-between moment: the logs are already on disk in front of you, and you just want to see the shape of an incident in a few seconds, locally, before deciding whether it deserves a deeper investigation. It optimizes for \"glance and decide\", not for long-term storage or alerting.\n\n## Design\n\nThe core is a windowing engine that is deliberately allocation-light: events stream through a ring of open windows and are flushed in order, so memory stays flat even on multi-gigabyte inputs. Reporters (a text table, JSON, and an experimental TUI) all consume the same window summaries, so the output formats never disagree about what they counted.\n\n## Status\n\nAlpha. The windowing engine and the text/JSON reporters are stable and covered by tests. The TUI explorer is experimental and its key bindings may still change. There is no config file yet — everything is flags — and anything under `internal/` is not a public API.\n\n## Roadmap\n\n- A streaming mode that updates summaries live as new lines arrive.\n- Pluggable extractors so non-JSON log formats can be mapped onto events.\n- A `--compare` flag to diff two time windows side by side.\n- A stable plugin API once the `internal/` layout settles.\n"
+        }
+      ]
+    }
+  ],
+  "stream": true,
+  "tools": [
+    {
+      "name": "Read",
+      "description": "Reads a file from the local filesystem.\n\n- `file_path` must be an absolute path.\n- Reads up to 2000 lines by default.\n- When you already know which part of the file you need, only read that part. This can be important for larger files.\n- Results are returned using cat -n format, with line numbers starting at 1\n- Reads images (PNG, JPG, …) and presents them visually. Reads PDFs via the `pages` parameter (e.g. \"1-5\", max 20 pages/request; required for PDFs over 10 pages). Reads Jupyter notebooks (.ipynb) as cells with outputs.\n- Reading a directory, a missing file, or an empty file returns an error or system reminder rather than content.\n- Do NOT re-read a file you just edited to verify — Edit/Write would have errored if the change failed, and the harness tracks file state for you.",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "description": "The absolute path to the file to read",
+            "type": "string"
+          },
+          "offset": {
+            "description": "The line number to start reading from. Only provide if the file is too large to read at once",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "limit": {
+            "description": "The number of lines to read. Only provide if the file is too large to read at once.",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "pages": {
+            "description": "Page range for PDF files (e.g., \"1-5\", \"3\", \"10-20\"). Only applicable to PDF files. Maximum 20 pages per request.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

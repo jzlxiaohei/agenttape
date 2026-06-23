@@ -18,7 +18,7 @@ func runServe(args []string) error {
 	data := fs.String("data", "tracelab-data", "data dir (SQLite db + raw files)")
 	jsonlOut := fs.String("jsonl", "", "use a JSONL file instead of SQLite (debug)")
 	viewer := fs.String("viewer", "frontend/dist", "built viewer dist dir to serve at /viewer")
-	allowLaunch := fs.Bool("allow-launch", false, "allow the viewer to launch agents in a terminal (off by default; the page always shows a copy-paste command)")
+	allowLaunch := fs.Bool("allow-launch", true, "allow the viewer to launch agents in a terminal (on by default; pass -allow-launch=false to disable — the page always still shows a copy-paste command)")
 	_ = fs.Parse(args)
 
 	var s sink.Sink

@@ -8,8 +8,9 @@ export interface ReplayCase {
   provider: string;
   method: string;
   target: string;
+  endpoint: string;
   body: string;
-  source: string; // seed | captured
+  source: string; // seed | captured | snapshot | manual
   created_at: string;
 }
 
@@ -17,6 +18,7 @@ export interface ActiveSession {
   id: string;
   client: string;
   upstream: string;
+  credential_kind: "key" | "subscription";
 }
 
 export function fetchCases(): Promise<ReplayCase[]> {
@@ -25,6 +27,12 @@ export function fetchCases(): Promise<ReplayCase[]> {
 
 export function fetchActiveSessions(): Promise<ActiveSession[]> {
   return api.getJSON<ActiveSession[]>("/api/active-sessions").then((s) => s ?? []);
+}
+
+// closeActiveSession forgets a live session from the proxy registry (drops its
+// in-memory creds). It does not kill the agent process in the user's terminal.
+export function closeActiveSession(id: string): Promise<void> {
+  return api.del(`/api/active-sessions/${id}`);
 }
 
 export function runCase(id: string, sessionId: string, body?: string): Promise<ReplayResult> {
@@ -36,4 +44,60 @@ export function runCase(id: string, sessionId: string, body?: string): Promise<R
 
 export function addCase(eventId: string, name?: string, tags?: string): Promise<ReplayCase> {
   return api.postJSON<ReplayCase>("/api/cases", { event_id: eventId, name: name ?? "", tags: tags ?? "" });
+}
+
+export function createCase(input: {
+  name: string;
+  tags?: string;
+  provider: string;
+  method?: string;
+  target?: string;
+  endpoint: string;
+  body: string;
+}): Promise<ReplayCase> {
+  return api.postJSON<ReplayCase>("/api/cases", {
+    ...input,
+    method: input.method ?? "POST",
+    tags: input.tags ?? "",
+    target: input.target ?? "",
+  });
+}
+
+// snapshotCase saves an edited body as a new case derived from `id` (never mutates
+// the original). Returns the freshly created snapshot.
+export function snapshotCase(id: string, body: string, name?: string): Promise<ReplayCase> {
+  return api.postJSON<ReplayCase>(`/api/cases/${id}/snapshot`, { body, name: name ?? "" });
+}
+
+export function deleteCase(id: string): Promise<void> {
+  return api.del(`/api/cases/${id}`);
+}
+
+// overwriteCase saves an edited body back onto the SAME case (in-place, by id),
+// unlike snapshot which forks a new one. Irreversible.
+export function overwriteCase(id: string, body: string): Promise<ReplayCase> {
+  return api.postJSON<ReplayCase>(`/api/cases/${id}/overwrite`, { body });
+}
+
+export type CurlMode = "proxy" | "direct";
+
+export interface CaseCurl {
+  curl: string;
+  has_auth: boolean;
+  revealed: boolean;
+  credential_kind?: "key" | "subscription";
+}
+
+// caseCurl builds a copy-pasteable curl for a case bound to a live session.
+// proxy mode carries no secret; direct mode embeds auth (masked unless reveal).
+export function caseCurl(
+  id: string,
+  input: { sessionId: string; mode: CurlMode; reveal?: boolean; body?: string },
+): Promise<CaseCurl> {
+  return api.postJSON<CaseCurl>(`/api/cases/${id}/curl`, {
+    session_id: input.sessionId,
+    mode: input.mode,
+    reveal: input.reveal ?? false,
+    ...(input.body === undefined ? {} : { body: input.body }),
+  });
 }

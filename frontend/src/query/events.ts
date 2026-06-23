@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { fetchSessionEvents, fetchEventDetail, fetchRaw, replayEvent } from "@/api/events";
+import { fetchSessionEvents, fetchEventDetail, fetchRaw, replayEvent, fetchCompactionEpisodes } from "@/api/events";
 
 export function useSessionEvents(sessionId: string | null) {
   return useQuery({
@@ -7,6 +7,16 @@ export function useSessionEvents(sessionId: string | null) {
     queryFn: () => fetchSessionEvents(sessionId!),
     enabled: !!sessionId,
     refetchInterval: 5000,
+  });
+}
+
+// useCompactionEpisodes derives a session's graded compaction boundaries
+// (cross-event; see internal/server/compaction.go).
+export function useCompactionEpisodes(sessionId: string | null | undefined) {
+  return useQuery({
+    queryKey: ["compaction-episodes", sessionId],
+    queryFn: () => fetchCompactionEpisodes(sessionId!),
+    enabled: !!sessionId,
   });
 }
 

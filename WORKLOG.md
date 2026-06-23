@@ -63,8 +63,10 @@ fixed. Newest phase on top. (Architecture lives in `CONVENTIONS.md` and the
   request material; a session supplies credentials at run time.
 
 ### Security model (Launch)
-- Server-launch is **opt-in**: `-allow-launch`, OFF by default. Without it the
-  server executes nothing; the page only shows the command to run yourself.
+- Server-launch is gated by `-allow-launch`, **ON by default**; pass
+  `-allow-launch=false` to disable, after which the server executes nothing and
+  the page only shows the command to run yourself. (Still origin-checked +
+  localhost-bound below.)
 - **Cross-origin POSTs rejected** (Origin check) — blocks CSRF / DNS-rebinding
   from triggering local exec.
 - Working dir is validated before launch (clear 400, no silent `cd` failure).
@@ -81,11 +83,20 @@ fixed. Newest phase on top. (Architecture lives in `CONVENTIONS.md` and the
 - Editing JSON in a `<textarea>` was poor → CodeMirror `CodeEditor`.
 
 ### Pending / next
-- **codex desktop launch** — needs global `~/.codex/config.toml` backup → write →
-  manual "结束并恢复" + conflict-confirm. Deliberately deferred (mutates global
-  config; can't be safely tested headless).
-- **Replay library → eval**: same case across models/params, batch runs, compare
-  matrix, assertions/scoring (降智检测 / regression).
+- **codex desktop launch** — DONE. `/api/codex-desktop/{status,install,restore}`:
+  backs up `~/.codex/config.toml` verbatim, writes proxy routing (+ optional hook
+  capture) via `launcher.MergeCodexDesktopConfig`, restores byte-exact. Gated on
+  `-allow-launch`; subscription only (chatgpt backend upstream); conflict-confirm
+  via a `.tracelab-desktop-state.json`. Caveat: hooks need a one-time in-app
+  `/hooks` trust (no persistent bypass exists; desktop can't pass the flag).
+  **Not verifiable headless** — needs a real Mac + Codex desktop to confirm.
+- **Replay library → eval**: foundation is in place (`executeCaseThroughSession`
+  + the normalized envelope's final_text / tool_calls / usage / stop_reason /
+  signals are ready-made assertion material), but **actively shelved**. Building
+  it out (assertions, batch runs, compare matrix, scoring, 降智/regression
+  history) would turn tracelab into a maintained eval/automation platform; the
+  intent is to stay a **personal research workbench**. Deferred by choice, not
+  blocked — revisit only if that positioning changes.
 - Minor: `Session` type lives in `httpcap` though it's cross-adapter (low-pri
   refactor — move to `internal/source`).
 
@@ -95,8 +106,8 @@ fixed. Newest phase on top. (Architecture lives in `CONVENTIONS.md` and the
 env -u GOROOT go build -o ./tracelab ./cmd/tracelab
 (cd frontend && npm run build)
 
-# serve (add -allow-launch to enable click-to-launch; off by default)
-./tracelab serve -data /tmp/tldata2 -listen 127.0.0.1:8788 -viewer ./frontend/dist -allow-launch
+# serve (click-to-launch is ON by default; pass -allow-launch=false to disable)
+./tracelab serve -data /tmp/tldata2 -listen 127.0.0.1:8788 -viewer ./frontend/dist
 # viewer: http://127.0.0.1:8788/viewer/
 
 # launch a session (CLI, or the /launch page):

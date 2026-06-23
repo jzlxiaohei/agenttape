@@ -59,6 +59,10 @@ func Open(dataDir string) (*Store, error) {
 		db.Close()
 		return nil, fmt.Errorf("seed cases: %w", err)
 	}
+	if err := st.seedClientHookEvents(); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("seed hook events: %w", err)
+	}
 	if _, err := db.Exec(
 		`INSERT INTO schema_meta(key,value) VALUES('version',?)
 		 ON CONFLICT(key) DO UPDATE SET value=excluded.value`, SchemaVersion); err != nil {
@@ -80,11 +84,15 @@ func (s *Store) DB() *sql.DB { return s.db }
 func migrate(db *sql.DB) error {
 	adds := []string{
 		`ALTER TABLE hook_events ADD COLUMN tool_name TEXT`,
+		`ALTER TABLE replay_cases ADD COLUMN endpoint TEXT`,
 	}
 	for _, stmt := range adds {
 		if _, err := db.Exec(stmt); err != nil && !strings.Contains(err.Error(), "duplicate column") {
 			return err
 		}
+	}
+	if err := backfillCaseEndpoints(db); err != nil {
+		return err
 	}
 	// Heal hook events captured before they were stamped with a receipt time:
 	// fall back to created_at (write time ≈ receipt time) so they interleave on the
@@ -93,6 +101,37 @@ func migrate(db *sql.DB) error {
 		`UPDATE events SET started_at = created_at
 		 WHERE kind = 'hook_event' AND (started_at IS NULL OR started_at = '')`); err != nil {
 		return err
+	}
+	return nil
+}
+
+func backfillCaseEndpoints(db *sql.DB) error {
+	rows, err := db.Query(
+		`SELECT id, provider, target FROM replay_cases
+		 WHERE endpoint IS NULL OR endpoint = ''`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	type row struct {
+		id, provider, target string
+	}
+	var missing []row
+	for rows.Next() {
+		var r row
+		if err := rows.Scan(&r.id, &r.provider, &r.target); err != nil {
+			return err
+		}
+		missing = append(missing, r)
+	}
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	for _, r := range missing {
+		if _, err := db.Exec(`UPDATE replay_cases SET endpoint = ? WHERE id = ?`,
+			EndpointForTarget(r.provider, r.target, ""), r.id); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"tracelab/internal/source/hook"
 	"tracelab/internal/source/httpcap"
 )
 
@@ -13,7 +14,7 @@ import (
 // (next.md 1.1).
 func TestLaunchClaudeCode_NonInvasive(t *testing.T) {
 	sess := &httpcap.Session{ID: "sess9", Token: "tok123"}
-	cmd := LaunchClaudeCode("http://127.0.0.1:8787", sess, "--help")
+	cmd := LaunchClaudeCode("http://127.0.0.1:8787", sess, hook.DefaultClaudeEvents(), "--help")
 
 	want := "ANTHROPIC_BASE_URL=http://127.0.0.1:8787/s/tok123"
 	if !slices.Contains(cmd.Env, want) {
@@ -42,7 +43,7 @@ func TestLaunchClaudeCode_NonInvasive(t *testing.T) {
 // with `-c` overrides only — no ~/.codex/config.toml mutation (next.md 1.1).
 func TestLaunchCodex_UsesSingleRunOverrides(t *testing.T) {
 	sess := &httpcap.Session{ID: "sess9", Token: "tokABC"}
-	cmd := LaunchCodex("http://127.0.0.1:8787", sess, "exec", "hello")
+	cmd := LaunchCodex("http://127.0.0.1:8787", sess, hook.DefaultCodexEvents(), "exec", "hello")
 
 	joined := strings.Join(cmd.Args, " ")
 	for _, want := range []string{

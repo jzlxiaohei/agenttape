@@ -10,6 +10,7 @@ export interface LaunchReq {
   upstream?: string;
   api_key?: string;
   terminal?: string;
+  args?: string; // extra native client flags (e.g. --resume), forwarded after `--`
 }
 
 // fetchTerminals lists installed terminal apps to launch into (macOS).
@@ -31,4 +32,18 @@ export function previewLaunch(req: LaunchReq): Promise<LaunchPreview> {
 // through the proxy. The session self-registers and shows up in Sessions shortly.
 export function launchAgent(req: LaunchReq): Promise<{ ok: boolean }> {
   return api.postJSON<{ ok: boolean }>("/api/launch", req);
+}
+
+export interface ManualCommand {
+  command: string;
+  session_id: string; // empty unless a session was registered
+}
+
+// fetchManualCommand returns the lightweight "run it yourself" env/-c command. With
+// register=false the token is a "<TOKEN>" placeholder (for display); register=true
+// registers a session so the proxy accepts the baked-in token.
+export function fetchManualCommand(
+  req: { kind: LaunchKind; mode?: LaunchMode; args?: string; register: boolean },
+): Promise<ManualCommand> {
+  return api.postJSON<ManualCommand>("/api/launch/manual", req);
 }

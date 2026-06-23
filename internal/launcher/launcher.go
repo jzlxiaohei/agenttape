@@ -18,8 +18,8 @@ import (
 // mutated (next.md 1.1). The hooks POST each event to the server's /_hook
 // endpoint stamped with this session's id, so hook events correlate with the
 // HTTP captures of the same session.
-func LaunchClaudeCode(serverURL string, sess *httpcap.Session, args ...string) *exec.Cmd {
-	settings := hook.BuildClaudeSettings(serverURL, sess.ID)
+func LaunchClaudeCode(serverURL string, sess *httpcap.Session, events []string, args ...string) *exec.Cmd {
+	settings := hook.BuildClaudeSettings(events, serverURL, sess.ID)
 	full := append([]string{"--settings", settings}, args...)
 	cmd := exec.Command("claude", full...)
 	cmd.Env = append(os.Environ(),
@@ -46,7 +46,7 @@ func LaunchClaudeCode(serverURL string, sess *httpcap.Session, args ...string) *
 // does not reliably inherit `-c` overrides, and we refuse to silently rewrite
 // the user's global config as a workaround. That limitation is documented rather
 // than worked around.
-func LaunchCodex(serverURL string, sess *httpcap.Session, args ...string) *exec.Cmd {
+func LaunchCodex(serverURL string, sess *httpcap.Session, events []string, args ...string) *exec.Cmd {
 	base := httpcap.SessionBaseURL(serverURL, sess)
 	overrides := []string{
 		"-c", `model_provider="tracelab"`,
@@ -55,7 +55,7 @@ func LaunchCodex(serverURL string, sess *httpcap.Session, args ...string) *exec.
 		"-c", `model_providers.tracelab.wire_api="responses"`,
 		"-c", `model_providers.tracelab.requires_openai_auth=true`,
 	}
-	overrides = append(overrides, hook.BuildCodexOverrides(serverURL, sess.ID)...)
+	overrides = append(overrides, hook.BuildCodexOverrides(events, serverURL, sess.ID)...)
 	overrides = append(overrides, "--dangerously-bypass-hook-trust")
 	cmd := exec.Command("codex", append(overrides, args...)...)
 	cmd.Env = os.Environ()

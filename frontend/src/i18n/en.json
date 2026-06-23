@@ -9,6 +9,9 @@
     "settings": "Settings"
   },
   "lang": { "toggle": "中文" },
+  "common": {
+    "close": "Close"
+  },
   "launch": {
     "title": "Launch",
     "subtitle": "Start a coding agent through the proxy — its session is captured automatically.",
@@ -22,26 +25,194 @@
     "terminal": "Terminal app",
     "workdir": "Working directory",
     "workdir_hint": "defaults to your home directory",
+    "workdir_recent": "Recent directories",
     "button": "Launch in new terminal",
     "launching": "Launching…",
     "started": "Started in a new terminal. The session will appear in Sessions once it makes a request.",
     "view_sessions": "Go to Sessions",
+    "method_spawn": "Launch for me",
+    "capture_full": "http + hooks",
+    "capture_http": "http only",
     "run_yourself": "Run it yourself",
-    "run_yourself_note": "Recommended — the server runs nothing. In key mode your key stays in your own shell and never reaches tracelab.",
+    "run_yourself_note": "Point your own client at the proxy and run it — HTTP-only (no hooks), but you control everything. In key mode your key stays in your own shell. Copy registers a session for the token.",
+    "run_yourself_registered": "Session #{{id}} registered — run the command, it'll appear in Sessions.",
+    "client_args": "Client args",
+    "client_args_hint": "--resume",
+    "client_args_note": "Optional native flags passed straight to the client, e.g. --resume to continue your last conversation. See the client's own docs for the rest.",
+    "full_capture": "Full capture (http + hooks)",
+    "full_capture_note": "Runs via tracelab launch, which also injects hook capture. Use this if you want hook events, not just HTTP.",
     "copy": "Copy",
     "copied": "Copied",
-    "disabled_note": "Server launch is off. Copy the command above, or restart serve with -allow-launch."
+    "disabled_note": "Server launch is off. Copy the command above, or restart serve with -allow-launch.",
+    "desktop": {
+      "warning": "This edits your global ~/.codex/config.toml (it can't be routed any other way). The original is backed up first and restored when you're done.",
+      "intro": "Inject proxy routing into ~/.codex/config.toml, then start the Codex desktop app. Subscription only — your ~/.codex/auth.json is untouched.",
+      "hooks": "Also inject hook capture",
+      "hooks_note": "Hooks are written too, but Codex gates them behind trust — approve them once via the app's /hooks. HTTP capture works regardless.",
+      "http_only_note": "Only HTTP traffic will be captured — no hook events.",
+      "install": "Inject & route",
+      "active": "Routing is active. Original config backed up.",
+      "step_restart": "Restart the Codex desktop app so it reloads the config.",
+      "step_trust": "If prompted, trust tracelab's hooks once (app's /hooks).",
+      "step_done": "When finished, click Stop & restore below.",
+      "restore": "Stop & restore"
+    }
+  },
+  "experiments": {
+    "section": "Experiments",
+    "needs_hooks": "needs hooks",
+    "open_launch": "Open the Launch page",
+    "subagent": {
+      "title": "Experiment 6 · Sub-agents",
+      "desc": "A sub-agent's fork → run → report-a-summary-back is harness orchestration; replaying one request can't show it. You run it live with hooks on, and the flow shows SubagentStart/Stop bracketing the sub-agent's own requests.",
+      "s1": {
+        "label": "Launch cc with hooks on",
+        "note": "Hooks are the only way to see the sub-agent boundary — start a session from the Launch page; SubagentStart/Stop/Task* are on by default."
+      },
+      "s2": {
+        "label": "Paste this into cc",
+        "note": "Self-contained — runs in any directory, needs no files or repo.",
+        "prompt": "Use the Task tool to launch a general-purpose sub-agent. Have it: (1) run `pwd` to see which directory it's in; (2) report back, in one line, what task it was given and whether it can see any of our earlier conversation. Don't do this yourself — delegate it."
+      },
+      "s3": {
+        "label": "Back in tracelab, open this session's flow",
+        "note": "Look for PreToolUse(Task) → SubagentStart → the sub-agent's own requests → SubagentStop → the Task tool_result."
+      },
+      "s4": {
+        "label": "Compare the sub-agent's request with the main agent's",
+        "note": "Different system prompt · trimmed tool set · fresh history · returns only a summary · same cwd."
+      }
+    },
+    "compaction": {
+      "title": "Experiment 5 · Compaction",
+      "desc": "The library has seed:cc-compaction (the summarize-trigger request only). The full story is PreCompact → last request before → PostCompact → first request after — across several requests + hooks. Run it to watch the context shrink.",
+      "s1": {
+        "label": "Launch cc with hooks on",
+        "note": "PreCompact / PostCompact mark the compaction boundary in the flow."
+      },
+      "s2": {
+        "label": "Trigger compaction",
+        "note": "Run /compact for an instant manual trigger, or fill the context near the limit to trip auto-compaction."
+      },
+      "s3": {
+        "label": "Open the flow and locate the boundary",
+        "note": "PreCompact → last request before → PostCompact → first request after."
+      },
+      "s4": {
+        "label": "Compare the before/after requests, and open the compaction panel",
+        "note": "The summarize request's detail shows the input→summary token reduction; the next request starts from the summary instead of the full history."
+      }
+    }
+  },
+  "compaction": {
+    "title": "Compaction",
+    "grade": {
+      "confirmed": "confirmed",
+      "strong_suspected": "strong",
+      "weak_suspected": "weak"
+    },
+    "hint": "A /compact request: the conversation so far was summarized. Below is how much context went in (incl. cache) vs the summary that came out.",
+    "context_in": "Context in",
+    "summary_out": "Summary out",
+    "compressed_to": "Compressed to ~{{pct}}% of input",
+    "summary": "Summary (model output)"
   },
   "cases": {
     "title": "Replay library",
     "subtitle": "Pick a case to run.",
     "empty": "No cases yet.",
+    "no_match": "No cases match this filter.",
+    "edit_to_enable": "Edit the body to enable",
+    "filter_all": "All providers",
+    "field_model": "Model",
+    "field_tools": "{{count}} tools",
+    "field_stream": "stream",
+    "open": "Open & run",
+    "seed": {
+      "codex_pure_text": "Plain text · no tools (codex)",
+      "codex_tool_read": "Tool round-trip · read file (codex)",
+      "codex_apply_patch": "Edit file · apply_patch (codex)",
+      "codex_tool_failure": "Tool failure · error feedback (codex)",
+      "cc_pure_text": "Plain text · no tools (cc)",
+      "cc_tool_read": "Tool round-trip · read file (cc)",
+      "cc_edit": "Edit file · structured Edit (cc)",
+      "cc_tool_failure": "Tool failure · error feedback (cc)",
+      "cc_title": "Session title generation (cc)",
+      "cc_full_claude": "Full request shape (cc)",
+      "cc_compaction": "Compaction · summarize conversation (cc)"
+    },
+    "seed_desc": {
+      "codex_pure_text": "Experiment 1 — first request shape with a full tool catalog but a \"just say hello\" prompt.",
+      "codex_tool_read": "Experiment 2 — how a tool_use + tool_result round-trip feeds back into the next request.",
+      "codex_apply_patch": "Experiment 3 — codex's custom_tool_call (apply_patch) freeform grammar for editing files.",
+      "codex_tool_failure": "Experiment 4 — how a non-zero exit / tool error is encoded back to the model.",
+      "cc_pure_text": "Experiment 1 — first request shape with a full tool catalog but a \"just say hello\" prompt.",
+      "cc_tool_read": "Experiment 2 — how a tool_use + tool_result round-trip feeds back into the next request.",
+      "cc_edit": "Experiment 3 (cc) — editing a file via the structured Edit tool (old_string/new_string). cc has no apply_patch; this is its analog to codex's freeform apply_patch.",
+      "cc_tool_failure": "Experiment 4 — how an is_error tool_result is encoded back to the model.",
+      "cc_title": "Bonus — the short request Claude Code fires to auto-name a session.",
+      "cc_full_claude": "Full request shape with cache_control breakpoints and adaptive thinking.",
+      "cc_compaction": "Experiment 5 — a real /compact trigger: the model is asked to summarize the whole conversation into <analysis>/<summary>. Shows context_management (clear_thinking) + adaptive thinking."
+    },
+    "section_built_in": "Built-in",
+    "section_added": "Added",
+    "new": "New",
+    "new_title": "New case",
+    "new_hint": "Paste or edit request JSON. Runs will be routed through the selected session.",
+    "name": "Name",
+    "name_hint": "Defaults to model + method",
+    "provider": "Provider",
+    "tags": "Tags",
+    "tags_hint": "Comma separated, e.g. text,smoke",
     "source_seed": "seed",
     "source_captured": "saved",
+    "source_snapshot": "snapshot",
+    "source_manual": "manual",
+    "endpoint": "Endpoint",
+    "original_url": "Original URL",
+    "run_url": "Run URL",
     "warning": "Running a case sends a real, billed request to upstream.",
     "session": "Run with session (supplies credentials)",
+    "cred_key": "API key",
+    "cred_subscription": "subscription",
     "none_active": "No live session in this process. Start one:",
-    "run": "Run"
+    "close_session": "Close session",
+    "close_session_confirm": "Close this live session? It's dropped from the proxy (and its in-memory credentials are cleared), and replay can no longer use it. This does NOT stop the agent running in your terminal — but its next request will fail.",
+    "run": "Run",
+    "create": "Create",
+    "save_snapshot": "Save snapshot",
+    "save_overwrite": "Save (overwrite)",
+    "overwrite_confirm": "Overwrite this case in place? The original body is replaced — can't be undone.",
+    "saving": "Saving…",
+    "delete": "Delete",
+    "delete_confirm": "Delete this case? This can't be undone.",
+    "delete_seed_confirm": "Delete this built-in case? It won't come back after a restart.",
+    "upstream_error": "Upstream returned an error:",
+    "truncated": "Response truncated (showing first 64 KB).",
+    "curl": "Copy as curl",
+    "curl_title": "Copy as curl",
+    "curl_mode_proxy": "Through proxy",
+    "curl_mode_direct": "Direct (with auth)",
+    "curl_proxy_note": "Hits tracelab's per-session proxy. Carries no secret — the proxy injects auth on forward. Works only while this session is alive.",
+    "curl_direct_note": "Hits upstream directly with this session's real credentials — portable, like Postman's copy-as-curl.",
+    "curl_direct_warning": "This command embeds real credentials. Anyone you paste it to (issue, screenshot, shared shell) can use them.",
+    "curl_subscription_note": "This is your login session token, not an API key you typed — and it can expire.",
+    "curl_reveal": "Reveal credentials",
+    "curl_hide": "Hide credentials"
+  },
+  "hooks": {
+    "title": "Hook capture",
+    "intro": "Which lifecycle and tool events tracelab wires when it launches each agent. Seeded with the built-in defaults; add events a runtime ships before tracelab catches up, or disable noisy ones. Changes apply to the next launch — no restart.",
+    "count": "{{enabled}}/{{total}} on",
+    "client_claude_code": "Claude Code",
+    "client_codex": "Codex",
+    "source_seed": "default",
+    "source_user": "added",
+    "add": "Add",
+    "add_placeholder": "Event name, e.g. PreToolUse",
+    "add_hint": "Unknown events are harmlessly ignored by the runtime, so adding one ahead of a release is safe.",
+    "delete": "Remove",
+    "delete_confirm": "Remove this event?"
   },
   "sessions": {
     "title": "Sessions",
@@ -51,13 +222,19 @@
     "events": "{{count}} events",
     "client": "Client",
     "model": "Model",
-    "upstream": "Upstream"
+    "upstream": "Upstream",
+    "delete": "Delete",
+    "delete_confirm": "Delete this session and its {{count}} events? The raw bytes are removed too — can't be undone.",
+    "http_only": "HTTP only",
+    "http_only_hint": "Only HTTP was captured — no hook events. Launched via the env \"run it yourself\" path."
   },
   "client": {
     "claude_code": "Claude Code",
-    "codex_cli": "Codex"
+    "codex_cli": "Codex",
+    "codex_desktop": "Codex Desktop"
   },
   "search": {
+    "title": "Search",
     "placeholder": "Search prompts, messages, tool calls…",
     "client": "Client",
     "provider": "Provider",

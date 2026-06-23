@@ -124,6 +124,25 @@ func (s *Sessions) AuthFor(sessionID string) http.Header {
 	return s.headers[sessionID]
 }
 
+// Remove forgets a live session: it drops the token→upstream mapping and any
+// in-memory auth/headers for it. This does NOT kill the coding-agent process
+// (tracelab doesn't own it) — it only revokes the proxy session, so the agent's
+// next proxied request fails and replay can no longer use it. Returns false if
+// no such session was registered in this process.
+func (s *Sessions) Remove(id string) bool {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	sess := s.byID[id]
+	if sess == nil {
+		return false
+	}
+	delete(s.byToken, sess.Token)
+	delete(s.byID, id)
+	delete(s.headers, id)
+	delete(s.inject, id)
+	return true
+}
+
 // List returns a snapshot of all sessions.
 func (s *Sessions) List() []*Session {
 	s.mu.RLock()

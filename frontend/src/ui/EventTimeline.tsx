@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Globe } from "lucide-react";
 import type { EventSummary } from "@/api/events";
 import { groupIntoTurns } from "@/viewmodel/detail";
 import { useSessionRoute, type FlowTab } from "@/viewmodel/route";
@@ -36,7 +37,14 @@ export function EventTimeline({ events }: { events: EventSummary[] }) {
       </div>
       <p className="mt-1.5 px-1 text-[11px] leading-snug text-muted-foreground">{activeHint}</p>
     </div>
-  ) : null;
+  ) : (
+    // No hooks → HTTP-only capture (env "run yourself"). Flag it so the missing flow
+    // tab is explained rather than just absent.
+    <div className="flex items-center gap-1.5 border-b px-3 py-2" title={t("sessions.http_only_hint")}>
+      <Globe size={13} className="shrink-0 text-muted-foreground" />
+      <span className="text-xs font-medium text-muted-foreground">{t("sessions.http_only")}</span>
+    </div>
+  );
 
   if (isFlow && turns) {
     return (

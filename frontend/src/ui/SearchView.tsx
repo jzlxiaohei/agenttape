@@ -5,6 +5,7 @@ import { useSessionRoute } from "@/viewmodel/route";
 import { useSearch, useFacets } from "@/query/search";
 import type { SearchResult } from "@/api/search";
 import { cn } from "@/lib/utils";
+import { ClientIcon } from "./ClientIcon";
 
 // Cross-session search: full-text query + tag/provider/client facets. Selecting
 // a result opens that event in the Sessions detail view.
@@ -89,9 +90,10 @@ function ResultRow({ result }: { result: SearchResult }) {
       className="block w-full rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:bg-muted/50"
     >
       <div className="flex items-center justify-between gap-2 text-xs">
-        <span className="font-medium">
+        <span className="flex items-center gap-1.5 font-medium">
+          <ClientIcon client={result.client} size={13} />
           {t(`client.${result.client}`, { defaultValue: result.client })}
-          {result.model && <span className="ml-2 text-muted-foreground">{result.model}</span>}
+          {result.model && <span className="ml-1 text-muted-foreground">{result.model}</span>}
         </span>
         <span className="shrink-0 text-muted-foreground mono">{fmt(result.started_at)}</span>
       </div>
