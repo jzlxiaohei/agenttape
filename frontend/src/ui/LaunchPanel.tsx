@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Rocket, Loader2, Terminal, Copy, Check, Monitor, FolderClock } from "lucide-react";
+import { Rocket, Loader2, Terminal, Copy, Check, Monitor, FolderClock, ChevronRight, ChevronDown } from "lucide-react";
 import { useLaunch, useTerminals, useLaunchPreview, useManualTemplate, useGenerateManual } from "@/query/launch";
 import type { LaunchKind, LaunchMode } from "@/api/launch";
 import { cn } from "@/lib/utils";
@@ -32,10 +32,8 @@ export function LaunchPanel() {
   const trimmedArgs = args.trim() || undefined;
   const rememberWorkdir = () => saveWorkdirHistory(workdir);
 
-  // preview is still used for serverLaunchEnabled (gates the spawn button). The
-  // full-capture copy command it also returns is hidden for now — the final
-  // packaged/distributed command will differ, so this isn't the canonical one yet.
   const preview = useLaunchPreview({ kind, mode, workdir: workdir.trim() || undefined, args: trimmedArgs });
+  const fullCommand = preview.data?.command ?? "";
   const serverLaunchEnabled = preview.data?.enabled ?? false;
 
   // Primary "run it yourself": the env/-c command. A <TOKEN> template shows live;
@@ -57,6 +55,17 @@ export function LaunchPanel() {
           setTimeout(() => setEnvCopied(false), 1500);
         });
       },
+    });
+  };
+
+  // Secondary "full capture (http + hooks)": the tracelab launch one-liner.
+  const [fullOpen, setFullOpen] = useState(false);
+  const [fullCopied, setFullCopied] = useState(false);
+  const copyFull = () => {
+    navigator.clipboard.writeText(fullCommand).then(() => {
+      rememberWorkdir();
+      setFullCopied(true);
+      setTimeout(() => setFullCopied(false), 1500);
     });
   };
 
@@ -233,6 +242,35 @@ export function LaunchPanel() {
             {t("launch.run_yourself_registered", { id: generate.data.session_id.slice(0, 8) })}
           </p>
         )}
+
+        <div>
+          <button
+            type="button"
+            onClick={() => setFullOpen((v) => !v)}
+            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            {fullOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+            {t("launch.full_capture")}
+          </button>
+          {fullOpen && (
+            <div className="mt-1.5 space-y-1">
+              <div className="flex items-stretch gap-2">
+                <code className="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-md border bg-muted px-2.5 py-2 text-xs mono">
+                  {fullCommand || "…"}
+                </code>
+                <button
+                  onClick={copyFull}
+                  disabled={!fullCommand}
+                  className="inline-flex shrink-0 items-center gap-1 rounded-md border px-2 text-xs text-muted-foreground hover:bg-muted disabled:opacity-50"
+                >
+                  {fullCopied ? <Check size={13} className="text-toolcall" /> : <Copy size={13} />}
+                  {fullCopied ? t("launch.copied") : t("launch.copy")}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">{t("launch.full_capture_note")}</p>
+            </div>
+          )}
+        </div>
       </MethodCard>
         </>
       )}
