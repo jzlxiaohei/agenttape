@@ -10,12 +10,12 @@ import (
 // Compaction detection is graded by evidence strength, never by keyword guessing
 // (see colleague review / REPLAY_LIB §7):
 //
-//   confirmed        — a PreCompact/PostCompact hook sits between the two requests
-//                      (harness ground truth).
-//   strong_suspected — history shrank AND the prior response is carried into the
-//                      next request (content lineage: data provably flowed A→B).
-//   weak_suspected   — history shrank only (could also be scroll-truncation, a
-//                      session reset, or a client rewrite — can't tell them apart).
+//	confirmed        — a PreCompact/PostCompact hook sits between the two requests
+//	                   (harness ground truth).
+//	strong_suspected — history shrank AND the prior response is carried into the
+//	                   next request (content lineage: data provably flowed A→B).
+//	weak_suspected   — history shrank only (could also be scroll-truncation, a
+//	                   session reset, or a client rewrite — can't tell them apart).
 //
 // It is inherently cross-event: the judgment can only complete once request B has
 // arrived, so we model a "compaction episode" over the (A, B) pair rather than

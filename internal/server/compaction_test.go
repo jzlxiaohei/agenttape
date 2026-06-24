@@ -13,12 +13,12 @@ func TestGradeCompaction(t *testing.T) {
 		hook, shrank, carried bool
 		want                  CompactionGrade
 	}{
-		{true, false, false, gradeConfirmed},  // hook wins regardless
-		{true, true, true, gradeConfirmed},     //
-		{false, true, true, gradeStrong},       // lineage proven
-		{false, true, false, gradeWeak},        // shrink only
-		{false, false, true, ""},               // carried but no shrink → normal turn, not compaction
-		{false, false, false, ""},              //
+		{true, false, false, gradeConfirmed}, // hook wins regardless
+		{true, true, true, gradeConfirmed},   //
+		{false, true, true, gradeStrong},     // lineage proven
+		{false, true, false, gradeWeak},      // shrink only
+		{false, false, true, ""},             // carried but no shrink → normal turn, not compaction
+		{false, false, false, ""},            //
 	}
 	for _, c := range cases {
 		got, _ := gradeCompaction(c.hook, c.shrank, c.carried)
