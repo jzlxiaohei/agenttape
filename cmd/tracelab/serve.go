@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"tracelab/internal/normalize/providers"
 	"tracelab/internal/server"
 	"tracelab/internal/sink"
 	"tracelab/internal/store"
+	"tracelab/internal/web"
 )
 
 func runServe(args []string) error {
@@ -17,7 +19,7 @@ func runServe(args []string) error {
 	listen := fs.String("listen", "127.0.0.1:8787", "listen address")
 	data := fs.String("data", "tracelab-data", "data dir (SQLite db + raw files)")
 	jsonlOut := fs.String("jsonl", "", "use a JSONL file instead of SQLite (debug)")
-	viewer := fs.String("viewer", "frontend/dist", "built viewer dist dir to serve at /viewer")
+	viewer := fs.String("viewer", "", "serve the viewer from this dist dir instead of the embedded bundle (frontend dev only; empty = use the binary's embedded viewer)")
 	allowLaunch := fs.Bool("allow-launch", true, "allow the viewer to launch agents in a terminal (on by default; pass -allow-launch=false to disable — the page always still shows a copy-paste command)")
 	_ = fs.Parse(args)
 
@@ -50,7 +52,13 @@ func runServe(args []string) error {
 	if st != nil {
 		srv.EnableAPI(st)
 		log.Printf("  api:      http://%s/api/sessions", *listen)
-		if srv.EnableViewer(*viewer) {
+		// Default: the viewer embedded in this binary (single-file distribution).
+		// -viewer <dir> overrides it with an on-disk dist for frontend dev.
+		viewerFS := web.Dist()
+		if *viewer != "" {
+			viewerFS = os.DirFS(*viewer)
+		}
+		if srv.EnableViewer(viewerFS) {
 			log.Printf("  viewer:   http://%s/viewer/", *listen)
 		}
 	}

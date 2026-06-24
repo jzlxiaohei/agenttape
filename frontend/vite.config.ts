@@ -10,6 +10,13 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(__dirname, "src") },
   },
+  // Build straight into the Go embed package so `go build` bundles the viewer into a
+  // single self-contained binary (see internal/web). Only index.html is committed
+  // there as a placeholder; this overwrites it with the real bundle.
+  build: {
+    outDir: path.resolve(__dirname, "../internal/web/dist"),
+    emptyOutDir: true,
+  },
   server: {
     port: 5173,
     proxy: {

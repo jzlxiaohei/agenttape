@@ -1,9 +1,9 @@
 package server
 
 import (
+	"io/fs"
 	"net/http"
-	"os"
-	"path/filepath"
+	"path"
 	"strings"
 
 	"tracelab/internal/store"
@@ -169,29 +169,35 @@ func (s *Server) EnableAPI(st *store.Store) {
 	})
 }
 
-// EnableViewer serves a built frontend (Vite dist) at /viewer if the directory
-// exists. SPA routes fall back to index.html.
-func (s *Server) EnableViewer(distDir string) bool {
-	if st, err := os.Stat(distDir); err != nil || !st.IsDir() {
+// EnableViewer serves the Viewer SPA at /viewer from the given filesystem — the
+// embedded bundle (web.Dist()) for a release binary, or os.DirFS(dir) for frontend
+// dev. SPA routes fall back to index.html. Returns false if the FS has no built
+// viewer (e.g. the placeholder-only embed before `npm run build`).
+func (s *Server) EnableViewer(fsys fs.FS) bool {
+	if fsys == nil {
 		return false
 	}
-	fs := http.FileServer(http.Dir(distDir))
-	index := filepath.Join(distDir, "index.html")
+	if _, err := fs.Stat(fsys, "index.html"); err != nil {
+		return false
+	}
+	fileServer := http.StripPrefix("/viewer/", http.FileServerFS(fsys))
+	serveIndex := func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFileFS(w, r, fsys, "index.html")
+	}
 	s.mux.HandleFunc("/viewer/", func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = strings.TrimPrefix(r.URL.Path, "/viewer")
 		// SPA fallback: serve real files (assets) as-is, but route paths like
-		// /sessions/:id — which have no file on disk — get index.html so client
-		// routing can take over on deep links and reloads.
-		rel := strings.TrimPrefix(filepath.Clean(r.URL.Path), "/")
+		// /sessions/:id — which have no file — get index.html so client routing can
+		// take over on deep links and reloads.
+		rel := strings.TrimPrefix(path.Clean(strings.TrimPrefix(r.URL.Path, "/viewer/")), "/")
 		if rel == "" || rel == "." {
-			http.ServeFile(w, r, index)
+			serveIndex(w, r)
 			return
 		}
-		if st, err := os.Stat(filepath.Join(distDir, rel)); err != nil || st.IsDir() {
-			http.ServeFile(w, r, index)
+		if st, err := fs.Stat(fsys, rel); err != nil || st.IsDir() {
+			serveIndex(w, r)
 			return
 		}
-		fs.ServeHTTP(w, r)
+		fileServer.ServeHTTP(w, r)
 	})
 	s.mux.HandleFunc("/viewer", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/viewer/", http.StatusFound)
