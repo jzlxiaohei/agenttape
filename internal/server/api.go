@@ -141,6 +141,7 @@ func (s *Server) EnableAPI(st *store.Store) {
 		}
 		writeJSON(w, events)
 	})
+	s.mux.HandleFunc("PATCH /api/sessions/{id}", func(w http.ResponseWriter, r *http.Request) { s.handleRenameSession(st, w, r) })
 	s.mux.HandleFunc("DELETE /api/sessions/{id}", func(w http.ResponseWriter, r *http.Request) { s.handleDeleteSession(st, w, r) })
 	s.mux.HandleFunc("GET /api/events/{id}", func(w http.ResponseWriter, r *http.Request) {
 		detail, err := st.GetEvent(r.PathValue("id"))

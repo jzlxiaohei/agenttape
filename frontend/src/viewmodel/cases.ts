@@ -41,6 +41,14 @@ export function caseDescription(c: ReplayCase, t: TFunction): string {
   return t(key, { defaultValue: "" });
 }
 
+// caseHint returns an optional "try this" callout for a seed (e.g. cc-edit's
+// toolset A/B), or "" if the seed has no hint. Keyed by cases.hint_<id>.
+export function caseHint(c: ReplayCase, t: TFunction): string {
+  if (c.source !== "seed") return "";
+  const key = `cases.hint_${c.id.replace(/^seed:/, "").replace(/-/g, "_")}`;
+  return t(key, { defaultValue: "" });
+}
+
 export interface CaseCardMeta {
   model: string;
   tools: number;

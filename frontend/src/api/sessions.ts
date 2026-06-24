@@ -25,3 +25,9 @@ export function fetchSessions(): Promise<SessionDTO[]> {
 export function deleteSession(id: string): Promise<void> {
   return api.del(`/api/sessions/${id}`);
 }
+
+// renameSession sets a user-chosen name, overriding the auto-derived title. Empty
+// clears it.
+export function renameSession(id: string, title: string): Promise<void> {
+  return api.patchJSON(`/api/sessions/${id}`, { title });
+}

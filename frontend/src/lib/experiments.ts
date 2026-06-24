@@ -9,12 +9,25 @@ export interface ExperimentStep {
 }
 
 export interface Experiment {
-  id: "subagent" | "compaction";
-  client: "cc"; // both are Claude Code-only behaviors → provider "anthropic"
+  id: "subagent" | "compaction" | "edit";
+  client: "cc"; // Claude Code-only behaviors → provider "anthropic"
   steps: ExperimentStep[];
 }
 
 export const experiments: Experiment[] = [
+  {
+    // The capture half of the cc-edit story: replay shows one Edit decision, but the
+    // real value is the Read → Edit → result loop, harness-driven and only visible
+    // live in Flow.
+    id: "edit",
+    client: "cc",
+    steps: [
+      { note: true, prompt: false },
+      { note: true, prompt: true },
+      { note: true, prompt: false },
+      { note: true, prompt: false },
+    ],
+  },
   {
     id: "subagent",
     client: "cc",

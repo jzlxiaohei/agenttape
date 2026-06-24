@@ -62,6 +62,27 @@
     "section": "Experiments",
     "needs_hooks": "needs hooks",
     "open_launch": "Open the Launch page",
+    "edit": {
+      "title": "Experiment · file-edit loop",
+      "desc": "The cc-edit case in the library only replays one request — the model's single-step decision. The real essence is the multi-turn Read → Edit → result → continue loop, which is harness-driven and only shows up in Flow when you run it live with hooks on.",
+      "s1": {
+        "label": "Launch cc with hooks on",
+        "note": "PreToolUse / PostToolUse mark each tool call's boundary in Flow — start a session from the Launch page."
+      },
+      "s2": {
+        "label": "Paste this into cc",
+        "note": "Self-contained — runs in any directory with a few source files; it naturally triggers read-then-edit.",
+        "prompt": "Pick a source file in the current directory and rename one identifier (a variable, JSON field, or function name) consistently. Read the file first, then use Edit for precise replacements, one occurrence at a time, to the end."
+      },
+      "s3": {
+        "label": "Back in tracelab, open this session's flow",
+        "note": "Find the chain: PreToolUse(Read) → Read request → tool_result → PreToolUse(Edit) → Edit request → tool_result."
+      },
+      "s4": {
+        "label": "Study the read-then-edit ordering",
+        "note": "Note: why the model insists on Read first (Edit's precondition) · where permission events land · whether the diff is the model's or harness-generated · how the result feeds the next request."
+      }
+    },
     "subagent": {
       "title": "Experiment 6 · Sub-agents",
       "desc": "A sub-agent's fork → run → report-a-summary-back is harness orchestration; replaying one request can't show it. You run it live with hooks on, and the flow shows SubagentStart/Stop bracketing the sub-agent's own requests.",
@@ -173,6 +194,7 @@
     "run_url": "Run URL",
     "warning": "Running a case sends a real, billed request to upstream.",
     "replay_scope_note": "Replay sends one request and shows one model response — a single-step wire shape and decision. The full multi-turn agent loop (tool call → result feedback → next turn) is harness orchestration; open Flow to see a real session.",
+    "hint_cc_edit": "🧪 The toolset shapes behavior: delete Read from the tools array in the body below and re-run. Without the Read tool (Edit's rule requires reading first), the model stalls, asks, or caveats instead of cleanly issuing an Edit. Put it back and compare the two responses.",
     "session": "Run with session (supplies credentials)",
     "cred_key": "API key",
     "cred_subscription": "subscription",
@@ -224,6 +246,11 @@
   "sessions": {
     "title": "Sessions",
     "empty": "No sessions captured yet. Launch cc or codex through the proxy.",
+    "no_match": "No matching sessions.",
+    "filter_placeholder": "Filter by name / id…",
+    "rename": "Rename",
+    "rename_placeholder": "Name this session",
+    "rename_save": "Save",
     "loading": "Loading sessions…",
     "error": "Failed to load sessions",
     "events": "{{count}} events",

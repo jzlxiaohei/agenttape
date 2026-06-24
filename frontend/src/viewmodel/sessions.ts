@@ -1,6 +1,15 @@
 import { useSessions } from "@/query/sessions";
 import { useSessionRoute } from "@/viewmodel/route";
+import { useUIStore } from "@/store/ui";
 import type { SessionDTO } from "@/api/sessions";
+
+// matchesSessionFilter prioritizes the name (title): a session matches if its title
+// or its id contains the (lowercased) query. Empty query matches everything.
+function matchesSessionFilter(s: SessionDTO, q: string): boolean {
+  if (!q) return true;
+  const needle = q.toLowerCase();
+  return s.title.toLowerCase().includes(needle) || s.id.toLowerCase().includes(needle);
+}
 
 export interface SessionVM extends SessionDTO {
   selected: boolean;
@@ -17,11 +26,14 @@ export interface SessionsView {
 export function useSessionsView(): SessionsView {
   const { data, isLoading, isError } = useSessions();
   const selectedId = useSessionRoute().sessionId;
+  const filter = useUIStore((s) => s.sessionFilter);
 
-  const sessions = (data ?? []).map<SessionVM>((s) => ({
-    ...s,
-    selected: s.id === selectedId,
-  }));
+  const sessions = (data ?? [])
+    .filter((s) => matchesSessionFilter(s, filter))
+    .map<SessionVM>((s) => ({
+      ...s,
+      selected: s.id === selectedId,
+    }));
 
   return { sessions, isLoading, isError };
 }

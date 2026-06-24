@@ -62,6 +62,27 @@
     "section": "实验",
     "needs_hooks": "需要 hooks",
     "open_launch": "去 Launch 页",
+    "edit": {
+      "title": "实验 · 改文件 loop",
+      "desc": "素材库里的 cc-edit 只能重放一条请求、看模型这一步的决策。真正的精髓是 Read → Edit → 结果回灌 → 继续 的多轮 loop，这是 harness 编排，只有实跑 + 开 hooks 才在 Flow 里看得到。",
+      "s1": {
+        "label": "开着 hooks 启动 cc",
+        "note": "PreToolUse / PostToolUse 在 Flow 里标出每次工具调用的边界——从 Launch 页起会话即可。"
+      },
+      "s2": {
+        "label": "把这条指令粘进 cc",
+        "note": "自包含——在任意有几个源文件的目录里都能跑，会自然触发先读后改。",
+        "prompt": "在当前目录挑一个源文件，把其中某个标识符（变量名 / JSON 字段 / 函数名）统一改个名。改之前先把文件读一遍，再用 Edit 精确替换，逐处改到底。"
+      },
+      "s3": {
+        "label": "回 tracelab，打开这条 session 的 flow",
+        "note": "找这条链：PreToolUse(Read) → Read 请求 → tool_result → PreToolUse(Edit) → Edit 请求 → tool_result。"
+      },
+      "s4": {
+        "label": "对比「先 Read 再 Edit」的顺序",
+        "note": "注意：模型为何坚持先 Read（Edit 的前置规则）· 权限事件落在哪 · diff 是模型给的还是 harness 生成的 · 结果如何回灌进下一请求。"
+      }
+    },
     "subagent": {
       "title": "实验 6 · 子 Agent",
       "desc": "子 agent 的 fork → 跑 → 只把摘要回灌主 agent，是 harness 编排，重放单条请求看不到。必须实跑并开启 hooks，flow 里才会用 SubagentStart/Stop 把子 agent 自己的请求夹起来。",
@@ -173,6 +194,7 @@
     "run_url": "本次 URL",
     "warning": "运行 case 会向上游发送一次真实的、计费的请求。",
     "replay_scope_note": "重放只发一条请求、看一次模型响应——展示的是单步 wire 形状与决策。完整的多轮 agent loop（工具调用 → 结果回灌 → 下一轮）是 harness 编排，去 Flow 看真实会话。",
+    "hint_cc_edit": "🧪 工具集会塑造行为：把下面 body 里 tools 数组中的 Read 删掉再 Run。没了 Read 工具（Edit 规则要求必须先 Read），模型就会卡住、反问或加免责声明，而不是利落地发 Edit。改回去再跑，对比两次响应。",
     "session": "用哪个会话运行(提供凭证)",
     "cred_key": "API key",
     "cred_subscription": "订阅",
@@ -224,6 +246,11 @@
   "sessions": {
     "title": "会话",
     "empty": "还没有捕获到会话。通过代理启动 cc 或 codex。",
+    "no_match": "没有匹配的会话。",
+    "filter_placeholder": "按名字 / id 过滤…",
+    "rename": "重命名",
+    "rename_placeholder": "给这个会话起个名字",
+    "rename_save": "保存",
     "loading": "加载会话中…",
     "error": "加载会话失败",
     "events": "{{count}} 个事件",

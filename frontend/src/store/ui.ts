@@ -35,7 +35,10 @@ interface UIState {
   searchClient: string;
   // replay library
   casesProvider: string; // "" = all providers
+  // sidebar session list: filter by name/id ("" = no filter)
+  sessionFilter: string;
 
+  setSessionFilter: (q: string) => void;
   setCasesProvider: (p: string) => void;
   setSearchQuery: (q: string) => void;
   setSearchFilter: (key: "searchTag" | "searchProvider" | "searchClient", value: string) => void;
@@ -59,7 +62,9 @@ export const useUIStore = create<UIState>((set) => ({
   searchProvider: "",
   searchClient: "",
   casesProvider: "",
+  sessionFilter: "",
 
+  setSessionFilter: (q) => set({ sessionFilter: q }),
   setCasesProvider: (p) => set({ casesProvider: p }),
   setSearchQuery: (q) => set({ searchQuery: q }),
   setSearchFilter: (key, value) => set({ [key]: value } as Partial<UIState>),

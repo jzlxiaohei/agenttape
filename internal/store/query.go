@@ -58,6 +58,14 @@ func (s *Store) GetSession(id string) (*SessionSummary, error) {
 	return &ss, nil
 }
 
+// SetSessionLabel sets a user-chosen name for a session, overriding the title that
+// was auto-derived from the first prompt. An empty label clears it (the auto-fill
+// in http.go may re-derive one from a later completion). Idempotent.
+func (s *Store) SetSessionLabel(id, label string) error {
+	_, err := s.db.Exec(`UPDATE sessions SET label = ? WHERE id = ?`, label, id)
+	return err
+}
+
 // DeleteSession permanently removes a session and ALL its captured data: every
 // event plus the per-type detail rows, tags, sections, FTS entries, raw-file
 // pointers, and the raw bytes on disk. Foreign keys are enforced, so children are
