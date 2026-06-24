@@ -172,6 +172,7 @@
     "original_url": "Original URL",
     "run_url": "Run URL",
     "warning": "Running a case sends a real, billed request to upstream.",
+    "replay_scope_note": "Replay sends one request and shows one model response — a single-step wire shape and decision. The full multi-turn agent loop (tool call → result feedback → next turn) is harness orchestration; open Flow to see a real session.",
     "session": "Run with session (supplies credentials)",
     "cred_key": "API key",
     "cred_subscription": "subscription",

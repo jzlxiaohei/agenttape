@@ -172,6 +172,7 @@
     "original_url": "原始 URL",
     "run_url": "本次 URL",
     "warning": "运行 case 会向上游发送一次真实的、计费的请求。",
+    "replay_scope_note": "重放只发一条请求、看一次模型响应——展示的是单步 wire 形状与决策。完整的多轮 agent loop（工具调用 → 结果回灌 → 下一轮）是 harness 编排，去 Flow 看真实会话。",
     "session": "用哪个会话运行(提供凭证)",
     "cred_key": "API key",
     "cred_subscription": "订阅",

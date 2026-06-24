@@ -559,6 +559,10 @@ function CaseRunner({ caseItem, onCreated }: { caseItem: ReplayCase; onCreated: 
 
       {selectedSession?.needs_key && <ReenterKeyBanner session={selectedSession} />}
 
+      <p className="border-b px-6 py-2 text-xs leading-relaxed text-muted-foreground">
+        {t("cases.replay_scope_note")}
+      </p>
+
       <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-hidden px-6 py-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-muted-foreground">
