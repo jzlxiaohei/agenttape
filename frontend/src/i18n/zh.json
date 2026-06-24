@@ -152,7 +152,7 @@
       "cc_tool_failure": "实验 4 —— is_error 的 tool_result 如何编码回模型。",
       "cc_title": "附赠 —— Claude Code 用来自动命名会话的那条短请求。",
       "cc_full_claude": "带 cache_control 断点与 adaptive thinking 的完整请求形状。",
-      "cc_compaction": "实验 5 —— 真实的 /compact 触发请求：要求模型把整段对话总结成 <analysis>/<summary>。可见 context_management(clear_thinking) + adaptive thinking。"
+      "cc_compaction": "实验 5 —— 按真实协议形状合成的 /compact 触发请求：要求模型把整段对话总结成 <analysis>/<summary>。可见 context_management(clear_thinking) + adaptive thinking。"
     },
     "section_built_in": "内置",
     "section_added": "后加",
@@ -175,6 +175,12 @@
     "session": "用哪个会话运行(提供凭证)",
     "cred_key": "API key",
     "cred_subscription": "订阅",
+    "needs_key": "待重输密钥",
+    "needs_key_hint": "这个 API key 会话在 tracelab 重启后丢了密钥(密钥从不落盘)。重输一次即可,无需重启 agent。",
+    "needs_key_banner": "这个 API key 会话在重启后丢了密钥(密钥从不落盘)。重新输入即可继续运行——你那个还开着的 agent 会在下次请求时自动恢复,不用重启。",
+    "needs_key_placeholder": "重新粘贴 API key",
+    "needs_key_save": "保存密钥",
+    "needs_key_saving": "保存中…",
     "none_active": "本进程内没有活跃会话。去启动一个:",
     "close_session": "关闭会话",
     "close_session_confirm": "关闭这个活跃会话?它会从代理里移除(内存中的凭证一并清除),replay 之后无法再用它。这不会停止你终端里正在运行的 agent——但它的下一次请求会失败。",

@@ -130,7 +130,8 @@ func (s *Server) handleCodexDesktopInstall(st *store.Store, w http.ResponseWrite
 	}
 	hooksInjected := len(events) > 0
 
-	sess := s.Sessions.Register("codex_cli", upstream)
+	codexSpec := agentProviders["codex"]
+	sess := s.Sessions.Register(codexSpec.Client, upstream, codexSpec.Provider, "subscription")
 	merged := launcher.MergeCodexDesktopConfig(string(original), "http://"+r.Host, sess, events)
 
 	if hadOriginal {

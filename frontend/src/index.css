@@ -22,6 +22,7 @@
   --color-toolresult: hsl(195 55% 42%);
   --color-error: hsl(0 65% 55%);
   --color-suspected: hsl(35 80% 48%);
+  --color-warning: hsl(28 80% 48%); /* action-needed attention (e.g. session key cleared on restart) */
 
   /* client brand identity (Claude Code vs Codex) */
   --color-claude: hsl(24 85% 55%);

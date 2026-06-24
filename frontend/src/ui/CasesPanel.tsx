@@ -23,6 +23,7 @@ import {
   useCases,
   useActiveSessions,
   useCloseActiveSession,
+  useReenterSessionKey,
   useRunCase,
   useSnapshotCase,
   useDeleteCase,
@@ -556,6 +557,8 @@ function CaseRunner({ caseItem, onCreated }: { caseItem: ReplayCase; onCreated: 
         </div>
       </header>
 
+      {selectedSession?.needs_key && <ReenterKeyBanner session={selectedSession} />}
+
       <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-hidden px-6 py-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-muted-foreground">
@@ -848,6 +851,47 @@ function CurlSheet({
   );
 }
 
+// ReenterKeyBanner prompts for the API key of a key-mode session that lost it on a
+// tracelab restart. The key goes straight to server memory (never disk); the still-
+// running agent resumes on its next request, so no relaunch is needed.
+function ReenterKeyBanner({ session }: { session: ActiveSession }) {
+  const { t } = useTranslation();
+  const reenter = useReenterSessionKey();
+  const [key, setKey] = useState("");
+  const submit = () => {
+    const v = key.trim();
+    if (!v) return;
+    reenter.mutate({ id: session.id, apiKey: v }, { onSuccess: () => setKey("") });
+  };
+  return (
+    <div className="mx-6 mt-3 space-y-2 rounded-md border border-warning/40 bg-warning/5 px-3 py-2">
+      <p className="flex items-start gap-1.5 text-xs text-warning">
+        <AlertTriangle size={13} className="mt-0.5 shrink-0" />
+        {t("cases.needs_key_banner")}
+      </p>
+      <div className="flex items-center gap-2">
+        <input
+          type="password"
+          value={key}
+          onChange={(e) => setKey(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+          placeholder={t("cases.needs_key_placeholder")}
+          className="mono min-w-0 flex-1 rounded-md border bg-card px-2 py-1 text-xs outline-none focus:border-accent"
+        />
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!key.trim() || reenter.isPending}
+          className="shrink-0 rounded-md bg-accent px-3 py-1 text-xs font-medium text-accent-foreground hover:opacity-90 disabled:opacity-50"
+        >
+          {reenter.isPending ? t("cases.needs_key_saving") : t("cases.needs_key_save")}
+        </button>
+      </div>
+      {reenter.isError && <p className="text-xs text-error">{(reenter.error as Error).message}</p>}
+    </div>
+  );
+}
+
 // AuthRow renders one auth target compactly: client glyph, upstream, and the
 // credential kind (subscription vs API key) — the thing that actually
 // distinguishes same-client sessions.
@@ -857,9 +901,19 @@ function AuthRow({ s }: { s: ActiveSession }) {
     <span className="flex min-w-0 flex-1 items-center gap-2">
       <ClientIcon client={s.client} size={14} />
       <span className="mono min-w-0 flex-1 truncate text-xs text-muted-foreground">{s.upstream}</span>
-      <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-        {t(`cases.cred_${s.credential_kind}`)}
-      </span>
+      {s.needs_key ? (
+        <span
+          title={t("cases.needs_key_hint")}
+          className="inline-flex shrink-0 items-center gap-1 rounded bg-warning/15 px-1.5 py-0.5 text-[10px] font-medium text-warning"
+        >
+          <AlertTriangle size={10} />
+          {t("cases.needs_key")}
+        </span>
+      ) : (
+        <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+          {t(`cases.cred_${s.credential_kind}`)}
+        </span>
+      )}
     </span>
   );
 }

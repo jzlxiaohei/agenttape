@@ -120,6 +120,22 @@ CREATE TABLE IF NOT EXISTS client_hook_events (
   PRIMARY KEY(client, event)
 );
 
+-- Live proxy-session routing facts, persisted so a still-running agent can be
+-- re-attached to the proxy after a tracelab restart (its baked-in token keeps
+-- resolving). NON-SECRET BY DESIGN: token is only a routing handle, and the real
+-- API key (key mode) is deliberately NOT stored — it lives in process memory and
+-- must be re-supplied after a restart. See docs/SECURITY.md. Distinct from
+-- `sessions`, which summarizes CAPTURED traffic.
+CREATE TABLE IF NOT EXISTS live_sessions (
+  id         TEXT PRIMARY KEY,
+  token      TEXT,                -- per-session proxy route (/s/<token>/…); not a credential
+  client     TEXT,                -- claude_code | codex_cli
+  upstream   TEXT,
+  provider   TEXT,                -- anthropic | openai-responses
+  mode       TEXT,                -- subscription | key
+  created_at TEXT
+);
+
 -- Per-section token stats (http only) for queries like "tools > 50% of tokens".
 CREATE TABLE IF NOT EXISTS sections (
   event_id      TEXT REFERENCES events(id),

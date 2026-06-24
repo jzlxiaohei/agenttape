@@ -18,7 +18,11 @@ export interface ActiveSession {
   id: string;
   client: string;
   upstream: string;
+  provider: string;
   credential_kind: "key" | "subscription";
+  // needs_key: a key-mode session restored after a restart whose real key was never
+  // persisted. It routes but would 401 until the key is re-supplied.
+  needs_key?: boolean;
 }
 
 export function fetchCases(): Promise<ReplayCase[]> {
@@ -33,6 +37,13 @@ export function fetchActiveSessions(): Promise<ActiveSession[]> {
 // in-memory creds). It does not kill the agent process in the user's terminal.
 export function closeActiveSession(id: string): Promise<void> {
   return api.del(`/api/active-sessions/${id}`);
+}
+
+// reenterSessionKey re-supplies the API key for a key-mode session that lost it on a
+// tracelab restart. The key goes only into server memory (never to disk); the still-
+// running agent resumes on its next request.
+export function reenterSessionKey(id: string, apiKey: string): Promise<{ ok: boolean }> {
+  return api.postJSON<{ ok: boolean }>(`/api/active-sessions/${id}/key`, { api_key: apiKey });
 }
 
 export function runCase(id: string, sessionId: string, body?: string): Promise<ReplayResult> {

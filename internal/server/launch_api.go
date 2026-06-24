@@ -124,11 +124,12 @@ func (s *Server) handleManualCommand(w http.ResponseWriter, r *http.Request) {
 		if upstream == "" {
 			upstream = defaultUpstream(req.Kind, req.Mode)
 		}
-		client := "codex_cli"
-		if req.Kind == "cc" {
-			client = "claude_code"
+		mode := req.Mode
+		if mode == "" {
+			mode = "subscription"
 		}
-		sess := s.Sessions.Register(client, upstream)
+		spec, _ := agentProviderByKind(req.Kind) // kind validated above by launchKinds
+		sess := s.Sessions.Register(spec.Client, upstream, spec.Provider, mode)
 		token, sessionID = sess.Token, sess.ID
 	}
 	writeJSON(w, map[string]any{
@@ -214,18 +215,17 @@ func (s *Server) handleLaunch(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "api_key required for key mode", http.StatusBadRequest)
 			return
 		}
-		client := "codex_cli"
-		if req.Kind == "cc" {
-			client = "claude_code"
+		spec, ok := agentProviderByKind(req.Kind)
+		if !ok {
+			http.Error(w, "unknown provider kind: "+req.Kind, http.StatusBadRequest)
+			return
 		}
-		sess := s.Sessions.Register(client, upstream)
-		s.Sessions.RememberInject(sess.ID, providerAuth(upstream, req.APIKey))
+		sess := s.Sessions.Register(spec.Client, upstream, spec.Provider, "key")
+		// The real key lives ONLY in process memory (inject); the agent is handed a
+		// placeholder env so the key never reaches the agent, the terminal, or disk.
+		s.Sessions.RememberInject(sess.ID, spec.injectAuth(req.APIKey))
 		cmd += fmt.Sprintf(" -token %s -session %s", shellQuote(sess.Token), shellQuote(sess.ID))
-		if req.Kind == "cc" {
-			env = "export ANTHROPIC_API_KEY=tracelab-proxy-placeholder\n"
-		} else {
-			env = "export OPENAI_API_KEY=tracelab-proxy-placeholder\n"
-		}
+		env = "export " + spec.KeyEnv + "=tracelab-proxy-placeholder\n"
 	}
 	if a := strings.TrimSpace(req.Args); a != "" {
 		// `--` stops tracelab's flag parser; the rest is forwarded to the client. The
@@ -264,6 +264,40 @@ func (s *Server) handleTerminals(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, detectTerminals())
 }
 
+// handleReinjectKey puts a real API key back into memory for a key-mode session that
+// lost it on a restart (NeedsKey). The key goes ONLY into the in-memory inject map,
+// exactly as the original launch did — never to disk. The still-running agent (which
+// keeps sending the placeholder) resumes on its next request, transparently.
+func (s *Server) handleReinjectKey(w http.ResponseWriter, r *http.Request) {
+	if !sameOriginOK(r) {
+		http.Error(w, "cross-origin blocked", http.StatusForbidden)
+		return
+	}
+	sess := s.Sessions.Get(r.PathValue("id"))
+	if sess == nil {
+		http.Error(w, "session not live in this process", http.StatusNotFound)
+		return
+	}
+	if sess.Mode != "key" {
+		http.Error(w, "session is not an API-key session; nothing to re-supply", http.StatusBadRequest)
+		return
+	}
+	var req struct {
+		APIKey string `json:"api_key"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || strings.TrimSpace(req.APIKey) == "" {
+		http.Error(w, "api_key required", http.StatusBadRequest)
+		return
+	}
+	spec, ok := agentProviderByProvider(sess.Provider)
+	if !ok {
+		http.Error(w, "no provider spec for "+sess.Provider, http.StatusBadRequest)
+		return
+	}
+	s.Sessions.RememberInject(sess.ID, spec.injectAuth(strings.TrimSpace(req.APIKey)))
+	writeJSON(w, map[string]any{"ok": true})
+}
+
 func detectTerminals() []string {
 	candidates := []string{"Terminal", "iTerm", "Ghostty", "WezTerm", "Alacritty", "kitty", "Warp", "Hyper"}
 	out := []string{}
@@ -288,31 +322,15 @@ func appInstalled(name string) bool {
 	return false
 }
 
-// defaultUpstream picks the upstream by client and credential mode. codex splits
-// by mode: a ChatGPT-subscription token only works against the Codex backend,
-// while a real OpenAI API key only works against the platform API. Getting this
-// wrong surfaces as a 401 "missing scopes: api.responses.write".
+// defaultUpstream picks the upstream by launch kind and credential mode, via the
+// provider registry (agent_providers.go) — the single source for which host each
+// provider's subscription token vs API key must hit. Unknown kinds fall back to the
+// Anthropic host so callers always get a usable default.
 func defaultUpstream(kind, mode string) string {
-	if kind == "cc" {
-		return "https://api.anthropic.com"
+	if spec, ok := agentProviderByKind(kind); ok {
+		return spec.upstreamFor(mode)
 	}
-	if mode == "key" {
-		return "https://api.openai.com/v1"
-	}
-	return "https://chatgpt.com/backend-api/codex"
-}
-
-// providerAuth builds the auth headers to inject for an API key, by wire format.
-func providerAuth(upstream, apiKey string) http.Header {
-	h := http.Header{}
-	h.Set("Content-Type", "application/json")
-	if strings.Contains(upstream, "anthropic") {
-		h.Set("x-api-key", apiKey)
-		h.Set("anthropic-version", "2023-06-01")
-	} else {
-		h.Set("Authorization", "Bearer "+apiKey)
-	}
-	return h
+	return agentProviders["cc"].SubURL
 }
 
 // shellQuote single-quotes a value so it is safe to embed in the launch script.

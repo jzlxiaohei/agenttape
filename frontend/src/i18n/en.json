@@ -152,7 +152,7 @@
       "cc_tool_failure": "Experiment 4 — how an is_error tool_result is encoded back to the model.",
       "cc_title": "Bonus — the short request Claude Code fires to auto-name a session.",
       "cc_full_claude": "Full request shape with cache_control breakpoints and adaptive thinking.",
-      "cc_compaction": "Experiment 5 — a real /compact trigger: the model is asked to summarize the whole conversation into <analysis>/<summary>. Shows context_management (clear_thinking) + adaptive thinking."
+      "cc_compaction": "Experiment 5 — a synthetic /compact trigger preserving the real wire shape: the model is asked to summarize the whole conversation into <analysis>/<summary>. Shows context_management (clear_thinking) + adaptive thinking."
     },
     "section_built_in": "Built-in",
     "section_added": "Added",
@@ -175,6 +175,12 @@
     "session": "Run with session (supplies credentials)",
     "cred_key": "API key",
     "cred_subscription": "subscription",
+    "needs_key": "key needed",
+    "needs_key_hint": "This API-key session lost its key when tracelab restarted (keys are never written to disk). Re-enter it once — no need to restart the agent.",
+    "needs_key_banner": "This API-key session lost its key on restart (keys are never written to disk). Re-enter it to keep running — your still-open agent resumes on its next request, no relaunch needed.",
+    "needs_key_placeholder": "Paste the API key again",
+    "needs_key_save": "Save key",
+    "needs_key_saving": "Saving…",
     "none_active": "No live session in this process. Start one:",
     "close_session": "Close session",
     "close_session_confirm": "Close this live session? It's dropped from the proxy (and its in-memory credentials are cleared), and replay can no longer use it. This does NOT stop the agent running in your terminal — but its next request will fail.",

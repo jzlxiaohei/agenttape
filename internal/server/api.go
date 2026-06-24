@@ -12,6 +12,11 @@ import (
 // EnableAPI mounts the read-only viewer API backed by the store. It is only
 // wired when serving with a SQLite store (the viewer needs persisted data).
 func (s *Server) EnableAPI(st *store.Store) {
+	// Re-attach proxy sessions persisted by an earlier run, so a still-running agent
+	// keeps routing through the proxy after a restart. Only non-secret routing comes
+	// back; key-mode sessions report NeedsKey() until the key is re-supplied.
+	s.Sessions.BindPersister(&liveSessionPersister{st: st})
+
 	s.mux.HandleFunc("/api/sessions", func(w http.ResponseWriter, _ *http.Request) {
 		sessions, err := st.ListSessions()
 		if err != nil {
@@ -68,18 +73,33 @@ func (s *Server) EnableAPI(st *store.Store) {
 			ID             string `json:"id"`
 			Client         string `json:"client"`
 			Upstream       string `json:"upstream"`
+			Provider       string `json:"provider"`
 			CredentialKind string `json:"credential_kind"`
+			// NeedsKey: a key-mode session restored after a restart whose real key was
+			// never persisted. It routes but would 401 until the key is re-supplied via
+			// POST /api/active-sessions/{id}/key.
+			NeedsKey bool `json:"needs_key"`
 		}
 		list := s.Sessions.List()
 		out := make([]dto, 0, len(list))
 		for _, ss := range list {
 			kind := "subscription"
-			if s.Sessions.InjectFor(ss.ID) != nil {
+			if ss.Mode == "key" || s.Sessions.InjectFor(ss.ID) != nil {
 				kind = "key"
 			}
-			out = append(out, dto{ID: ss.ID, Client: ss.Client, Upstream: ss.Upstream, CredentialKind: kind})
+			out = append(out, dto{
+				ID: ss.ID, Client: ss.Client, Upstream: ss.Upstream,
+				Provider: ss.Provider, CredentialKind: kind,
+				NeedsKey: s.Sessions.NeedsKey(ss.ID),
+			})
 		}
 		writeJSON(w, out)
+	})
+	// Re-supply the API key for a key-mode session that lost it on restart. The key
+	// goes ONLY into process memory (inject) — same as launch, never to disk. The
+	// still-running agent (sending a placeholder) resumes on its next request.
+	s.mux.HandleFunc("POST /api/active-sessions/{id}/key", func(w http.ResponseWriter, r *http.Request) {
+		s.handleReinjectKey(w, r)
 	})
 	// Close a live session: forget it from the in-memory proxy registry (and drop
 	// its creds). Does not kill the agent process — see Sessions.Remove.

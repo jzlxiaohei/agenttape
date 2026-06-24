@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchCases, fetchActiveSessions, closeActiveSession, runCase, addCase, createCase, snapshotCase, deleteCase, overwriteCase, caseCurl } from "@/api/cases";
+import { fetchCases, fetchActiveSessions, closeActiveSession, reenterSessionKey, runCase, addCase, createCase, snapshotCase, deleteCase, overwriteCase, caseCurl } from "@/api/cases";
 import type { CurlMode } from "@/api/cases";
 
 export function useCases() {
@@ -15,6 +15,16 @@ export function useCloseActiveSession() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => closeActiveSession(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["active-sessions"] }),
+  });
+}
+
+// useReenterSessionKey re-supplies an API key for a key-mode session that lost it on
+// restart. Invalidates active-sessions so the needs_key flag clears in the UI.
+export function useReenterSessionKey() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { id: string; apiKey: string }) => reenterSessionKey(v.id, v.apiKey),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["active-sessions"] }),
   });
 }

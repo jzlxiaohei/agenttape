@@ -88,7 +88,7 @@ func (s *Server) handleRegister(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid register request", http.StatusBadRequest)
 		return
 	}
-	sess := s.Sessions.Register(req.Client, req.Upstream)
+	sess := s.Sessions.Register(req.Client, req.Upstream, providerForUpstream(req.Upstream), "subscription")
 	writeJSON(w, registerResp{
 		SessionID: sess.ID,
 		Token:     sess.Token,

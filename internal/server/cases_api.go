@@ -238,8 +238,9 @@ func (s *Server) handleSnapshotCase(st *store.Store, w http.ResponseWriter, r *h
 }
 
 // handleDeleteCase removes a case. Built-in seed cases are deletable too: the
-// library is the user's to curate, and seeding is once-per-database (see
-// store.seedCases), so a deleted built-in stays gone across restarts.
+// library is the user's to curate, and seeding is gated on a content digest (see
+// store.seedCases), so a deleted built-in stays gone across restarts — until the
+// embedded seed set changes (a rebuild), which reinstalls the full built-in set.
 func (s *Server) handleDeleteCase(st *store.Store, w http.ResponseWriter, r *http.Request) {
 	c, err := st.GetCase(r.PathValue("id"))
 	if err == store.ErrNoRows {
@@ -321,7 +322,13 @@ func (s *Server) handleRunCase(st *store.Store, w http.ResponseWriter, r *http.R
 	}
 	auth := s.Sessions.AuthFor(req.SessionID)
 	if auth == nil {
-		http.Error(w, "no in-memory credentials for that session; launch a session first", http.StatusConflict)
+		msg := "no in-memory credentials for that session; launch a session first"
+		if s.Sessions.NeedsKey(req.SessionID) {
+			// Key-mode session restored after a restart: routing is back but the key was
+			// never persisted. Re-supply it instead of relaunching the agent.
+			msg = "this API-key session lost its key on restart; re-enter the key for it, then run again"
+		}
+		http.Error(w, msg, http.StatusConflict)
 		return
 	}
 	body := c.Body
