@@ -1,8 +1,11 @@
 package store
 
 import (
+	"crypto/sha256"
 	_ "embed"
+	"encoding/hex"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 )
@@ -117,18 +120,19 @@ func (s *Store) DeleteCase(id string) error {
 	return err
 }
 
-// seedCases installs predefined cases ONCE per database. A schema_meta flag marks
-// that seeding has happened, so cases the user deletes — built-in ones included —
-// stay deleted across restarts instead of resurrecting. Trade-off: seeds added by
-// a later tracelab version won't auto-appear in an existing library (the library
-// becomes fully user-owned after first run). The simplest experiment: ask the
-// model "who are you" — one per wire format.
+// seedCases installs the built-in cases and keeps them in sync with the embedded
+// seed files. It fingerprints the embedded seed set (every seed's fields + body) and
+// stores the digest in schema_meta under 'cases_seed_digest'. When the digest is
+// unchanged it does nothing — so for a released binary the built-in set is stable and
+// a user's in-place edits/deletions of built-ins persist across restarts. When the
+// embedded seeds change (a rebuild after editing seeds/*.json, or a new tracelab
+// version that adds/edits seeds) the digest differs and every seed row is reinstalled
+// via INSERT OR REPLACE — no manual SQL reset needed.
+//
+// Trade-off: a seed-set change reinstalls the FULL built-in set, so any built-in a
+// user deleted or overwrote in place comes back (refreshed) on that rebuild. Self-made
+// cases are never touched — INSERT OR REPLACE only ever hits namespaced seed:* ids.
 func (s *Store) seedCases() error {
-	var seeded string
-	if err := s.db.QueryRow(
-		`SELECT value FROM schema_meta WHERE key = 'cases_seeded'`).Scan(&seeded); err == nil && seeded == "1" {
-		return nil
-	}
 	const (
 		codexTarget = "https://chatgpt.com/backend-api/codex/responses"
 		ccTarget    = "https://api.anthropic.com/v1/messages"
@@ -158,23 +162,54 @@ func (s *Store) seedCases() error {
 		ccCase("seed:cc-tool-failure", "Tool failure · error feedback (cc)", "tool,error,cc", ccToolFailureBody),
 		ccCase("seed:cc-title", "Session title generation (cc)", "text,cc", ccTitleBody),
 		ccCase("seed:cc-full-claude", "Full request shape (cc)", "text,cc,smoke", ccFullMessagesBody),
-		// experiment 5: a real captured /compact trigger — the request that asks the
-		// model to summarize the conversation so far (sanitized, see REPLAY_LIB §4).
+		// Experiment 5: a synthetic conversation retaining the real /compact wire
+		// shape — the request asks the model to summarize into <analysis>/<summary>.
 		ccCase("seed:cc-compaction", "Compaction · summarize conversation (cc)", "compaction,context,cc", ccCompactionBody),
 	}
+	digest := seedDigest(seeds)
+	var stored string
+	if err := s.db.QueryRow(
+		`SELECT value FROM schema_meta WHERE key = 'cases_seed_digest'`).Scan(&stored); err == nil && stored == digest {
+		return nil // embedded seed set unchanged since last run
+	}
+
 	now := time.Now().UTC().Format(time.RFC3339Nano)
 	for _, c := range seeds {
 		if _, err := s.db.Exec(
-			`INSERT OR IGNORE INTO replay_cases(id, name, tags, provider, method, target, endpoint, body, source, created_at)
+			`INSERT OR REPLACE INTO replay_cases(id, name, tags, provider, method, target, endpoint, body, source, created_at)
 			 VALUES(?,?,?,?,?,?,?,?,?,?)`,
 			c.ID, c.Name, c.Tags, c.Provider, c.Method, c.Target, c.Endpoint, c.Body, c.Source, now); err != nil {
 			return err
 		}
 	}
-	_, err := s.db.Exec(
-		`INSERT INTO schema_meta(key, value) VALUES('cases_seeded','1')
-		 ON CONFLICT(key) DO UPDATE SET value = '1'`)
+	if _, err := s.db.Exec(
+		`INSERT INTO schema_meta(key, value) VALUES('cases_seed_digest', ?)
+		 ON CONFLICT(key) DO UPDATE SET value = excluded.value`, digest); err != nil {
+		return err
+	}
+	// Retire the pre-digest once-per-database flag; the digest supersedes it.
+	_, err := s.db.Exec(`DELETE FROM schema_meta WHERE key = 'cases_seeded'`)
 	return err
+}
+
+// seedDigest fingerprints the embedded seed set so seedCases can detect when the
+// built-in definitions change (a rebuild) and reinstall them. It hashes every field
+// that gets written, and sorts the per-seed lines first so merely reordering the
+// seeds slice doesn't churn the digest.
+func seedDigest(seeds []ReplayCase) string {
+	lines := make([]string, len(seeds))
+	for i, c := range seeds {
+		lines[i] = strings.Join([]string{
+			c.ID, c.Name, c.Tags, c.Provider, c.Method, c.Target, c.Endpoint, c.Body,
+		}, "\x00")
+	}
+	sort.Strings(lines)
+	h := sha256.New()
+	for _, l := range lines {
+		h.Write([]byte(l))
+		h.Write([]byte{'\n'})
+	}
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 // EndpointForTarget turns an absolute captured target into the path that should
