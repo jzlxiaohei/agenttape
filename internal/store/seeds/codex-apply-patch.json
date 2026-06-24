@@ -8,7 +8,7 @@
       "content": [
         {
           "type": "input_text",
-          "text": "把 README.md 的标题从 “# Demo Project” 改成 “# Demo”。"
+          "text": "先把 README.md 的标题从 “# Demo Project” 改成 “# Demo”，然后在文件末尾追加一行 “Status: alpha”。两步都用 apply_patch。"
         }
       ]
     },

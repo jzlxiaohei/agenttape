@@ -8,7 +8,7 @@
       "content": [
         {
           "type": "input_text",
-          "text": "读取 README.md，并用一句话总结它的第一段。"
+          "text": "先 cat README.md 看这个项目是干什么的，再用 ls 列一下当前目录有哪些文件，然后用一句话告诉我它是什么、包含哪些文件。"
         }
       ]
     },

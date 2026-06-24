@@ -17,7 +17,7 @@
       "content": [
         {
           "type": "text",
-          "text": "在 reporter.go 里，把 JSON reporter 输出的字段名从 camelCase 改成 snake_case，先改 errorRate → error_rate。改完简单说一句。"
+          "text": "在 reporter.go 里，把 JSON reporter 输出的所有字段名从 camelCase 改成 snake_case，一个一个用 Edit 改，从 errorRate 开始，逐个改到底。"
         }
       ]
     },
@@ -46,7 +46,7 @@
         {
           "type": "tool_result",
           "tool_use_id": "toolu_edit_demo01",
-          "content": "The file /workspace/reporter.go has been updated. Here's the result of running `cat -n` on a snippet of the edited file:\n    41\t\tout := map[string]any{\n    42\t\t\t\"window_start\": window.Start.Unix(),\n    43\t\t\t\"count\":        window.Count,\n    44\t\t\t\"error_rate\":   window.ErrorRate,\n    45\t\t\t\"p50_ms\":       window.P50,\n    46\t\t\t\"p95_ms\":       window.P95,\n    47\t\t}"
+          "content": "The file /workspace/reporter.go has been updated. Here's the result of running `cat -n` on a snippet of the edited file:\n    41\t\tout := map[string]any{\n    42\t\t\t\"windowStart\": window.Start.Unix(),\n    43\t\t\t\"count\":       window.Count,\n    44\t\t\t\"error_rate\":  window.ErrorRate,\n    45\t\t\t\"p50Ms\":       window.P50,\n    46\t\t\t\"p95Ms\":       window.P95,\n    47\t\t\t\"maxLatency\":  window.MaxLatency,\n    48\t\t}"
         }
       ]
     }

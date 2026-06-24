@@ -17,7 +17,7 @@
       "content": [
         {
           "type": "text",
-          "text": "读取 README.md，然后用三到四句话总结这个项目：它解决什么问题、现在处于什么阶段、接下来计划做什么。不要逐段复述，要提炼。"
+          "text": "先读 README.md 了解这个项目，然后读 internal/report/json.go，告诉我 JSON reporter 实际输出了哪些字段名、跟 README 的描述对不对得上。"
         }
       ]
     },
