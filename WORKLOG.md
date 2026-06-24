@@ -1,119 +1,103 @@
-# tracelab — work log & notes
+# TraceLab — 当前状态与决策记录
 
-A running summary of what's built, the key decisions, and the problems found +
-fixed. Newest phase on top. (Architecture lives in `CONVENTIONS.md` and the
-`.claude/skills/`; this file is the narrative + gotchas.)
+这份文件记录**已经落地的能力、仍需验证的事项和明确不做的范围**。它不是把所有想法都
+堆进来的任务清单。对外介绍见 [`README.md`](README.md)，工程硬约束见
+[`CONVENTIONS.md`](CONVENTIONS.md)，Replay 细节见 [`REPLAY_LIB.md`](REPLAY_LIB.md)，
+安全边界见 [`docs/SECURITY.md`](docs/SECURITY.md)。最后更新：2026-06-24。
 
----
+## 已完成
 
-## Phase: codex hooks → flow graph → routing → diff → replay → launch → replay lib
+### Capture 与归一化
 
-### What's delivered
+- Claude Code 与 Codex 的 HTTP 反向代理捕获，以及两种 runtime 的 harness hooks。
+- HTTP / Hook 统一落为 `SourceEvent`，Provider normalizer 独立解析 Anthropic Messages、
+  OpenAI Responses 和 OpenAI Chat。
+- Hook 使用接收时间戳；`tool_use_id` / `call_id` 与工具名进入关联链路。
+- SQLite、原始字节、跨会话搜索、标签与请求组成 Token 估算。
 
-**Capture**
-- HTTP reverse-proxy capture (cc + codex) and **harness hooks** for both runtimes.
-  - cc hooks via `--settings`; **codex hooks** via `-c hooks.<E>=[...]` (TOML) +
-    `--dangerously-bypass-hook-trust` (per-invocation, no `~/.codex/config.toml`
-    write). codex events carry `tool_use_id` == responses `call_id`.
-  - `tool_name` extracted from hook payloads → shown on flow cards.
-  - Hooks are **receipt-timestamped** (RFC3339Nano, same as HTTP) so they
-    interleave on the timeline.
+### Viewer
 
-**Viewer (React, MVVM)**
-- **Flow graph (hook-first)**: a turn's spine is the hook timeline; each hook
-  card shows its payload inline (folded by default, key fields surfaced). HTTP is
-  not a first-layer node — a `request #N` chip opens the exchange in a **side
-  sheet**. Correlation is structural (no jumping): hook→request by strict causal
-  ordering (tool hook → producing completion; UserPromptSubmit → triggered
-  request), `is_completion` only.
-- **Context diff in flow**: a ⇄ on the request chip opens the Diff tab; semantic
-  diff shows a one-line change classification (+N tool results / system changed /
-  suspected compaction).
-- **URL routing**: navigation state lives in the URL (`/sessions/:id?tab=…&
-  req_id=…&turn_id=…`), shareable + reload-safe; Go viewer has a real SPA
-  fallback for deep links.
-- **Replay**: re-send a captured completion (optionally edited body, CodeMirror
-  JSON editor) to upstream, normalize, compare original vs replay. Two-step
-  confirm; not persisted.
+- Hook-first Flow：Hook 是执行流主干，HTTP 请求通过 chip 打开侧栏证据。
+- Context Diff：比较相邻请求的 System、Tools、Messages 与 Tool Results。
+- URL 路由可分享、可刷新，Go 服务支持 SPA deep-link fallback。
+- Compaction 按跨事件 episode 分级：Hook 证据为 `confirmed`，历史收缩加内容血缘为
+  `strong_suspected`，仅历史收缩为 `weak_suspected`。
+- Replay：可编辑并重发一条捕获请求，使用同一 normalizer 展示结果；运行结果不写回 Trace。
 
-**Launch page (`/launch`)** — opt-in
-- Start cc/codex through the proxy in a chosen terminal app (auto-detected:
-  Terminal/iTerm/Ghostty/…). Subscription or API-key mode.
-- Always shows a copy-paste "run it yourself" command.
+### Replay Library
 
-**Replay library (`/cases`)** — eval groundwork
-- `replay_cases` table + predefined "你是谁" seeds (one per wire format) + "save
-  as case" from captures. Run a case against a chosen **live session** (supplies
-  credentials), editable body, reuses the replay pipeline. Not persisted.
+- Case 持久化、从捕获保存、手工创建、就地覆盖、另存 Snapshot、删除自建 Case。
+- 内置 11 个 Claude Code / Codex 请求 seed，并提供 compaction 与子 Agent 动手实验卡。
+- Case 可绑定 live session 真实运行，或导出 Proxy / Direct 两种 cURL；Direct 默认隐藏凭证。
+- Seed 使用内容 digest 自动刷新；修改 `internal/store/seeds/*.json` 后重新构建、重启即可，
+  不再需要手动清理数据库标记。
 
-### Key design decisions
-- **Credentials in process memory only, never on disk.** Captured auth headers
-  and API-key-mode inject auth live in `Sessions` (memory); they die with the
-  process. Consequence: only sessions captured/registered in the *current* serve
-  process are replayable (others → 409).
-- **API-key launch = proxy-inject.** The agent gets a placeholder key; the proxy
-  swaps in the real key (held in memory) on forward — key never reaches the
-  agent/terminal/disk. The copy-paste manual command keeps the key in the user's
-  own shell instead.
-- **Replay reuses capture's normalize pipeline** — resend verbatim bytes, build a
-  SourceEvent, run the same registry. No provider-specific replay code.
-- **Correlation is exact, not heuristic** — based on the fixed tool-call
-  lifecycle ordering, filtered to real completions.
-- **Replay library is "grown", not separate** — a case is provider-neutral
-  request material; a session supplies credentials at run time.
+### Launch 与 session 重连
 
-### Security model (Launch)
-- Server-launch is gated by `-allow-launch`, **ON by default**; pass
-  `-allow-launch=false` to disable, after which the server executes nothing and
-  the page only shows the command to run yourself. (Still origin-checked +
-  localhost-bound below.)
-- **Cross-origin POSTs rejected** (Origin check) — blocks CSRF / DNS-rebinding
-  from triggering local exec.
-- Working dir is validated before launch (clear 400, no silent `cd` failure).
+- CLI / Viewer 启动 Claude Code、Codex CLI；支持订阅登录与 API Key 模式。
+- API Key 只在 TraceLab 内存中，Agent 收到占位符，由代理转发时注入真实凭证。
+- `live_sessions` 只持久化非密路由。重启后订阅模式自动恢复；API Key 模式需在 UI
+  重新输入一次 Key。
+- Codex Desktop 支持配置逐字节备份、临时代理注入和恢复；受 `-allow-launch` 控制。
+- Viewer 的服务端启动当前默认开启，可用 `-allow-launch=false` 关闭；无论是否开启，
+  页面都会提供可复制的手动命令。
 
-### Problems found & fixed
-- Hook events had **empty `started_at`** → all hooks sorted before all HTTP and
-  correlation computed null. Fix: stamp receipt time + idempotent migration
-  backfilling old rows from `created_at`.
-- Correlation initially included **control/probe requests** (`is_completion=
-  false`) → hooks linked to a probe. Fix: only real completions are targets.
-- A stray `./tracelab serve` (no `-data`) squatted :8787 with an empty dir →
-  looked like data loss; data was intact. (Process kills are denied to the agent;
-  the good instance runs on **:8788**.)
-- Editing JSON in a `<textarea>` was poor → CodeMirror `CodeEditor`.
+## 关键决策
 
-### Pending / next
-- **codex desktop launch** — DONE. `/api/codex-desktop/{status,install,restore}`:
-  backs up `~/.codex/config.toml` verbatim, writes proxy routing (+ optional hook
-  capture) via `launcher.MergeCodexDesktopConfig`, restores byte-exact. Gated on
-  `-allow-launch`; subscription only (chatgpt backend upstream); conflict-confirm
-  via a `.tracelab-desktop-state.json`. Caveat: hooks need a one-time in-app
-  `/hooks` trust (no persistent bypass exists; desktop can't pass the flag).
-  **Not verifiable headless** — needs a real Mac + Codex desktop to confirm.
-- **Replay library → eval**: foundation is in place (`executeCaseThroughSession`
-  + the normalized envelope's final_text / tool_calls / usage / stop_reason /
-  signals are ready-made assertion material), but **actively shelved**. Building
-  it out (assertions, batch runs, compare matrix, scoring, 降智/regression
-  history) would turn tracelab into a maintained eval/automation platform; the
-  intent is to stay a **personal research workbench**. Deferred by choice, not
-  blocked — revisit only if that positioning changes.
-- Minor: `Session` type lives in `httpcap` though it's cross-adapter (low-pri
-  refactor — move to `internal/source`).
+- **原始证据优先。** 归一化便于比较，但不会替代原始请求与响应。
+- **关联依赖结构与时序。** 工具生命周期按 ID 和因果顺序关联，不用文本关键词猜测。
+- **不确定性显式分级。** Compaction 等跨事件结论区分确认、强疑似和弱疑似。
+- **凭证不落盘。** 捕获头、注入 Key 和重放认证只保存在进程内存；细节以
+  [`docs/SECURITY.md`](docs/SECURITY.md) 为准。
+- **Replay Case 是实验素材，不是自动化评测任务。** Session 提供上游与凭证，Case 只保存
+  请求形状和路由元信息。
 
-### How to run / test
+## 仍需验证或处理
+
+- 在真实 macOS + Codex Desktop 中手动验证配置安装、一次性 Hook 信任与逐字节恢复。
+- 在有凭证的 live session 下逐个运行内置 seed，校准多步工具任务是否稳定产生下一次
+  工具调用。该项需要真实上游请求，可能计费。
+- 发布前安全整改、依赖与发布物复扫以 [`security-audit/CHECKLIST.md`](security-audit/CHECKLIST.md)
+  为准；2026-06-23 的报告是历史快照，不作为当前状态表。
+- 低优先级：`Session` 类型目前仍在 `httpcap`，以后可移到跨 adapter 的 `internal/source`。
+
+## 明确暂不做
+
+- 不把 Replay Library 扩成完整的评测 / 自动化平台：暂不做断言、批量运行、评分矩阵和
+  **能力回归检测**。这里统一用“能力回归”或“行为回归”描述可观察结果，避免含混、拟人化
+  的价值判断。只有产品定位改变时才重新评估。
+- 不用单条 Replay Case 冒充完整 harness 实验。权限、Compaction、子 Agent 调度等能力
+  必须结合多次请求与 Hook 观察。
+- 不以最快支持最多客户端为目标；当前优先把 Claude Code / Codex 的行为链路做深。
+
+## 后续产品方向（想法，不是承诺）
+
+这些想法从原独立的 Viewer 方向文档合并而来，集中放在这里，避免和当前任务混淆：
+
+1. 在后端物化 turn 与 tool span，而不只依赖前端分组。
+2. 建立逐轮 Context Ledger，展示消息增删、摘要引入、工具目录变化与 Token 增量。
+3. 完善工具生命周期：权限、失败、重试、结果是否进入下一请求、工具输出 Token 成本。
+4. 为选中轮次生成确定性的 “Explain this turn”，每一行都链接回 Trace 证据。
+5. 继续深化 Compaction / Subagent episode，展示父子关系、保留内容和上下文变化。
+
+## 运行与验证
+
 ```bash
-# build
-env -u GOROOT go build -o ./tracelab ./cmd/tracelab
+go build -o ./tracelab ./cmd/tracelab
 (cd frontend && npm run build)
+go test ./...
 
-# serve (click-to-launch is ON by default; pass -allow-launch=false to disable)
-./tracelab serve -data /tmp/tldata2 -listen 127.0.0.1:8788 -viewer ./frontend/dist
-# viewer: http://127.0.0.1:8788/viewer/
-
-# launch a session (CLI, or the /launch page):
-./tracelab launch -kind codex -server http://127.0.0.1:8788
-
-# replay lib test: /viewer/cases → 你是谁 → pick the live session → run (billed)
+./tracelab serve \
+  -data ./tracelab-data \
+  -listen 127.0.0.1:8787 \
+  -viewer ./frontend/dist
 ```
-Notes: macOS only for web-launch; replay/cases make **real billed** upstream
-calls; only sessions live in the current serve process are replayable.
+
+打开 <http://127.0.0.1:8787/viewer/>。Replay / Case Run 会访问真实上游并可能计费。
+
+## 常见误区
+
+- 端口上残留的旧进程可能使用另一份数据目录，看起来像“数据丢了”；先确认正在访问的进程
+  与 `-data` 参数。
+- Seed 通过 `go:embed` 编进二进制；只改 JSON、不重新构建不会生效。
+- API Key 模式重启后只恢复路由，不恢复 Key；这是凭证不落盘的设计结果。
