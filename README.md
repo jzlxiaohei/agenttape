@@ -65,6 +65,7 @@ go build -o agenttape ./cmd/agenttape
 ```
 
 Open <http://127.0.0.1:8787/viewer/> and go to the **Launch** page — pick a client (Claude Code / Codex), working directory, and auth method, then start a captured session in one click. No flags to remember.
+![Launch Page](./docs/assets/launch.png)
 
 Prefer the terminal? The same launch works from the CLI:
 

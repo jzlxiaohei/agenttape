@@ -65,6 +65,7 @@ go build -o agenttape ./cmd/agenttape
 ```
 
 打开 <http://127.0.0.1:8787/viewer/>，进入 **「启动」页** —— 选客户端（Claude Code / Codex）、工作目录和认证方式，一键起一个被捕获的会话，不用记任何 flag。
+![启动页](./docs/assets/launch.png)
 
 更喜欢终端？同样的启动也能用 CLI：
 
