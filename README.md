@@ -64,16 +64,16 @@ go build -o agenttape ./cmd/agenttape
 ./agenttape serve
 ```
 
-Open <http://127.0.0.1:8787/viewer/>, then connect an agent to capture it:
+Open <http://127.0.0.1:8787/viewer/> and go to the **Launch** page — pick a client (Claude Code / Codex), working directory, and auth method, then start a captured session in one click. No flags to remember.
+
+Prefer the terminal? The same launch works from the CLI:
 
 ```bash
 ./agenttape launch -kind cc    -- <claude-args>   # Claude Code (subscription login)
 ./agenttape launch -kind codex -- <codex-args>    # Codex CLI
 ```
 
-You can also pick the working directory, client, and auth method on the Viewer's Launch page.
-
-> Prebuilt binaries, `go install`, Homebrew, platform notes, and more flags are in [`docs/INSTALL.md`](docs/INSTALL.md). One-click "open in a new terminal" is macOS-only for now; on other platforms use the "Run it yourself" command from the Launch page — capture itself is cross-platform.
+> Prebuilt binaries, `go install`, Homebrew, platform notes, and more flags are in [`docs/INSTALL.md`](docs/INSTALL.md). One-click "open in a new terminal" is macOS-only for now; on other platforms the Launch page gives you a copy-paste "Run it yourself" command — capture itself is cross-platform.
 
 ## Data and security boundaries
 

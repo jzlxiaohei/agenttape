@@ -64,16 +64,16 @@ go build -o agenttape ./cmd/agenttape
 ./agenttape serve
 ```
 
-打开 <http://127.0.0.1:8787/viewer/>，然后把一个 agent 接进来抓取：
+打开 <http://127.0.0.1:8787/viewer/>，进入 **「启动」页** —— 选客户端（Claude Code / Codex）、工作目录和认证方式，一键起一个被捕获的会话，不用记任何 flag。
+
+更喜欢终端？同样的启动也能用 CLI：
 
 ```bash
 ./agenttape launch -kind cc    -- <claude-args>   # Claude Code（订阅登录）
 ./agenttape launch -kind codex -- <codex-args>    # Codex CLI
 ```
 
-也可以在 Viewer 的「启动」页选工作目录、客户端与认证方式。
-
-> 预编译二进制、`go install`、Homebrew、平台说明与更多参数见 [`docs/INSTALL.md`](docs/INSTALL.md)。Web 端一键开新终端目前仅 macOS；其它平台用 Launch 页的「自己运行」复制命令，捕获本身跨平台。
+> 预编译二进制、`go install`、Homebrew、平台说明与更多参数见 [`docs/INSTALL.md`](docs/INSTALL.md)。Web 端一键开新终端目前仅 macOS；其它平台用「启动」页的「自己运行」复制命令，捕获本身跨平台。
 
 ## 数据与安全边界
 
