@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"time"
 
-	"agenttape/internal/event"
-	"agenttape/internal/source"
+	"github.com/jzlxiaohei/agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/source"
 )
 
 // Adapter receives hook posts and emits SourceEvents.

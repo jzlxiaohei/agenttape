@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"agenttape/internal/source/hook"
-	"agenttape/internal/source/httpcap"
+	"github.com/jzlxiaohei/agenttape/internal/source/hook"
+	"github.com/jzlxiaohei/agenttape/internal/source/httpcap"
 )
 
 func TestMergeCodexDesktopConfig(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 func hasSession(ss []store.SessionSummary, id string) bool {

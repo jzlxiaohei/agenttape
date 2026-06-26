@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/event"
 )
 
 // Normalizer interprets SourceEvents for one provider/wire-API. Detect reports

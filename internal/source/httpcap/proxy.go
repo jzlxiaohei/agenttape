@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"agenttape/internal/event"
-	"agenttape/internal/source"
+	"github.com/jzlxiaohei/agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/source"
 )
 
 // Proxy is the reverse-proxy capture adapter. Requests arrive as

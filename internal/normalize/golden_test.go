@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"agenttape/internal/event"
-	"agenttape/internal/normalize"
-	"agenttape/internal/normalize/providers"
+	"github.com/jzlxiaohei/agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/normalize/providers"
 )
 
 // buildCaptureEvent constructs a SourceEvent from raw request/response bodies,

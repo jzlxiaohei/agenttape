@@ -3,7 +3,7 @@ package store
 import (
 	"fmt"
 
-	"agenttape/internal/source/hook"
+	"github.com/jzlxiaohei/agenttape/internal/source/hook"
 )
 
 // HookClients is the closed set of clients whose hook event set is configurable.

@@ -1,6 +1,6 @@
 package normalize
 
-import "agenttape/internal/event"
+import "github.com/jzlxiaohei/agenttape/internal/event"
 
 // RequestBody returns the request body as text, preferring the transport-decoded
 // payload and falling back to the raw artifact. The second result is false when

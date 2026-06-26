@@ -3,7 +3,7 @@ package store
 import (
 	"database/sql"
 
-	"agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
 )
 
 func insertSections(tx *sql.Tx, eventID string, sections []normalize.SectionStat) error {

@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"agenttape/internal/source/hook"
-	"agenttape/internal/source/httpcap"
+	"github.com/jzlxiaohei/agenttape/internal/source/hook"
+	"github.com/jzlxiaohei/agenttape/internal/source/httpcap"
 )
 
 // The Codex DESKTOP app cannot take per-invocation `-c` overrides (its background

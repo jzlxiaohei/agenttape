@@ -8,8 +8,8 @@ import (
 	"os"
 	"os/exec"
 
-	"agenttape/internal/source/hook"
-	"agenttape/internal/source/httpcap"
+	"github.com/jzlxiaohei/agenttape/internal/source/hook"
+	"github.com/jzlxiaohei/agenttape/internal/source/httpcap"
 )
 
 // LaunchClaudeCode builds a command that runs Claude Code through the proxy

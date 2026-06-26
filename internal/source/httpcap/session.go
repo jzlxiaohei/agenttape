@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"agenttape/internal/source"
+	"github.com/jzlxiaohei/agenttape/internal/source"
 )
 
 // Session maps a launcher-issued token to the upstream it should be proxied to.

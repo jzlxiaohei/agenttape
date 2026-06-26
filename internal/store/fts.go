@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"strings"
 
-	"agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
 )
 
 // insertFTS indexes the meaningful prompt sections for full-text search:

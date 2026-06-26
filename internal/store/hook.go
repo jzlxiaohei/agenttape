@@ -3,7 +3,7 @@ package store
 import (
 	"database/sql"
 
-	"agenttape/internal/sink"
+	"github.com/jzlxiaohei/agenttape/internal/sink"
 )
 
 func (s *Store) writeHook(tx *sql.Tx, rec sink.Record) error {

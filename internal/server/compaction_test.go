@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"agenttape/internal/normalize"
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 func TestGradeCompaction(t *testing.T) {

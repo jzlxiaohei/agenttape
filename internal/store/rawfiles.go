@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/event"
 )
 
 // roleSuffix maps an artifact role to a human-friendly filename suffix so users

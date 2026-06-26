@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"agenttape/internal/event"
-	"agenttape/internal/normalize/providers"
-	"agenttape/internal/sink"
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/normalize/providers"
+	"github.com/jzlxiaohei/agenttape/internal/sink"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 func fixture(t *testing.T, name string) string {

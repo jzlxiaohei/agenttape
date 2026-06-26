@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"agenttape/internal/normalize"
-	"agenttape/internal/normalize/shared"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/normalize/shared"
 )
 
 // parseResponse reconstructs the response from either an SSE stream or a single

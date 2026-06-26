@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"agenttape/internal/launcher"
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/launcher"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 // codexDesktopState records an active injection so the UI can show "restore" across

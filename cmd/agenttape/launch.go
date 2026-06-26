@@ -9,9 +9,9 @@ import (
 	"os"
 	"os/exec"
 
-	"agenttape/internal/launcher"
-	"agenttape/internal/source/hook"
-	"agenttape/internal/source/httpcap"
+	"github.com/jzlxiaohei/agenttape/internal/launcher"
+	"github.com/jzlxiaohei/agenttape/internal/source/hook"
+	"github.com/jzlxiaohei/agenttape/internal/source/httpcap"
 )
 
 func runLaunch(args []string) error {

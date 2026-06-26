@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"agenttape/internal/event"
-	"agenttape/internal/sink"
+	"github.com/jzlxiaohei/agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/sink"
 )
 
 // Write persists one captured record: it upserts the session, inserts the event

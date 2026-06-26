@@ -4,8 +4,8 @@
 package sink
 
 import (
-	"agenttape/internal/event"
-	"agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
 )
 
 // Record is one persisted unit: the raw source event plus its normalized view

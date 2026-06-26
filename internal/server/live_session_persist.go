@@ -1,8 +1,8 @@
 package server
 
 import (
-	"agenttape/internal/source/httpcap"
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/source/httpcap"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 // liveSessionPersister adapts the store to httpcap.SessionPersister, keeping the

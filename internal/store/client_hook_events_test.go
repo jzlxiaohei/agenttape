@@ -4,8 +4,8 @@ import (
 	"slices"
 	"testing"
 
-	"agenttape/internal/source/hook"
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/source/hook"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 func TestClientHookEvents(t *testing.T) {

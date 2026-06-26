@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"os"
 
-	"agenttape/internal/normalize/providers"
-	"agenttape/internal/server"
-	"agenttape/internal/sink"
-	"agenttape/internal/store"
-	"agenttape/internal/web"
+	"github.com/jzlxiaohei/agenttape/internal/normalize/providers"
+	"github.com/jzlxiaohei/agenttape/internal/server"
+	"github.com/jzlxiaohei/agenttape/internal/sink"
+	"github.com/jzlxiaohei/agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/web"
 )
 
 func runServe(args []string) error {

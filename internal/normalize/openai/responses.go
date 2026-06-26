@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"strings"
 
-	"agenttape/internal/event"
-	"agenttape/internal/normalize"
-	"agenttape/internal/normalize/shared"
+	"github.com/jzlxiaohei/agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/normalize/shared"
 )
 
 // ResponsesNormalizer implements normalize.Normalizer for the OpenAI Responses

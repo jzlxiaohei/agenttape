@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 // TestSeedCasesContainNoProjectConversation keeps built-in material portable:

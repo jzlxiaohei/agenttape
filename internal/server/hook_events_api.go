@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"slices"
 
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 // hook_events_api.go exposes the per-client hook event registry: the set of

@@ -6,7 +6,7 @@ import (
 	"path"
 	"strings"
 
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 // EnableAPI mounts the read-only viewer API backed by the store. It is only

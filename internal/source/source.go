@@ -7,7 +7,7 @@ package source
 import (
 	"net/http"
 
-	"agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/event"
 )
 
 // Emitter receives a fully-built SourceEvent from an adapter.

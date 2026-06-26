@@ -4,9 +4,9 @@
 package providers
 
 import (
-	"agenttape/internal/normalize"
-	"agenttape/internal/normalize/anthropic"
-	"agenttape/internal/normalize/openai"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/normalize/anthropic"
+	"github.com/jzlxiaohei/agenttape/internal/normalize/openai"
 )
 
 // Registry returns a registry with all built-in normalizers registered.

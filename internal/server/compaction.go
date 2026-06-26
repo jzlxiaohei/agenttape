@@ -3,8 +3,8 @@ package server
 import (
 	"strings"
 
-	"agenttape/internal/normalize"
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 // Compaction detection is graded by evidence strength, never by keyword guessing

@@ -1,4 +1,4 @@
-module agenttape
+module github.com/jzlxiaohei/agenttape
 
 go 1.26.4
 

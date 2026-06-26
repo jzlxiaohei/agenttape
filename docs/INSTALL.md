@@ -63,7 +63,7 @@ go build -o agenttape ./cmd/agenttape
 ## 方式三:go install(只装 CLI/服务,不含 Viewer)
 
 ```bash
-go install <module-path>/cmd/agenttape@latest
+go install github.com/jzlxiaohei/agenttape/cmd/agenttape@latest
 ```
 
 `go install` 只编 Go 源码,**不会跑前端构建**,所以装出来的二进制里 Viewer 是占位页

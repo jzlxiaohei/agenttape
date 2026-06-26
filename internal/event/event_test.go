@@ -3,7 +3,7 @@ package event_test
 import (
 	"testing"
 
-	"agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/event"
 )
 
 // consume is a source-agnostic consumer: it works purely off the SourceEvent

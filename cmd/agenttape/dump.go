@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"agenttape/internal/normalize"
-	"agenttape/internal/sink"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/sink"
 )
 
 func runDump(args []string) error {

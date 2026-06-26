@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"agenttape/internal/normalize/providers"
-	"agenttape/internal/server"
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/normalize/providers"
+	"github.com/jzlxiaohei/agenttape/internal/server"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 type caseCurlResp struct {

@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"agenttape/internal/event"
-	"agenttape/internal/normalize"
-	"agenttape/internal/source"
-	"agenttape/internal/source/httpcap"
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/source"
+	"github.com/jzlxiaohei/agenttape/internal/source/httpcap"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 // replayResp is the result of re-sending a request to upstream.

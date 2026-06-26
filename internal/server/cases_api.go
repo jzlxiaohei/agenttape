@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"agenttape/internal/source"
-	"agenttape/internal/store"
+	"github.com/jzlxiaohei/agenttape/internal/source"
+	"github.com/jzlxiaohei/agenttape/internal/store"
 )
 
 // handleListCases returns the replay library.

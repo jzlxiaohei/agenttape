@@ -3,7 +3,7 @@ package store
 import (
 	"encoding/json"
 
-	"agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
 )
 
 // CompletionRec is one captured completion of a session, with its normalized

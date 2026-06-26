@@ -8,11 +8,11 @@ import (
 	"log"
 	"net/http"
 
-	"agenttape/internal/event"
-	"agenttape/internal/normalize"
-	"agenttape/internal/sink"
-	"agenttape/internal/source/hook"
-	"agenttape/internal/source/httpcap"
+	"github.com/jzlxiaohei/agenttape/internal/event"
+	"github.com/jzlxiaohei/agenttape/internal/normalize"
+	"github.com/jzlxiaohei/agenttape/internal/sink"
+	"github.com/jzlxiaohei/agenttape/internal/source/hook"
+	"github.com/jzlxiaohei/agenttape/internal/source/httpcap"
 )
 
 // Server holds the shared session registry and exposes a single mux.
