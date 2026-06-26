@@ -5,6 +5,7 @@ import { Rocket, Loader2, Terminal, Copy, Check, Monitor, FolderClock, ChevronRi
 import { useLaunch, useTerminals, useLaunchPreview, useManualTemplate, useGenerateManual } from "@/query/launch";
 import type { LaunchKind, LaunchMode } from "@/api/launch";
 import { cn } from "@/lib/utils";
+import { Select } from "@/components/ui/select";
 import { ClientIcon } from "./ClientIcon";
 import { CodexDesktopPanel } from "./CodexDesktopPanel";
 
@@ -29,6 +30,7 @@ export function LaunchPanel() {
 
   const termList = terminals ?? [];
   const effectiveTerminal = terminal || termList[0] || "Terminal";
+  const terminalOptions = termList.map((tm) => ({ value: tm, label: tm }));
   const trimmedArgs = args.trim() || undefined;
   const rememberWorkdir = () => saveWorkdirHistory(workdir);
 
@@ -166,18 +168,12 @@ export function LaunchPanel() {
 
         {termList.length > 0 && (
           <Field label={t("launch.terminal")}>
-            <input
-              list="launch-terminal-apps"
+            <Select
               value={effectiveTerminal}
-              onChange={(e) => setTerminal(e.target.value)}
+              onChange={setTerminal}
+              options={terminalOptions}
               placeholder={t("launch.terminal_hint")}
-              className="w-full rounded-md border bg-card px-2.5 py-1.5 text-sm"
             />
-            <datalist id="launch-terminal-apps">
-              {termList.map((tm) => (
-                <option key={tm} value={tm} />
-              ))}
-            </datalist>
             <p className="mt-1 text-xs text-muted-foreground">{t("launch.terminal_note")}</p>
           </Field>
         )}

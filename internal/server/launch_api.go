@@ -310,7 +310,7 @@ func detectTerminals() []string {
 	candidates := []string{"Terminal", "iTerm", "Ghostty", "WezTerm", "Alacritty", "kitty", "Warp", "Hyper"}
 	out := []string{}
 	for _, name := range candidates {
-		if name == "Terminal" || appInstalled(name) { // Terminal.app ships with macOS
+		if name == "Terminal" || appLaunchable(name) {
 			out = append(out, name)
 		}
 	}
@@ -318,10 +318,9 @@ func detectTerminals() []string {
 }
 
 // appLaunchable reports whether macOS can resolve an app by the given name, using
-// the same Launch Services lookup that `open -a` performs (so it accepts display
-// names that don't match a /Applications/<name>.app path, which appInstalled would
-// miss). It has no side effects — it neither launches the app nor reveals it in
-// Finder. macOS only; returns false elsewhere.
+// the same Launch Services lookup that `open -a` performs. It has no side effects
+// — it neither launches the app nor reveals it in Finder. macOS only; returns
+// false elsewhere.
 func appLaunchable(name string) bool {
 	if runtime.GOOS != "darwin" {
 		return false
@@ -331,19 +330,6 @@ func appLaunchable(name string) bool {
 	esc := strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(name)
 	script := `POSIX path of (path to application "` + esc + `")`
 	return exec.Command("osascript", "-e", script).Run() == nil
-}
-
-func appInstalled(name string) bool {
-	paths := []string{"/Applications/" + name + ".app"}
-	if home, err := os.UserHomeDir(); err == nil {
-		paths = append(paths, home+"/Applications/"+name+".app")
-	}
-	for _, p := range paths {
-		if st, err := os.Stat(p); err == nil && st.IsDir() {
-			return true
-		}
-	}
-	return false
 }
 
 // defaultUpstream picks the upstream by launch kind and credential mode, via the

@@ -5,6 +5,7 @@ import { useSessionRoute } from "@/viewmodel/route";
 import { useSearch, useFacets } from "@/query/search";
 import type { SearchResult } from "@/api/search";
 import { cn } from "@/lib/utils";
+import { Select } from "@/components/ui/select";
 import { ClientIcon } from "./ClientIcon";
 
 // Cross-session search: full-text query + tag/provider/client facets. Selecting
@@ -64,19 +65,20 @@ function FacetSelect({
   onChange: (v: string) => void;
   render?: (v: string) => string;
 }) {
+  const selectOptions = [
+    { value: "", label },
+    ...(options ?? []).map((o) => ({ value: o, label: render ? render(o) : o })),
+  ];
+
   return (
-    <select
+    <Select
       value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={cn("rounded-md border bg-card px-2 py-1", value && "border-accent/50 text-accent")}
-    >
-      <option value="">{label}</option>
-      {(options ?? []).map((o) => (
-        <option key={o} value={o}>
-          {render ? render(o) : o}
-        </option>
-      ))}
-    </select>
+      onChange={onChange}
+      options={selectOptions}
+      className="w-36"
+      buttonClassName={cn("min-h-7 px-2 py-1 text-xs", value && "border-accent/50 text-accent")}
+      optionClassName="text-xs"
+    />
   );
 }
 

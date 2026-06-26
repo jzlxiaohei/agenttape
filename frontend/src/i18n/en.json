@@ -24,7 +24,7 @@
     "api_key": "API key",
     "terminal": "Terminal app",
     "terminal_hint": "Terminal",
-    "terminal_note": "Pick a detected app or type any installed terminal (e.g. Ghostty, WezTerm). The name must match an installed .app.",
+    "terminal_note": "Pick one of the detected terminal apps. Detection uses the same macOS app lookup as launch.",
     "macos_only": "Launching for you supports macOS only. On Linux/Windows, use “Run it yourself” below.",
     "workdir": "Working directory",
     "workdir_hint": "defaults to your home directory",

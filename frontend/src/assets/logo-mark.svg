@@ -1,0 +1,46 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">AgentTape mark</title>
+  <desc id="desc">A dark tape loop with timeline nodes, a replay arrow, and signal accents.</desc>
+  <defs>
+    <linearGradient id="tape" x1="40" y1="54" x2="218" y2="196" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#202A36"/>
+      <stop offset="1" stop-color="#101721"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="62" y1="82" x2="190" y2="118" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#22D3EE"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
+    </linearGradient>
+    <filter id="softShadow" x="18" y="34" width="220" height="186" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0B1220" flood-opacity=".16"/>
+    </filter>
+  </defs>
+
+  <rect width="256" height="256" rx="56" fill="#F8FAFC"/>
+
+  <g filter="url(#softShadow)">
+    <path d="M58 80C58 60.118 74.118 44 94 44H169.5C196.838 44 219 66.162 219 93.5V151.5C219 177.181 198.181 198 172.5 198H63.5L89.5 172H172.5C183.822 172 193 162.822 193 151.5V96.5C193 82.417 181.583 71 167.5 71H95C88.373 71 83 76.373 83 83V106.5L58 132V80Z" fill="url(#tape)"/>
+    <path d="M58 132C58 102.177 82.177 78 112 78H191V104H111.5C96.864 104 85 115.864 85 130.5C85 145.136 96.864 157 111.5 157H173.5L199.5 183H110C81.281 183 58 159.719 58 131V132Z" fill="url(#tape)"/>
+    <path d="M171 158H199.5L219 178V198L171 158Z" fill="#0F172A"/>
+  </g>
+
+  <path d="M78 91H178" stroke="url(#cyan)" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="78" cy="91" r="12" fill="#0F172A" stroke="#22D3EE" stroke-width="8"/>
+  <circle cx="112" cy="91" r="12" fill="#0F172A" stroke="#22D3EE" stroke-width="8"/>
+  <circle cx="146" cy="91" r="12" fill="#0F172A" stroke="#22D3EE" stroke-width="8"/>
+  <circle cx="180" cy="91" r="15" fill="#0F172A" stroke="#0EA5E9" stroke-width="8"/>
+
+  <path d="M160 44C178 33 201 34 218 48" stroke="#F59E0B" stroke-width="8" stroke-linecap="round"/>
+  <path d="M160 44L171 39L168 57L160 44Z" fill="#F59E0B"/>
+
+  <circle cx="87" cy="157" r="10" fill="#FF6B57"/>
+  <path d="M113 146L100 157L113 168" stroke="#22D3EE" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M133 146L146 157L133 168" stroke="#22D3EE" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M122 171L129 143" stroke="#38BDF8" stroke-width="6" stroke-linecap="round"/>
+
+  <path d="M169 145V157L181 169" stroke="#F59E0B" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="169" cy="145" r="7" fill="#F59E0B"/>
+  <circle cx="181" cy="169" r="7" fill="#F59E0B"/>
+
+  <path d="M203 91L203 110" stroke="#F8FAFC" stroke-width="7" stroke-linecap="round"/>
+  <path d="M203 129L203 148" stroke="#F8FAFC" stroke-width="7" stroke-linecap="round"/>
+</svg>

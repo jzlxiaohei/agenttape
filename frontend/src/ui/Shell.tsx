@@ -4,6 +4,7 @@ import { Rocket, Search, FlaskConical, Webhook } from "lucide-react";
 import { LanguageToggle } from "./LanguageToggle";
 import { SessionList } from "./SessionList";
 import { cn } from "@/lib/utils";
+import logoMark from "@/assets/logo-mark.svg";
 
 // App shell: a persistent left sidebar (function nav on top, captured-session list
 // below) wrapping the routed page content.
@@ -29,12 +30,10 @@ function Sidebar() {
   return (
     <nav className="flex w-72 shrink-0 flex-col border-r bg-rail">
       <button
-        onClick={() => nav("/sessions")}
+        onClick={() => nav("/launch")}
         className="flex items-center gap-2 px-4 py-3 text-left"
       >
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-sm font-bold text-accent-foreground">
-          t
-        </div>
+        <img src={logoMark} alt="" className="h-7 w-7 shrink-0 rounded-lg" />
         <span className="font-semibold">agenttape</span>
       </button>
 

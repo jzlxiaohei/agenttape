@@ -52,6 +52,7 @@ import { visibleExperiments } from "@/lib/experiments";
 import { ExperimentCard } from "./ExperimentCard";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogA11y, DialogContent } from "@/components/ui/dialog";
+import { Select } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetA11y } from "@/components/ui/sheet";
 import CodeEditor from "./CodeEditor";
 import { ClientIcon } from "./ClientIcon";
@@ -402,18 +403,17 @@ function CaseCreator({ onCancel, onCreated }: { onCancel: () => void; onCreated:
         </label>
         <label className="space-y-1">
           <span className="text-xs font-medium text-muted-foreground">{t("cases.provider")}</span>
-          <select
+          <Select
             value={provider}
-            onChange={(e) => {
-              const next = e.target.value;
+            onChange={(next) => {
               setProvider(next);
               setEndpoint(next === "anthropic" ? "/v1/messages" : "/responses");
             }}
-            className="w-full rounded-md border bg-card px-2.5 py-1.5 text-sm"
-          >
-            <option value="openai-responses">openai-responses</option>
-            <option value="anthropic">anthropic</option>
-          </select>
+            options={[
+              { value: "openai-responses", label: "openai-responses" },
+              { value: "anthropic", label: "anthropic" },
+            ]}
+          />
         </label>
         <label className="space-y-1">
           <span className="text-xs font-medium text-muted-foreground">{t("cases.endpoint")}</span>

@@ -24,7 +24,7 @@
     "api_key": "API key",
     "terminal": "终端 App",
     "terminal_hint": "Terminal",
-    "terminal_note": "可选探测到的应用，或直接输入任意已安装的终端（如 Ghostty、WezTerm）。名称需与已安装的 .app 一致。",
+    "terminal_note": "选择一个已探测到的终端 App。探测方式与 macOS 启动时的 App 查找一致。",
     "macos_only": "「帮我启动」仅支持 macOS。Linux/Windows 请用下方的「自己运行」。",
     "workdir": "工作目录",
     "workdir_hint": "默认你的 home 目录",

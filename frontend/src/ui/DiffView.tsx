@@ -8,6 +8,7 @@ import { json } from "@codemirror/lang-json";
 import { useSessionRoute } from "@/viewmodel/route";
 import { useSessionEventsView } from "@/viewmodel/detail";
 import { useRawFile } from "@/query/events";
+import { Select } from "@/components/ui/select";
 import { SemanticDiff } from "./SemanticDiff";
 import { cn } from "@/lib/utils";
 
@@ -58,17 +59,17 @@ export default function DiffView({ eventId }: { eventId: string }) {
         <div className="flex flex-1 items-center gap-2 rounded-lg border bg-muted/40 px-3 py-1.5">
           <History size={14} className="shrink-0 text-muted-foreground" />
           <span className="shrink-0 font-semibold text-muted-foreground">{t("diff.earlier")}</span>
-          <select
+          <Select
             value={effectiveLeft ?? ""}
-            onChange={(e) => setLeftId(e.target.value)}
-            className="min-w-0 flex-1 rounded-md border bg-card px-2 py-0.5"
-          >
-            {olderCompletions.map((e) => (
-              <option key={e.id} value={e.id}>
-                {fmt(e.started_at)} · {e.model || e.provider}
-              </option>
-            ))}
-          </select>
+            onChange={setLeftId}
+            options={olderCompletions.map((e) => ({
+              value: e.id,
+              label: `${fmt(e.started_at)} · ${e.model || e.provider}`,
+            }))}
+            className="min-w-0 flex-1"
+            buttonClassName="min-h-7 px-2 py-0.5 text-xs"
+            optionClassName="text-xs"
+          />
         </div>
         <div className="flex flex-1 items-center gap-2 rounded-lg border-2 border-accent bg-accent/10 px-3 py-1.5">
           <CircleDot size={14} className="shrink-0 text-accent" />
