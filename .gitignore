@@ -1,11 +1,11 @@
-/tracelab
+/agenttape
 *.jsonl
 /dist/
 # Built viewer bundle is embedded at build time; keep only the placeholder
 # index.html committed (so `go build` works pre-build), ignore the real bundle.
 /internal/web/dist/*
 !/internal/web/dist/index.html
-/tracelab-data/
+/agenttape-data/
 /.cache/
 /.pnpm-store/
 .DS_Store

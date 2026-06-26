@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
-	"tracelab/internal/normalize"
-	"tracelab/internal/sink"
+	"agenttape/internal/normalize"
+	"agenttape/internal/sink"
 )
 
 func runDump(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: tracelab dump <traces.jsonl>")
+		return fmt.Errorf("usage: agenttape dump <traces.jsonl>")
 	}
 	records, err := sink.ReadAll(args[0])
 	if err != nil {

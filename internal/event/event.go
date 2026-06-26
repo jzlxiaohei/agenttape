@@ -1,4 +1,4 @@
-// Package event defines the stable handoff contract between tracelab's
+// Package event defines the stable handoff contract between agenttape's
 // collection layer (source adapters) and everything downstream (normalize,
 // sink). A SourceEvent carries raw, faithfully captured facts about one
 // observed exchange — HTTP request/response bytes or a harness hook payload.
@@ -10,7 +10,7 @@
 package event
 
 // SchemaVersion identifies the SourceEvent contract revision.
-const SchemaVersion = "tracelab.event.v1"
+const SchemaVersion = "agenttape.event.v1"
 
 // EventKind is the shape of the observed exchange.
 type EventKind string

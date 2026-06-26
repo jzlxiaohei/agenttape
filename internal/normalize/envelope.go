@@ -7,7 +7,7 @@ package normalize
 import "encoding/json"
 
 // EnvelopeSchemaVersion identifies the normalized model revision.
-const EnvelopeSchemaVersion = "tracelab.normalized.v1"
+const EnvelopeSchemaVersion = "agenttape.normalized.v1"
 
 // BlockType classifies a content block. The type is always derived from the
 // provider's own structural type field — never guessed from keywords.

@@ -1,6 +1,6 @@
-# TraceLab — 设计原则与方向
+# AgentTape — 设计原则与方向
 
-这份文件记录 TraceLab 的**设计原则、明确不做的范围和后续方向**。已实现的能力见
+这份文件记录 AgentTape 的**设计原则、明确不做的范围和后续方向**。已实现的能力见
 [`../README.md`](../README.md)，工程硬约束见 [`../CONVENTIONS.md`](../CONVENTIONS.md)，
 Replay 细节见 [`REPLAY_LIB.md`](REPLAY_LIB.md)，安全边界见 [`SECURITY.md`](SECURITY.md)。
 

@@ -1,9 +1,9 @@
 ---
 name: frontend-design
-description: tracelab 前端视觉设计与 i18n 规范（Tailwind + shadcn/ui，暗色 DevTools 风，中英双语）。写任何样式/文案前先读。
+description: agenttape 前端视觉设计与 i18n 规范（Tailwind + shadcn/ui，暗色 DevTools 风，中英双语）。写任何样式/文案前先读。
 ---
 
-# 前端设计 & i18n 规范（tracelab / 模块三）
+# 前端设计 & i18n 规范（agenttape / 模块三）
 
 定位:**浅色、柔和、聊天 App 风**的研究工具,审美参照 Cumora / Slack / Linear。
 布局=最左图标栏 + 会话列表 + 中间对话流(+ 右侧研究面板)。圆角、头像、留白舒适,

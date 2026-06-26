@@ -6,7 +6,7 @@ import (
 )
 
 // agentProvider captures everything provider-specific about launching a coding
-// agent through tracelab's proxy and re-attaching its session after a restart.
+// agent through agenttape's proxy and re-attaching its session after a restart.
 // Adding a new provider is meant to be ONE entry in agentProviders below — no
 // other code on the launch / inject / re-attach path branches on which provider
 // it is; they all go through this table.

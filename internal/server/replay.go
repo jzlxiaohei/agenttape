@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"tracelab/internal/event"
-	"tracelab/internal/normalize"
-	"tracelab/internal/source"
-	"tracelab/internal/source/httpcap"
-	"tracelab/internal/store"
+	"agenttape/internal/event"
+	"agenttape/internal/normalize"
+	"agenttape/internal/source"
+	"agenttape/internal/source/httpcap"
+	"agenttape/internal/store"
 )
 
 // replayResp is the result of re-sending a request to upstream.

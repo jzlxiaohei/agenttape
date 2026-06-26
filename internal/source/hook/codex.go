@@ -8,7 +8,7 @@ import (
 // codexEvents is the BUILT-IN DEFAULT set of Codex CLI hook events (codex >=
 // 0.141), used to seed the store's per-client registry on first run. It is not
 // read at launch — the launcher reads the user-editable enabled set from the
-// store — so a user can add a newly-shipped Codex event without a tracelab
+// store — so a user can add a newly-shipped Codex event without a agenttape
 // release. Sourced from the official docs (developers.openai.com/codex/hooks).
 // Each fires a command that receives a JSON payload on stdin — the SAME handoff
 // shape as Claude Code's hooks, so the /_hook endpoint treats both runtimes

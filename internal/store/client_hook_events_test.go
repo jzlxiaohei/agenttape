@@ -4,8 +4,8 @@ import (
 	"slices"
 	"testing"
 
-	"tracelab/internal/source/hook"
-	"tracelab/internal/store"
+	"agenttape/internal/source/hook"
+	"agenttape/internal/store"
 )
 
 func TestClientHookEvents(t *testing.T) {

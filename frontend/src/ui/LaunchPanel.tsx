@@ -58,7 +58,7 @@ export function LaunchPanel() {
     });
   };
 
-  // Secondary "full capture (http + hooks)": the tracelab launch one-liner.
+  // Secondary "full capture (http + hooks)": the agenttape launch one-liner.
   const [fullOpen, setFullOpen] = useState(false);
   const [fullCopied, setFullCopied] = useState(false);
   const copyFull = () => {
@@ -282,7 +282,7 @@ export function LaunchPanel() {
   );
 }
 
-const workdirHistoryKey = "tracelab.launch.workdirs";
+const workdirHistoryKey = "agenttape.launch.workdirs";
 
 function readWorkdirHistory(): string[] {
   try {

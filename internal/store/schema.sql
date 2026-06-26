@@ -1,4 +1,4 @@
--- tracelab module 2 schema (version 1).
+-- agenttape module 2 schema (version 1).
 -- Design: a shared "spine" (events) for the unified session timeline, with
 -- type-specific detail tables (http_exchanges / hook_events) so the two very
 -- different data sources evolve independently without NULL-soup. Raw bytes live
@@ -106,12 +106,12 @@ CREATE TABLE IF NOT EXISTS replay_cases (
   created_at TEXT
 );
 
--- Per-client hook event registry: which lifecycle/tool events tracelab wires
+-- Per-client hook event registry: which lifecycle/tool events agenttape wires
 -- when it launches each coding agent. Seeded with the built-in defaults (one row
 -- per event, source='seed', kept current against each runtime's docs); the
 -- launcher reads the ENABLED rows here, so users can add a newly-shipped event
 -- (source='user') or disable a noisy one (enabled=0) from the UI without waiting
--- for a tracelab release. Distinct from hook_events, which stores CAPTURED hooks.
+-- for a agenttape release. Distinct from hook_events, which stores CAPTURED hooks.
 CREATE TABLE IF NOT EXISTS client_hook_events (
   client  TEXT NOT NULL,        -- claude_code | codex
   event   TEXT NOT NULL,        -- PreToolUse, SessionStart, …
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS client_hook_events (
 );
 
 -- Live proxy-session routing facts, persisted so a still-running agent can be
--- re-attached to the proxy after a tracelab restart (its baked-in token keeps
+-- re-attached to the proxy after a agenttape restart (its baked-in token keeps
 -- resolving). NON-SECRET BY DESIGN: token is only a routing handle, and the real
 -- API key (key mode) is deliberately NOT stored — it lives in process memory and
 -- must be re-supplied after a restart. See docs/SECURITY.md. Distinct from

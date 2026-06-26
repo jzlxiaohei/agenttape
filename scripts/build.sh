@@ -8,7 +8,7 @@ FRONTEND_DIR="$ROOT/frontend"
 WEB_DIST="$ROOT/internal/web/dist"
 STAMP_DIR="$ROOT/.cache/build"
 FRONTEND_STAMP="$STAMP_DIR/frontend.sha256"
-BINARY="${TRACELAB_BIN:-$ROOT/tracelab}"
+BINARY="${AGENTTAPE_BIN:-$ROOT/agenttape}"
 FRONTEND_BUILD="${FRONTEND_BUILD:-auto}"
 NPM="${NPM:-npm}"
 GOCACHE="${GOCACHE:-$ROOT/.cache/go-build}"
@@ -95,7 +95,7 @@ fi
 echo "==> Building Go binary: $BINARY"
 (
   cd "$ROOT"
-  go build "$@" -o "$BINARY" ./cmd/tracelab
+  go build "$@" -o "$BINARY" ./cmd/agenttape
 )
 
 echo "==> Done"

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"tracelab/internal/event"
-	"tracelab/internal/sink"
+	"agenttape/internal/event"
+	"agenttape/internal/sink"
 )
 
 // Write persists one captured record: it upserts the session, inserts the event

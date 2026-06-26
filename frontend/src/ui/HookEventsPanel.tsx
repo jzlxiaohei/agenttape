@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 import { ClientIcon } from "./ClientIcon";
 import { Popconfirm } from "./Popconfirm";
 
-// Hook capture settings: the per-client set of lifecycle/tool events tracelab
+// Hook capture settings: the per-client set of lifecycle/tool events agenttape
 // wires when it launches each coding agent. Seeded with built-in defaults but
 // user-editable, so a newly-shipped runtime event can be captured (or a noisy one
-// muted) without waiting for a tracelab release. The launch reads the enabled set.
+// muted) without waiting for a agenttape release. The launch reads the enabled set.
 export function HookEventsPanel() {
   const { t } = useTranslation();
   const { data, isLoading } = useHookEvents();

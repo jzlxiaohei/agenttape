@@ -1,9 +1,9 @@
 ---
 name: frontend-mvvm
-description: tracelab 前端 MVVM 架构与代码规范（Vite+React+TS / Zustand / TanStack Query / React Router）。写任何前端代码前先读。
+description: agenttape 前端 MVVM 架构与代码规范（Vite+React+TS / Zustand / TanStack Query / React Router）。写任何前端代码前先读。
 ---
 
-# 前端 MVVM 规范（tracelab / 模块三）
+# 前端 MVVM 规范（agenttape / 模块三）
 
 上一代 viewer 的病:业务状态散落在 UI 的 `useState`、组件里直接 fetch、render 里堆解析,
 `RequestInspector.tsx` 900 行 / `traceView.ts` 1900 行。本规范强制分层,违反即返工。

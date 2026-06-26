@@ -1,8 +1,8 @@
 package server
 
 import (
-	"tracelab/internal/source/httpcap"
-	"tracelab/internal/store"
+	"agenttape/internal/source/httpcap"
+	"agenttape/internal/store"
 )
 
 // liveSessionPersister adapts the store to httpcap.SessionPersister, keeping the

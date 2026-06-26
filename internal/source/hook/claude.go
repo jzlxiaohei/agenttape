@@ -9,7 +9,7 @@ import (
 // claudeEvents is the BUILT-IN DEFAULT set of Claude Code hook events, used to
 // seed the store's per-client registry on first run. It is not read at launch:
 // the launcher reads the (user-editable) enabled set from the store, so a user
-// can add an event the moment a new Claude Code release ships one — no tracelab
+// can add an event the moment a new Claude Code release ships one — no agenttape
 // release required. Sourced from the official docs (code.claude.com/docs/en/hooks).
 // We default-capture everything EXCEPT MessageDisplay, which fires continuously
 // while assistant text streams and would flood capture (a user can still add it).

@@ -3,7 +3,7 @@ package store
 import (
 	"fmt"
 
-	"tracelab/internal/source/hook"
+	"agenttape/internal/source/hook"
 )
 
 // HookClients is the closed set of clients whose hook event set is configurable.
@@ -12,7 +12,7 @@ import (
 // they wire the same event set, just via different injection mechanisms.
 var HookClients = []string{"claude_code", "codex"}
 
-// HookEventDef is one configurable hook event for a client: whether tracelab
+// HookEventDef is one configurable hook event for a client: whether agenttape
 // wires it on launch, and whether it is a built-in default or user-added.
 type HookEventDef struct {
 	Client  string `json:"client"`

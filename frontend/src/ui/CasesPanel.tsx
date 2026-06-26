@@ -898,7 +898,7 @@ function CurlSheet({
 }
 
 // ReenterKeyBanner prompts for the API key of a key-mode session that lost it on a
-// tracelab restart. The key goes straight to server memory (never disk); the still-
+// agenttape restart. The key goes straight to server memory (never disk); the still-
 // running agent resumes on its next request, so no relaunch is needed.
 function ReenterKeyBanner({ session }: { session: ActiveSession }) {
   const { t } = useTranslation();

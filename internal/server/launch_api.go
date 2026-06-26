@@ -33,8 +33,8 @@ func sameOriginOK(r *http.Request) bool {
 }
 
 // manualCommand is the FULL-CAPTURE copy-paste command (http + hooks): it runs the
-// agent through `tracelab launch`, which injects hooks too. In key mode the key
-// stays in the user's own shell env and never reaches tracelab's server. Extra
+// agent through `agenttape launch`, which injects hooks too. In key mode the key
+// stays in the user's own shell env and never reaches agenttape's server. Extra
 // args (e.g. --resume) are forwarded to the underlying client after `--`.
 func manualCommand(exe, wd, serverURL, kind, mode, args string) string {
 	prefix, suffix := "", ""
@@ -49,7 +49,7 @@ func manualCommand(exe, wd, serverURL, kind, mode, args string) string {
 		}
 	}
 	if a := strings.TrimSpace(args); a != "" {
-		// `--` stops tracelab's flag parser; everything after is handed to the client.
+		// `--` stops agenttape's flag parser; everything after is handed to the client.
 		suffix += " -- " + a
 	}
 	return fmt.Sprintf("cd %s && %s%s launch -kind %s -server %s%s",
@@ -85,11 +85,11 @@ func buildManualEnvCommand(kind, mode, serverURL, token, args string) string {
 		b.WriteString("export OPENAI_API_KEY='<YOUR_KEY>'\n")
 	}
 	b.WriteString("codex \\\n")
-	b.WriteString("  -c 'model_provider=\"tracelab\"' \\\n")
-	b.WriteString("  -c 'model_providers.tracelab.name=\"tracelab\"' \\\n")
-	b.WriteString("  -c 'model_providers.tracelab.base_url=\"" + base + "\"' \\\n")
-	b.WriteString("  -c 'model_providers.tracelab.wire_api=\"responses\"' \\\n")
-	b.WriteString("  -c 'model_providers.tracelab.requires_openai_auth=true'")
+	b.WriteString("  -c 'model_provider=\"agenttape\"' \\\n")
+	b.WriteString("  -c 'model_providers.agenttape.name=\"agenttape\"' \\\n")
+	b.WriteString("  -c 'model_providers.agenttape.base_url=\"" + base + "\"' \\\n")
+	b.WriteString("  -c 'model_providers.agenttape.wire_api=\"responses\"' \\\n")
+	b.WriteString("  -c 'model_providers.agenttape.requires_openai_auth=true'")
 	if extra != "" {
 		b.WriteString(" " + extra)
 	}
@@ -139,7 +139,7 @@ func (s *Server) handleManualCommand(w http.ResponseWriter, r *http.Request) {
 }
 
 // handleLaunch starts a coding agent in a NEW terminal window (so its TUI has a
-// real tty) routed through this proxy, by running the existing `tracelab launch`
+// real tty) routed through this proxy, by running the existing `agenttape launch`
 // CLI. Two credential modes:
 //   - subscription: the agent uses the account you already logged in (no key).
 //   - key: we register the session, keep the API key ONLY in process memory, and
@@ -196,7 +196,7 @@ func (s *Server) handleLaunch(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if runtime.GOOS != "darwin" {
-		http.Error(w, "web launch currently supports macOS only; use the CLI: tracelab launch -kind "+req.Kind, http.StatusNotImplemented)
+		http.Error(w, "web launch currently supports macOS only; use the CLI: agenttape launch -kind "+req.Kind, http.StatusNotImplemented)
 		return
 	}
 	if req.Workdir != "" {
@@ -225,16 +225,16 @@ func (s *Server) handleLaunch(w http.ResponseWriter, r *http.Request) {
 		// placeholder env so the key never reaches the agent, the terminal, or disk.
 		s.Sessions.RememberInject(sess.ID, spec.injectAuth(req.APIKey))
 		cmd += fmt.Sprintf(" -token %s -session %s", shellQuote(sess.Token), shellQuote(sess.ID))
-		env = "export " + spec.KeyEnv + "=tracelab-proxy-placeholder\n"
+		env = "export " + spec.KeyEnv + "=agenttape-proxy-placeholder\n"
 	}
 	if a := strings.TrimSpace(req.Args); a != "" {
-		// `--` stops tracelab's flag parser; the rest is forwarded to the client. The
+		// `--` stops agenttape's flag parser; the rest is forwarded to the client. The
 		// args run in the user's own local shell (their machine), like the workdir.
 		cmd += " -- " + a
 	}
 
 	script := fmt.Sprintf("#!/bin/bash\n%scd %s || exit 1\nexec %s\n", env, shellQuote(wd), cmd)
-	f, err := os.CreateTemp("", "tracelab-launch-*.sh")
+	f, err := os.CreateTemp("", "agenttape-launch-*.sh")
 	if err != nil {
 		httpError(w, err)
 		return

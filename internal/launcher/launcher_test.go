@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"tracelab/internal/source/hook"
-	"tracelab/internal/source/httpcap"
+	"agenttape/internal/source/hook"
+	"agenttape/internal/source/httpcap"
 )
 
 // TestLaunchClaudeCode_NonInvasive verifies cc is redirected purely via an env
@@ -47,8 +47,8 @@ func TestLaunchCodex_UsesSingleRunOverrides(t *testing.T) {
 
 	joined := strings.Join(cmd.Args, " ")
 	for _, want := range []string{
-		`model_provider="tracelab"`,
-		`model_providers.tracelab.base_url="http://127.0.0.1:8787/s/tokABC"`,
+		`model_provider="agenttape"`,
+		`model_providers.agenttape.base_url="http://127.0.0.1:8787/s/tokABC"`,
 		`requires_openai_auth=true`,
 		"session=sess9",
 		"exec hello",

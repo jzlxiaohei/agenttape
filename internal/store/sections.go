@@ -3,7 +3,7 @@ package store
 import (
 	"database/sql"
 
-	"tracelab/internal/normalize"
+	"agenttape/internal/normalize"
 )
 
 func insertSections(tx *sql.Tx, eventID string, sections []normalize.SectionStat) error {

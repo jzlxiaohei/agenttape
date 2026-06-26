@@ -8,11 +8,11 @@ import (
 	"log"
 	"net/http"
 
-	"tracelab/internal/event"
-	"tracelab/internal/normalize"
-	"tracelab/internal/sink"
-	"tracelab/internal/source/hook"
-	"tracelab/internal/source/httpcap"
+	"agenttape/internal/event"
+	"agenttape/internal/normalize"
+	"agenttape/internal/sink"
+	"agenttape/internal/source/hook"
+	"agenttape/internal/source/httpcap"
 )
 
 // Server holds the shared session registry and exposes a single mux.
@@ -61,7 +61,7 @@ func (s *Server) emit(ev *event.SourceEvent) {
 		rec.Normalized = env
 	}
 	if err := s.sink.Write(rec); err != nil {
-		log.Printf("tracelab: sink write failed for event %s: %v", ev.ID, err)
+		log.Printf("agenttape: sink write failed for event %s: %v", ev.ID, err)
 	}
 }
 

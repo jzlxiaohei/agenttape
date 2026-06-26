@@ -32,7 +32,7 @@ func TestSessionsAreDistinct(t *testing.T) {
 	}
 }
 
-// TestReattachAfterRestart simulates a tracelab restart: a new registry bound to the
+// TestReattachAfterRestart simulates a agenttape restart: a new registry bound to the
 // same persister must restore the token route (so a live agent keeps working), and a
 // key-mode session must report NeedsKey until its key is re-supplied — proving no
 // secret was persisted.

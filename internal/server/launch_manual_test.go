@@ -33,9 +33,9 @@ func TestBuildManualEnvCommand_CCKeyMode(t_ *testing.T) {
 func TestBuildManualEnvCommand_Codex(t_ *testing.T) {
 	cmd := buildManualEnvCommand("codex", "subscription", "http://h", "tok", "resume")
 	for _, want := range []string{
-		`-c 'model_provider="tracelab"'`,
-		`-c 'model_providers.tracelab.base_url="http://h/s/tok"'`,
-		`-c 'model_providers.tracelab.wire_api="responses"'`,
+		`-c 'model_provider="agenttape"'`,
+		`-c 'model_providers.agenttape.base_url="http://h/s/tok"'`,
+		`-c 'model_providers.agenttape.wire_api="responses"'`,
 		"resume", // trailing client arg
 	} {
 		if !strings.Contains(cmd, want) {
@@ -45,7 +45,7 @@ func TestBuildManualEnvCommand_Codex(t_ *testing.T) {
 }
 
 func TestManualCommand_ForwardsArgs(t_ *testing.T) {
-	cmd := manualCommand("/bin/tracelab", "/work", "http://h", "cc", "subscription", "--resume")
+	cmd := manualCommand("/bin/agenttape", "/work", "http://h", "cc", "subscription", "--resume")
 	if !strings.Contains(cmd, "launch -kind cc") || !strings.Contains(cmd, " -- --resume") {
 		t_.Errorf("full-capture cmd should forward args after --: %s", cmd)
 	}

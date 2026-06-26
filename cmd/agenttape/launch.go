@@ -9,15 +9,15 @@ import (
 	"os"
 	"os/exec"
 
-	"tracelab/internal/launcher"
-	"tracelab/internal/source/hook"
-	"tracelab/internal/source/httpcap"
+	"agenttape/internal/launcher"
+	"agenttape/internal/source/hook"
+	"agenttape/internal/source/httpcap"
 )
 
 func runLaunch(args []string) error {
 	fs := flag.NewFlagSet("launch", flag.ExitOnError)
 	kind := fs.String("kind", "", "client kind: cc | codex")
-	serverURL := fs.String("server", "http://127.0.0.1:8787", "running tracelab server")
+	serverURL := fs.String("server", "http://127.0.0.1:8787", "running agenttape server")
 	upstream := fs.String("upstream", "", "upstream base URL (defaults by kind)")
 	token := fs.String("token", "", "use a pre-registered session token (skip register)")
 	session := fs.String("session", "", "pre-registered session id (use with -token)")
@@ -48,7 +48,7 @@ func runLaunch(args []string) error {
 	cmd := chooseLauncher(*kind, *serverURL, sess, events, fs.Args())
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 
-	fmt.Fprintf(os.Stderr, "tracelab: launching %s via %s (no global config modified)\n",
+	fmt.Fprintf(os.Stderr, "agenttape: launching %s via %s (no global config modified)\n",
 		client, httpcap.SessionBaseURL(*serverURL, sess))
 	return cmd.Run()
 }

@@ -12,10 +12,10 @@ import (
 	"sync"
 	"testing"
 
-	"tracelab/internal/normalize/providers"
-	"tracelab/internal/server"
-	"tracelab/internal/sink"
-	"tracelab/internal/store"
+	"agenttape/internal/normalize/providers"
+	"agenttape/internal/server"
+	"agenttape/internal/sink"
+	"agenttape/internal/store"
 )
 
 type memSink struct {

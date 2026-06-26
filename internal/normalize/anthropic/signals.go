@@ -1,7 +1,7 @@
 package anthropic
 
 import (
-	"tracelab/internal/normalize"
+	"agenttape/internal/normalize"
 )
 
 // deriveSignals emits structural tag hints we can read from the typed structure

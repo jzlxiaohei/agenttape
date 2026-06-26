@@ -1,4 +1,4 @@
-// Package web embeds the built Viewer SPA so `tracelab serve` ships as a single
+// Package web embeds the built Viewer SPA so `agenttape serve` ships as a single
 // self-contained binary — no external dist directory to carry around.
 //
 // The frontend builds into internal/web/dist (see frontend/vite.config.ts

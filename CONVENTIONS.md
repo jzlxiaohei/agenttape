@@ -1,4 +1,4 @@
-# tracelab — 后端工程约定
+# agenttape — 后端工程约定
 
 本项目的代码由 AI 与人协作生成。这份约定是**硬规矩**，每次写后端代码前先读它。
 目标：避免上一代 `aethertrace` 的问题（`viewer.go` 2400 行、cc/codex 揉在一起、

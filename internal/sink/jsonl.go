@@ -37,7 +37,7 @@ func (j *JSONL) Close() error {
 	return j.f.Close()
 }
 
-// ReadAll loads all records from a JSONL file (used by `tracelab dump` and
+// ReadAll loads all records from a JSONL file (used by `agenttape dump` and
 // tests).
 func ReadAll(path string) ([]Record, error) {
 	f, err := os.Open(path)

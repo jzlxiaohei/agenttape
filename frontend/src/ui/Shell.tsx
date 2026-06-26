@@ -35,7 +35,7 @@ function Sidebar() {
         <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-sm font-bold text-accent-foreground">
           t
         </div>
-        <span className="font-semibold">tracelab</span>
+        <span className="font-semibold">agenttape</span>
       </button>
 
       <div className="space-y-0.5 px-2">

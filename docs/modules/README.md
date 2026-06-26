@@ -1,6 +1,6 @@
 # 模块指南 / Module guides
 
-tracelab 的每个模块一页：**为了做什么** + **基本流程** + **关键文件**，涉及安全的地方
+agenttape 的每个模块一页：**为了做什么** + **基本流程** + **关键文件**，涉及安全的地方
 单独标一段。想动哪块代码，先读对应这页。深层约定见 [`CONVENTIONS.md`](../../CONVENTIONS.md)，
 凭证/安全不变量见 [`SECURITY.md`](../SECURITY.md)，复盘库见 [`REPLAY_LIB.md`](../REPLAY_LIB.md)。
 

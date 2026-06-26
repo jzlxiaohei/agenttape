@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"tracelab/internal/source"
+	"agenttape/internal/source"
 )
 
 // Session maps a launcher-issued token to the upstream it should be proxied to.
@@ -27,7 +27,7 @@ type Session struct {
 }
 
 // SessionRecord is the NON-SECRET subset of a session that may be persisted so a
-// still-running agent can be re-attached to the proxy after a tracelab restart.
+// still-running agent can be re-attached to the proxy after a agenttape restart.
 // It deliberately carries NO credentials: token is just a routing handle, and the
 // real key (key mode) is never written — it must be re-supplied after a restart.
 type SessionRecord struct {
@@ -85,7 +85,7 @@ func NewSessions() *Sessions {
 
 // BindPersister attaches a persister and rehydrates sessions saved by an earlier
 // run, so an agent that is still running keeps routing through the proxy after a
-// tracelab restart. Only the non-secret routing facts come back; in-memory auth
+// agenttape restart. Only the non-secret routing facts come back; in-memory auth
 // (captured headers / injected keys) does NOT — a restored key-mode session reports
 // NeedsKey()==true until its key is re-supplied. Safe to call once at startup.
 func (s *Sessions) BindPersister(p SessionPersister) {
@@ -103,7 +103,7 @@ func (s *Sessions) BindPersister(p SessionPersister) {
 	s.mu.Unlock()
 	if err != nil {
 		// Non-fatal: persistence is a convenience. Worst case the agent must relaunch.
-		log.Printf("tracelab: rehydrate live sessions: %v", err)
+		log.Printf("agenttape: rehydrate live sessions: %v", err)
 	}
 }
 
@@ -143,7 +143,7 @@ func (s *Sessions) Register(client, upstream, provider, mode string) *Session {
 	s.mu.Unlock()
 	if p != nil {
 		if err := p.SaveSession(sess.record()); err != nil {
-			log.Printf("tracelab: persist live session %s: %v", sess.ID, err)
+			log.Printf("agenttape: persist live session %s: %v", sess.ID, err)
 		}
 	}
 	return sess
@@ -203,7 +203,7 @@ func (s *Sessions) AuthFor(sessionID string) http.Header {
 
 // Remove forgets a live session: it drops the token→upstream mapping and any
 // in-memory auth/headers for it. This does NOT kill the coding-agent process
-// (tracelab doesn't own it) — it only revokes the proxy session, so the agent's
+// (agenttape doesn't own it) — it only revokes the proxy session, so the agent's
 // next proxied request fails and replay can no longer use it. Returns false if
 // no such session was registered in this process.
 func (s *Sessions) Remove(id string) bool {
@@ -220,7 +220,7 @@ func (s *Sessions) Remove(id string) bool {
 	p := s.persist
 	if p != nil {
 		if err := p.DeleteSession(id); err != nil {
-			log.Printf("tracelab: forget persisted live session %s: %v", id, err)
+			log.Printf("agenttape: forget persisted live session %s: %v", id, err)
 		}
 	}
 	return true

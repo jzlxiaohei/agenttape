@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strings"
 
-	"tracelab/internal/source/hook"
-	"tracelab/internal/source/httpcap"
+	"agenttape/internal/source/hook"
+	"agenttape/internal/source/httpcap"
 )
 
 // The Codex DESKTOP app cannot take per-invocation `-c` overrides (its background
@@ -16,9 +16,9 @@ import (
 // markers make the injection recognizable for conflict detection and manual
 // cleanup; restore itself is byte-exact from the backup, not marker-based.
 const (
-	CodexMarker    = "# tracelab: Codex desktop capture (auto-injected — restore via the tracelab launch page)"
-	codexBlockOpen = "# >>> tracelab capture (auto-injected) >>>"
-	codexBlockEnd  = "# <<< tracelab capture <<<"
+	CodexMarker    = "# agenttape: Codex desktop capture (auto-injected — restore via the agenttape launch page)"
+	codexBlockOpen = "# >>> agenttape capture (auto-injected) >>>"
+	codexBlockEnd  = "# <<< agenttape capture <<<"
 )
 
 var topLevelModelProvider = regexp.MustCompile(`(?m)^\s*model_provider\s*=`)
@@ -39,13 +39,13 @@ func MergeCodexDesktopConfig(original, serverURL string, sess *httpcap.Session, 
 
 	var b strings.Builder
 	b.WriteString(CodexMarker + "\n")
-	b.WriteString(`model_provider = "tracelab"` + "\n")
+	b.WriteString(`model_provider = "agenttape"` + "\n")
 	if stripped != "" {
 		b.WriteString("\n" + stripped + "\n")
 	}
 	b.WriteString("\n" + codexBlockOpen + "\n")
-	b.WriteString("[model_providers.tracelab]\n")
-	b.WriteString(`name = "tracelab capture"` + "\n")
+	b.WriteString("[model_providers.agenttape]\n")
+	b.WriteString(`name = "agenttape capture"` + "\n")
 	fmt.Fprintf(&b, "base_url = %q\n", base)
 	b.WriteString(`wire_api = "responses"` + "\n")
 	b.WriteString("requires_openai_auth = true\n")
@@ -75,7 +75,7 @@ func stripTopLevelModelProvider(s string) string {
 	return strings.Join(out, "\n")
 }
 
-// HasCodexMarker reports whether config already carries tracelab's injection.
+// HasCodexMarker reports whether config already carries agenttape's injection.
 func HasCodexMarker(content string) bool {
 	return strings.Contains(content, CodexMarker)
 }

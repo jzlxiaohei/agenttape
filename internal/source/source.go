@@ -7,7 +7,7 @@ package source
 import (
 	"net/http"
 
-	"tracelab/internal/event"
+	"agenttape/internal/event"
 )
 
 // Emitter receives a fully-built SourceEvent from an adapter.

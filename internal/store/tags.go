@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"tracelab/internal/event"
-	"tracelab/internal/sink"
+	"agenttape/internal/event"
+	"agenttape/internal/sink"
 )
 
 // tagRow is one tag to persist.

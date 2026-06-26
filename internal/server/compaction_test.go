@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"tracelab/internal/normalize"
-	"tracelab/internal/store"
+	"agenttape/internal/normalize"
+	"agenttape/internal/store"
 )
 
 func TestGradeCompaction(t *testing.T) {

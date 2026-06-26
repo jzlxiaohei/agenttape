@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"tracelab/internal/store"
+	"agenttape/internal/store"
 )
 
 // handleRenameSession sets a user-chosen name (label) for a captured session.

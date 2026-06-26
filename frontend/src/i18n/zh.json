@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "tracelab",
+    "title": "AgentTape",
     "subtitle": "Coding-Agent 请求实验室"
   },
   "nav": {
@@ -44,7 +44,7 @@
     "client_args_hint": "--resume",
     "client_args_note": "可选,原样透传给客户端的原生参数,例如 --resume 继续上次对话。其余参数请查客户端自己的文档。",
     "full_capture": "完整捕获(http + hooks)",
-    "full_capture_note": "走 tracelab launch,会额外注入 hook 捕获。想要 hook 事件(不只 HTTP)时用这个。",
+    "full_capture_note": "走 agenttape launch,会额外注入 hook 捕获。想要 hook 事件(不只 HTTP)时用这个。",
     "copy": "复制",
     "copied": "已复制",
     "disabled_note": "服务端启动已关闭。复制上面的命令自己跑,或用 -allow-launch 重启 serve。",
@@ -57,7 +57,7 @@
       "install": "注入并路由",
       "active": "路由已生效,原配置已备份。",
       "step_restart": "重启 Codex 桌面应用,让它重新加载配置。",
-      "step_trust": "如有提示,在应用的 /hooks 里信任一次 tracelab 的 hook。",
+      "step_trust": "如有提示,在应用的 /hooks 里信任一次 agenttape 的 hook。",
       "step_done": "实验结束后,点下面的「结束并恢复」。",
       "restore": "结束并恢复"
     }
@@ -79,7 +79,7 @@
         "prompt": "在当前目录挑一个源文件，把其中某个标识符（变量名 / JSON 字段 / 函数名）统一改个名。改之前先把文件读一遍，再用 Edit 精确替换，逐处改到底。"
       },
       "s3": {
-        "label": "回 tracelab，打开这条 session 的 flow",
+        "label": "回 agenttape，打开这条 session 的 flow",
         "note": "找这条链：PreToolUse(Read) → Read 请求 → tool_result → PreToolUse(Edit) → Edit 请求 → tool_result。"
       },
       "s4": {
@@ -100,7 +100,7 @@
         "prompt": "用 Task 工具起一个 general-purpose 子 agent，让它：① 运行 `pwd` 看自己在哪个目录；② 用一句话报告它被分配到的任务是什么、以及它能不能看到我们之前的对话。你自己别做，交给子 agent。"
       },
       "s3": {
-        "label": "回 tracelab，打开这条 session 的 flow",
+        "label": "回 agenttape，打开这条 session 的 flow",
         "note": "找 PreToolUse(Task) → SubagentStart → 子 agent 自己的请求 → SubagentStop → Task 的 tool_result。"
       },
       "s4": {
@@ -203,7 +203,7 @@
     "cred_key": "API key",
     "cred_subscription": "订阅",
     "needs_key": "待重输密钥",
-    "needs_key_hint": "这个 API key 会话在 tracelab 重启后丢了密钥(密钥从不落盘)。重输一次即可,无需重启 agent。",
+    "needs_key_hint": "这个 API key 会话在 agenttape 重启后丢了密钥(密钥从不落盘)。重输一次即可,无需重启 agent。",
     "needs_key_banner": "这个 API key 会话在重启后丢了密钥(密钥从不落盘)。重新输入即可继续运行——你那个还开着的 agent 会在下次请求时自动恢复,不用重启。",
     "needs_key_placeholder": "重新粘贴 API key",
     "needs_key_save": "保存密钥",
@@ -229,7 +229,7 @@
     "curl_title": "复制为 curl",
     "curl_mode_proxy": "走代理",
     "curl_mode_direct": "直连(含 auth)",
-    "curl_proxy_note": "打到 tracelab 的会话代理,不含任何密钥——代理在转发时注入 auth。仅在该会话存活时有效。",
+    "curl_proxy_note": "打到 agenttape 的会话代理,不含任何密钥——代理在转发时注入 auth。仅在该会话存活时有效。",
     "curl_direct_note": "用该会话的真实凭据直连上游——可移植,就像 Postman 的 copy-as-curl。",
     "curl_direct_warning_masked": "敏感 header 已打码。这个版本更适合分享,但不能直接运行;需要显示凭据或手动替换打码值。",
     "curl_direct_warning_revealed": "真实凭据已经显示。复制、截图、屏幕共享、终端历史或日志都可能泄露密钥。",
@@ -241,7 +241,7 @@
   },
   "hooks": {
     "title": "Hook 捕获",
-    "intro": "tracelab 启动各 agent 时会接入哪些生命周期 / 工具事件。已用内置默认值预置;runtime 新发布的事件可抢先添加,过吵的可禁用。改动下次启动即生效,无需重启。",
+    "intro": "agenttape 启动各 agent 时会接入哪些生命周期 / 工具事件。已用内置默认值预置;runtime 新发布的事件可抢先添加,过吵的可禁用。改动下次启动即生效,无需重启。",
     "count": "已开启 {{enabled}}/{{total}}",
     "client_claude_code": "Claude Code",
     "client_codex": "Codex",

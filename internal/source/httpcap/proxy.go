@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"tracelab/internal/event"
-	"tracelab/internal/source"
+	"agenttape/internal/event"
+	"agenttape/internal/source"
 )
 
 // Proxy is the reverse-proxy capture adapter. Requests arrive as
@@ -39,7 +39,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	token, rest := splitToken(r.URL.Path)
 	sess := p.sessions.Lookup(token)
 	if sess == nil {
-		http.Error(w, "tracelab: unknown session token", http.StatusBadGateway)
+		http.Error(w, "agenttape: unknown session token", http.StatusBadGateway)
 		return
 	}
 
@@ -54,7 +54,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	upReq, err := http.NewRequestWithContext(r.Context(), r.Method, upURL, bytes.NewReader(reqBody))
 	if err != nil {
-		http.Error(w, "tracelab: build upstream request: "+err.Error(), http.StatusBadGateway)
+		http.Error(w, "agenttape: build upstream request: "+err.Error(), http.StatusBadGateway)
 		return
 	}
 	copyHeaders(upReq.Header, r.Header)
@@ -75,7 +75,7 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := p.client.Do(upReq)
 	if err != nil {
-		http.Error(w, "tracelab: upstream error: "+err.Error(), http.StatusBadGateway)
+		http.Error(w, "agenttape: upstream error: "+err.Error(), http.StatusBadGateway)
 		return
 	}
 	defer resp.Body.Close()

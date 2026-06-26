@@ -20,7 +20,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // Dev: proxy API calls to the running `tracelab serve`.
+      // Dev: proxy API calls to the running `agenttape serve`.
       "/api": "http://127.0.0.1:8787",
     },
   },

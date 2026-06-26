@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"strings"
 
-	"tracelab/internal/event"
-	"tracelab/internal/normalize"
-	"tracelab/internal/sink"
+	"agenttape/internal/event"
+	"agenttape/internal/normalize"
+	"agenttape/internal/sink"
 )
 
 func (s *Store) writeHTTP(tx *sql.Tx, rec sink.Record) error {

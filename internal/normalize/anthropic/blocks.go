@@ -3,7 +3,7 @@ package anthropic
 import (
 	"encoding/json"
 
-	"tracelab/internal/normalize"
+	"agenttape/internal/normalize"
 )
 
 // wireBlock covers every Anthropic content block variant. Type is read straight

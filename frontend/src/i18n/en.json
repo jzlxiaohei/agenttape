@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "tracelab",
+    "title": "AgentTape",
     "subtitle": "coding-agent request lab"
   },
   "nav": {
@@ -44,7 +44,7 @@
     "client_args_hint": "--resume",
     "client_args_note": "Optional native flags passed straight to the client, e.g. --resume to continue your last conversation. See the client's own docs for the rest.",
     "full_capture": "Full capture (http + hooks)",
-    "full_capture_note": "Runs via tracelab launch, which also injects hook capture. Use this if you want hook events, not just HTTP.",
+    "full_capture_note": "Runs via agenttape launch, which also injects hook capture. Use this if you want hook events, not just HTTP.",
     "copy": "Copy",
     "copied": "Copied",
     "disabled_note": "Server launch is off. Copy the command above, or restart serve with -allow-launch.",
@@ -57,7 +57,7 @@
       "install": "Inject & route",
       "active": "Routing is active. Original config backed up.",
       "step_restart": "Restart the Codex desktop app so it reloads the config.",
-      "step_trust": "If prompted, trust tracelab's hooks once (app's /hooks).",
+      "step_trust": "If prompted, trust agenttape's hooks once (app's /hooks).",
       "step_done": "When finished, click Stop & restore below.",
       "restore": "Stop & restore"
     }
@@ -79,7 +79,7 @@
         "prompt": "Pick a source file in the current directory and rename one identifier (a variable, JSON field, or function name) consistently. Read the file first, then use Edit for precise replacements, one occurrence at a time, to the end."
       },
       "s3": {
-        "label": "Back in tracelab, open this session's flow",
+        "label": "Back in agenttape, open this session's flow",
         "note": "Find the chain: PreToolUse(Read) → Read request → tool_result → PreToolUse(Edit) → Edit request → tool_result."
       },
       "s4": {
@@ -100,7 +100,7 @@
         "prompt": "Use the Task tool to launch a general-purpose sub-agent. Have it: (1) run `pwd` to see which directory it's in; (2) report back, in one line, what task it was given and whether it can see any of our earlier conversation. Don't do this yourself — delegate it."
       },
       "s3": {
-        "label": "Back in tracelab, open this session's flow",
+        "label": "Back in agenttape, open this session's flow",
         "note": "Look for PreToolUse(Task) → SubagentStart → the sub-agent's own requests → SubagentStop → the Task tool_result."
       },
       "s4": {
@@ -203,7 +203,7 @@
     "cred_key": "API key",
     "cred_subscription": "subscription",
     "needs_key": "key needed",
-    "needs_key_hint": "This API-key session lost its key when tracelab restarted (keys are never written to disk). Re-enter it once — no need to restart the agent.",
+    "needs_key_hint": "This API-key session lost its key when agenttape restarted (keys are never written to disk). Re-enter it once — no need to restart the agent.",
     "needs_key_banner": "This API-key session lost its key on restart (keys are never written to disk). Re-enter it to keep running — your still-open agent resumes on its next request, no relaunch needed.",
     "needs_key_placeholder": "Paste the API key again",
     "needs_key_save": "Save key",
@@ -229,7 +229,7 @@
     "curl_title": "Copy as curl",
     "curl_mode_proxy": "Through proxy",
     "curl_mode_direct": "Direct (with auth)",
-    "curl_proxy_note": "Hits tracelab's per-session proxy. Carries no secret — the proxy injects auth on forward. Works only while this session is alive.",
+    "curl_proxy_note": "Hits agenttape's per-session proxy. Carries no secret — the proxy injects auth on forward. Works only while this session is alive.",
     "curl_direct_note": "Hits upstream directly with this session's real credentials — portable, like Postman's copy-as-curl.",
     "curl_direct_warning_masked": "Sensitive headers are masked. This copy is safer to share, but it is not directly runnable until you reveal or replace the masked values.",
     "curl_direct_warning_revealed": "Credentials are visible now. Copying, screenshots, screen shares, terminal history, or logs can leak real secrets.",
@@ -241,7 +241,7 @@
   },
   "hooks": {
     "title": "Hook capture",
-    "intro": "Which lifecycle and tool events tracelab wires when it launches each agent. Seeded with the built-in defaults; add events a runtime ships before tracelab catches up, or disable noisy ones. Changes apply to the next launch — no restart.",
+    "intro": "Which lifecycle and tool events agenttape wires when it launches each agent. Seeded with the built-in defaults; add events a runtime ships before agenttape catches up, or disable noisy ones. Changes apply to the next launch — no restart.",
     "count": "{{enabled}}/{{total}} on",
     "client_claude_code": "Claude Code",
     "client_codex": "Codex",

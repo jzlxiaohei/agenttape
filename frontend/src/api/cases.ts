@@ -40,7 +40,7 @@ export function closeActiveSession(id: string): Promise<void> {
 }
 
 // reenterSessionKey re-supplies the API key for a key-mode session that lost it on a
-// tracelab restart. The key goes only into server memory (never to disk); the still-
+// agenttape restart. The key goes only into server memory (never to disk); the still-
 // running agent resumes on its next request.
 export function reenterSessionKey(id: string, apiKey: string): Promise<{ ok: boolean }> {
   return api.postJSON<{ ok: boolean }>(`/api/active-sessions/${id}/key`, { api_key: apiKey });

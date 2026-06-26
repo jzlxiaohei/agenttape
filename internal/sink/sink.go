@@ -4,8 +4,8 @@
 package sink
 
 import (
-	"tracelab/internal/event"
-	"tracelab/internal/normalize"
+	"agenttape/internal/event"
+	"agenttape/internal/normalize"
 )
 
 // Record is one persisted unit: the raw source event plus its normalized view

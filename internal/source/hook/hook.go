@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"time"
 
-	"tracelab/internal/event"
-	"tracelab/internal/source"
+	"agenttape/internal/event"
+	"agenttape/internal/source"
 )
 
 // Adapter receives hook posts and emits SourceEvents.

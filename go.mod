@@ -1,4 +1,4 @@
-module tracelab
+module agenttape
 
 go 1.26.4
 

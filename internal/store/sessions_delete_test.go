@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"tracelab/internal/store"
+	"agenttape/internal/store"
 )
 
 func hasSession(ss []store.SessionSummary, id string) bool {

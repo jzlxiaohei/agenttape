@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"slices"
 
-	"tracelab/internal/store"
+	"agenttape/internal/store"
 )
 
 // hook_events_api.go exposes the per-client hook event registry: the set of
-// lifecycle/tool events tracelab wires when launching each coding agent. It is
+// lifecycle/tool events agenttape wires when launching each coding agent. It is
 // seeded with built-in defaults but user-editable, so a user can capture a
 // newly-shipped Claude Code / Codex event (or mute a noisy one) from the UI
-// without waiting for a tracelab release. The launcher reads the ENABLED rows at
+// without waiting for a agenttape release. The launcher reads the ENABLED rows at
 // launch time; see store.ClientHookEvents.
 
 // handleListHookEvents returns every configured event across all clients (the UI

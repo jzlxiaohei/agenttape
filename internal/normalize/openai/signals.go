@@ -1,6 +1,6 @@
 package openai
 
-import "tracelab/internal/normalize"
+import "agenttape/internal/normalize"
 
 // deriveSignals emits structural tag hints shared by both OpenAI normalizers.
 // Tool calls and reasoning are read from typed structure (facts); we emit no

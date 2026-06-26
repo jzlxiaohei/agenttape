@@ -3,7 +3,7 @@ package store
 import (
 	"encoding/json"
 
-	"tracelab/internal/normalize"
+	"agenttape/internal/normalize"
 )
 
 // CompletionRec is one captured completion of a session, with its normalized

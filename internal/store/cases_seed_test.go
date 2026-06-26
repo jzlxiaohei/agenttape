@@ -4,12 +4,12 @@ import (
 	"strings"
 	"testing"
 
-	"tracelab/internal/store"
+	"agenttape/internal/store"
 )
 
 // TestSeedCasesContainNoProjectConversation keeps built-in material portable:
 // seeds may preserve real wire shapes, but must not embed a conversation about
-// TraceLab itself, local paths, or discarded product language.
+// AgentTape itself, local paths, or discarded product language.
 func TestSeedCasesContainNoProjectConversation(t *testing.T) {
 	st, err := store.Open(t.TempDir())
 	if err != nil {
@@ -22,7 +22,7 @@ func TestSeedCasesContainNoProjectConversation(t *testing.T) {
 		t.Fatalf("list cases: %v", err)
 	}
 	forbidden := []string{
-		"tracelab",
+		"agenttape",
 		"worklog.md",
 		"replay_lib.md",
 		"deeper_viewer.md",

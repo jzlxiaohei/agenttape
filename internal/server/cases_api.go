@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"tracelab/internal/source"
-	"tracelab/internal/store"
+	"agenttape/internal/source"
+	"agenttape/internal/store"
 )
 
 // handleListCases returns the replay library.

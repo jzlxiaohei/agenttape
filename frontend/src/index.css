@@ -84,12 +84,12 @@ pre,
 .md th, .md td { border: 1px solid var(--color-border); padding: 0.3em 0.6em; }
 
 /* CodeMirror should occupy the available panel width, never shrink to content. */
-.tracelab-code-editor,
-.tracelab-code-editor .cm-editor {
+.agenttape-code-editor,
+.agenttape-code-editor .cm-editor {
   width: 100%;
   max-width: 100%;
 }
-.tracelab-code-editor .cm-scroller {
+.agenttape-code-editor .cm-scroller {
   width: 100%;
 }
 

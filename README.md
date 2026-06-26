@@ -1,23 +1,23 @@
-# TraceLab
+# AgentTape
 
 **English** | [中文](README_cn.md)
 
 A local-first workbench for studying coding-agent behavior.
 
-TraceLab captures the real requests flowing between Claude Code / Codex CLI and the model, while also receiving the agent runtime's hook events — and puts both kinds of evidence on a single timeline. It aims to answer more than "what HTTP request was sent":
+AgentTape captures the real requests flowing between Claude Code / Codex CLI and the model, while also receiving the agent runtime's hook events — and puts both kinds of evidence on a single timeline. It aims to answer more than "what HTTP request was sent":
 
 - Why did this turn trigger this model call?
 - What changed between adjacent requests in the system prompt, messages, tool catalog, and tool results?
 - How do tool calls, permissions, context compaction, and sub-agents compose into one full execution?
 - After a captured request is edited or replayed in another session, how does the model's behavior differ?
 
-> TraceLab is inspired by [claude-tap](https://github.com/liaohch3/claude-tap) — a mature, broad local agent-traffic viewer. TraceLab takes a narrower, more research-oriented path: it brings HTTP, hooks, context diffs, and replayable material into a single experiment workflow.
+> AgentTape is inspired by [claude-tap](https://github.com/liaohch3/claude-tap) — a mature, broad local agent-traffic viewer. AgentTape takes a narrower, more research-oriented path: it brings HTTP, hooks, context diffs, and replayable material into a single experiment workflow.
 
 ## More than packet capture
 
-A single coding-agent behavior is not a single HTTP request. Beyond the model call there are prompt submissions, tool executions, permission decisions, context compaction, and sub-agent start/stop — all runtime events. Ordinary capture shows the network but rarely reconstructs *why the agent got here*. TraceLab keeps these forms of evidence together:
+A single coding-agent behavior is not a single HTTP request. Beyond the model call there are prompt submissions, tool executions, permission decisions, context compaction, and sub-agent start/stop — all runtime events. Ordinary capture shows the network but rarely reconstructs *why the agent got here*. AgentTape keeps these forms of evidence together:
 
-| Layer | What TraceLab records | What it answers |
+| Layer | What AgentTape records | What it answers |
 | --- | --- | --- |
 | HTTP | Raw request/response, streaming events, headers, token usage | What the model actually saw and returned |
 | Runtime Hooks | Prompt, Tool, Permission, Compact, Subagent lifecycle events | What the agent did before and after a request |
@@ -35,7 +35,7 @@ A single coding-agent behavior is not a single HTTP request. Beyond the model ca
 
 **3. Turn a capture into a repeatable experiment.** Any model request can be saved into the Replay Library as an editable case: edit the JSON and re-send for real, parse the result with the same normalizer, save snapshots to accumulate comparable variants, or export Proxy / Direct cURL to reproduce outside the UI.
 
-![TraceLab Replay Library](./docs/assets/replay-library.png)
+![AgentTape Replay Library](./docs/assets/replay-library.png)
 ![Edit and replay a captured request](./docs/assets/replay-case-editor.png)
 
 > Replay sends a real request upstream and may incur API costs. Results are not written back into the trace by default, to keep experiment output separate from original evidence.
@@ -51,24 +51,24 @@ A single coding-agent behavior is not a single HTTP request. Beyond the model ca
 | Codex Desktop | ✅ | ✅ | ✅ | macOS, experimental |
 | OpenAI Chat Completions | proxied traffic | depends on runtime | ✅ | manual |
 
-TraceLab deliberately keeps its scope to Claude Code and Codex — going deep on execution flow, context, and experiment capability rather than racing to add more clients.
+AgentTape deliberately keeps its scope to Claude Code and Codex — going deep on execution flow, context, and experiment capability rather than racing to add more clients.
 
 ## Quick start
 
 Build from source (requires Go 1.26+ and Node 18+):
 
 ```bash
-git clone <repo-url> tracelab && cd tracelab
+git clone <repo-url> agenttape && cd agenttape
 (cd frontend && npm install && npm run build)   # the Viewer is embedded into the binary at build time
-go build -o tracelab ./cmd/tracelab
-./tracelab serve
+go build -o agenttape ./cmd/agenttape
+./agenttape serve
 ```
 
 Open <http://127.0.0.1:8787/viewer/>, then connect an agent to capture it:
 
 ```bash
-./tracelab launch -kind cc    -- <claude-args>   # Claude Code (subscription login)
-./tracelab launch -kind codex -- <codex-args>    # Codex CLI
+./agenttape launch -kind cc    -- <claude-args>   # Claude Code (subscription login)
+./agenttape launch -kind codex -- <codex-args>    # Codex CLI
 ```
 
 You can also pick the working directory, client, and auth method on the Viewer's Launch page.
@@ -77,9 +77,9 @@ You can also pick the working directory, client, and auth method on the Viewer's
 
 ## Data and security boundaries
 
-TraceLab is a local tool with no hosted dashboard. Captured data is never additionally uploaded by TraceLab; the original model requests are still forwarded to the model upstream you configured.
+AgentTape is a local tool with no hosted dashboard. Captured data is never additionally uploaded by AgentTape; the original model requests are still forwarded to the model upstream you configured.
 
-- The service listens on `127.0.0.1` only by default; data is stored under `tracelab-data/`.
+- The service listens on `127.0.0.1` only by default; data is stored under `agenttape-data/`.
 - Common auth headers are redacted before persistence; in API-key launch mode the real key lives only in process memory and is gone once the process exits.
 - Prompts, responses, tool arguments, and tool output are recorded in full — they may still contain source code, file contents, or secrets.
 - **Copying a Direct-mode cURL can leak real credentials** — after you opt into "show credentials," the copied content may contain a real `Authorization` / API key / cookie, so treat it like a password. Proxy mode (recommended) instead injects credentials from the local session, so the copied command contains no key.
@@ -107,7 +107,7 @@ Capture sources and protocol semantics are separated: HTTP and hooks only provid
 
 ## Project status
 
-TraceLab is currently a personal research workbench; features and data structures may still change quickly. The Replay Library is experiment infrastructure and is not planned to grow into a full evaluation platform or hosted service in the near term.
+AgentTape is currently a personal research workbench; features and data structures may still change quickly. The Replay Library is experiment infrastructure and is not planned to grow into a full evaluation platform or hosted service in the near term.
 
 Design principles and direction are in [`docs/ROADMAP.md`](docs/ROADMAP.md), engineering constraints in [`CONVENTIONS.md`](CONVENTIONS.md), Replay details in [`docs/REPLAY_LIB.md`](docs/REPLAY_LIB.md), and the security model in [`docs/SECURITY.md`](docs/SECURITY.md).
 
@@ -117,4 +117,4 @@ MIT — see [`LICENSE`](LICENSE).
 
 ## Acknowledgements
 
-Thanks to [liaohch3/claude-tap](https://github.com/liaohch3/claude-tap). It demonstrated the value of locally intercepting and visualizing real coding-agent traffic, and was an important early inspiration for TraceLab.
+Thanks to [liaohch3/claude-tap](https://github.com/liaohch3/claude-tap). It demonstrated the value of locally intercepting and visualizing real coding-agent traffic, and was an important early inspiration for AgentTape.

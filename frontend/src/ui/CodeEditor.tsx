@@ -53,7 +53,7 @@ export default function CodeEditor({
           ref={ref}
           value={value}
           height={height}
-          className={cn("tracelab-code-editor w-full max-w-full", fill && "h-full")}
+          className={cn("agenttape-code-editor w-full max-w-full", fill && "h-full")}
           editable
           extensions={[json(), foldService.of(jsonBracketFold), EditorViewExtension.lineWrapping]}
           basicSetup={{

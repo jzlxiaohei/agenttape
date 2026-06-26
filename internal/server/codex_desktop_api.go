@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"time"
 
-	"tracelab/internal/launcher"
-	"tracelab/internal/store"
+	"agenttape/internal/launcher"
+	"agenttape/internal/store"
 )
 
 // codexDesktopState records an active injection so the UI can show "restore" across
 // reloads and restore knows exactly what to undo. Lives next to the config it
-// guards (~/.codex/), never in tracelab's data dir.
+// guards (~/.codex/), never in agenttape's data dir.
 type codexDesktopState struct {
 	HadOriginal bool   `json:"had_original"`
 	SessionID   string `json:"session_id"`
@@ -31,8 +31,8 @@ func codexPaths() (dir, config, backup, state string, err error) {
 	dir = filepath.Join(home, ".codex")
 	return dir,
 		filepath.Join(dir, "config.toml"),
-		filepath.Join(dir, "config.toml.tracelab-bak"),
-		filepath.Join(dir, ".tracelab-desktop-state.json"),
+		filepath.Join(dir, "config.toml.agenttape-bak"),
+		filepath.Join(dir, ".agenttape-desktop-state.json"),
 		nil
 }
 
@@ -48,7 +48,7 @@ func readCodexState(statePath string) (*codexDesktopState, bool) {
 	return &st, true
 }
 
-// handleCodexDesktopStatus reports whether tracelab routing is currently injected
+// handleCodexDesktopStatus reports whether agenttape routing is currently injected
 // into ~/.codex/config.toml (so the UI can offer restore after a reload).
 func (s *Server) handleCodexDesktopStatus(w http.ResponseWriter, _ *http.Request) {
 	_, _, _, statePath, err := codexPaths()
@@ -99,7 +99,7 @@ func (s *Server) handleCodexDesktopInstall(st *store.Store, w http.ResponseWrite
 	}
 	// Never stack injections — require an explicit restore first.
 	if _, active := readCodexState(statePath); active {
-		http.Error(w, "tracelab routing is already active; restore it first", http.StatusConflict)
+		http.Error(w, "agenttape routing is already active; restore it first", http.StatusConflict)
 		return
 	}
 	if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -110,7 +110,7 @@ func (s *Server) handleCodexDesktopInstall(st *store.Store, w http.ResponseWrite
 	original, readErr := os.ReadFile(configPath)
 	hadOriginal := readErr == nil
 	if hadOriginal && launcher.HasCodexMarker(string(original)) {
-		http.Error(w, "config.toml already has a tracelab block but no state file; remove it manually, then retry", http.StatusConflict)
+		http.Error(w, "config.toml already has a agenttape block but no state file; remove it manually, then retry", http.StatusConflict)
 		return
 	}
 

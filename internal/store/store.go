@@ -40,7 +40,7 @@ func Open(dataDir string) (*Store, error) {
 		return nil, fmt.Errorf("create raw dir: %w", err)
 	}
 
-	dsn := "file:" + filepath.Join(dataDir, "tracelab.db") +
+	dsn := "file:" + filepath.Join(dataDir, "agenttape.db") +
 		"?_pragma=foreign_keys(1)&_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)"
 	db, err := sql.Open("sqlite", dsn)
 	if err != nil {

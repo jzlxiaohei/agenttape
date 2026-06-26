@@ -3,8 +3,8 @@ package openai
 import (
 	"encoding/json"
 
-	"tracelab/internal/normalize"
-	"tracelab/internal/normalize/shared"
+	"agenttape/internal/normalize"
+	"agenttape/internal/normalize/shared"
 )
 
 // reassembleChatSSE reconstructs a Chat Completions response from its streamed

@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"tracelab/internal/event"
+	"agenttape/internal/event"
 )
 
 // roleSuffix maps an artifact role to a human-friendly filename suffix so users

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"tracelab/internal/normalize"
-	"tracelab/internal/normalize/shared"
+	"agenttape/internal/normalize"
+	"agenttape/internal/normalize/shared"
 )
 
 // parseResponse reconstructs the response from either an SSE stream or a single

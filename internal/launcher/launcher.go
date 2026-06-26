@@ -1,5 +1,5 @@
 // Package launcher builds client process invocations that connect a coding
-// agent to tracelab's capture adapters. It is the composition layer: HTTP
+// agent to agenttape's capture adapters. It is the composition layer: HTTP
 // traffic is pointed at httpcap, while harness lifecycle/tool events are wired
 // to hook capture.
 package launcher
@@ -8,8 +8,8 @@ import (
 	"os"
 	"os/exec"
 
-	"tracelab/internal/source/hook"
-	"tracelab/internal/source/httpcap"
+	"agenttape/internal/source/hook"
+	"agenttape/internal/source/httpcap"
 )
 
 // LaunchClaudeCode builds a command that runs Claude Code through the proxy
@@ -24,7 +24,7 @@ func LaunchClaudeCode(serverURL string, sess *httpcap.Session, events []string, 
 	cmd := exec.Command("claude", full...)
 	cmd.Env = append(os.Environ(),
 		"ANTHROPIC_BASE_URL="+httpcap.SessionBaseURL(serverURL, sess),
-		"TRACELAB_SESSION="+sess.ID,
+		"AGENTTAPE_SESSION="+sess.ID,
 	)
 	return cmd
 }
@@ -49,11 +49,11 @@ func LaunchClaudeCode(serverURL string, sess *httpcap.Session, events []string, 
 func LaunchCodex(serverURL string, sess *httpcap.Session, events []string, args ...string) *exec.Cmd {
 	base := httpcap.SessionBaseURL(serverURL, sess)
 	overrides := []string{
-		"-c", `model_provider="tracelab"`,
-		"-c", `model_providers.tracelab.name="tracelab capture"`,
-		"-c", `model_providers.tracelab.base_url="` + base + `"`,
-		"-c", `model_providers.tracelab.wire_api="responses"`,
-		"-c", `model_providers.tracelab.requires_openai_auth=true`,
+		"-c", `model_provider="agenttape"`,
+		"-c", `model_providers.agenttape.name="agenttape capture"`,
+		"-c", `model_providers.agenttape.base_url="` + base + `"`,
+		"-c", `model_providers.agenttape.wire_api="responses"`,
+		"-c", `model_providers.agenttape.requires_openai_auth=true`,
 	}
 	overrides = append(overrides, hook.BuildCodexOverrides(events, serverURL, sess.ID)...)
 	overrides = append(overrides, "--dangerously-bypass-hook-trust")

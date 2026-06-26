@@ -4,9 +4,9 @@
 package providers
 
 import (
-	"tracelab/internal/normalize"
-	"tracelab/internal/normalize/anthropic"
-	"tracelab/internal/normalize/openai"
+	"agenttape/internal/normalize"
+	"agenttape/internal/normalize/anthropic"
+	"agenttape/internal/normalize/openai"
 )
 
 // Registry returns a registry with all built-in normalizers registered.

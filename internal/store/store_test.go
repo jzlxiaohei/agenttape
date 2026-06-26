@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"tracelab/internal/event"
-	"tracelab/internal/normalize/providers"
-	"tracelab/internal/sink"
-	"tracelab/internal/store"
+	"agenttape/internal/event"
+	"agenttape/internal/normalize/providers"
+	"agenttape/internal/sink"
+	"agenttape/internal/store"
 )
 
 func fixture(t *testing.T, name string) string {

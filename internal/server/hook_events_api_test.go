@@ -8,9 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"tracelab/internal/normalize/providers"
-	"tracelab/internal/server"
-	"tracelab/internal/store"
+	"agenttape/internal/normalize/providers"
+	"agenttape/internal/server"
+	"agenttape/internal/store"
 )
 
 func hookEventsServer(t *testing.T) *httptest.Server {

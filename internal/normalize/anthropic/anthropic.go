@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"strings"
 
-	"tracelab/internal/event"
-	"tracelab/internal/normalize"
-	"tracelab/internal/normalize/shared"
+	"agenttape/internal/event"
+	"agenttape/internal/normalize"
+	"agenttape/internal/normalize/shared"
 )
 
 // Normalizer implements normalize.Normalizer for the Anthropic Messages API.

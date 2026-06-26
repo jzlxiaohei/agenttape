@@ -84,11 +84,11 @@ jobs:
       - name: Build binary with embedded viewer
         run: |
           mkdir -p dist
-          TRACELAB_BIN="$PWD/dist/tracelab-linux-amd64" ./scripts/build.sh
+          AGENTTAPE_BIN="$PWD/dist/agenttape-linux-amd64" ./scripts/build.sh
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
         with:
-          name: tracelab-linux-amd64
-          path: dist/tracelab-linux-amd64
+          name: agenttape-linux-amd64
+          path: dist/agenttape-linux-amd64
           if-no-files-found: error

@@ -3,8 +3,8 @@ package server
 import (
 	"strings"
 
-	"tracelab/internal/normalize"
-	"tracelab/internal/store"
+	"agenttape/internal/normalize"
+	"agenttape/internal/store"
 )
 
 // Compaction detection is graded by evidence strength, never by keyword guessing

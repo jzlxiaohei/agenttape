@@ -1,6 +1,6 @@
 package store
 
-import "tracelab/internal/normalize"
+import "agenttape/internal/normalize"
 
 // stripBlockRaw clears ContentBlock.Raw throughout an envelope before it is
 // persisted. The full original payload is on disk (design choice C), so keeping a

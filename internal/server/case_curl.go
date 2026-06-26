@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"tracelab/internal/store"
+	"agenttape/internal/store"
 )
 
 // curlResp is a copy-pasteable curl for a replay case, in one of two flavors.

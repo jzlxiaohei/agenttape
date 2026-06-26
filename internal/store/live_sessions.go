@@ -3,7 +3,7 @@ package store
 import "time"
 
 // LiveSessionRow is the persisted, NON-SECRET routing of a proxy session — enough
-// to re-attach a still-running agent after a tracelab restart, and nothing more.
+// to re-attach a still-running agent after a agenttape restart, and nothing more.
 // No credentials: token is a routing handle, and a key-mode session's real key is
 // never stored (it lives only in process memory). See docs/SECURITY.md.
 type LiveSessionRow struct {

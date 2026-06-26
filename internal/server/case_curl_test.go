@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"tracelab/internal/normalize/providers"
-	"tracelab/internal/server"
-	"tracelab/internal/store"
+	"agenttape/internal/normalize/providers"
+	"agenttape/internal/server"
+	"agenttape/internal/store"
 )
 
 type caseCurlResp struct {

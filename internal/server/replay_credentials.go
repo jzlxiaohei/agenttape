@@ -1,7 +1,7 @@
 package server
 
 // replayCredentialConflictMessage explains why replay/curl cannot run yet. Live
-// session routing is persisted across a tracelab restart, but credentials are
+// session routing is persisted across a agenttape restart, but credentials are
 // deliberately memory-only. Subscription sessions can be rehydrated when the
 // still-running client sends one more proxied request; key-mode sessions need the
 // user to re-enter the key because the agent only has a placeholder.

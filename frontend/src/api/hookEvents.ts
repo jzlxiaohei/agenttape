@@ -1,6 +1,6 @@
 import { api } from "./client";
 
-// One configurable hook event for a client: whether tracelab wires it on launch,
+// One configurable hook event for a client: whether agenttape wires it on launch,
 // and whether it is a built-in default (seed) or user-added.
 export interface HookEventDef {
   client: string;

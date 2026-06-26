@@ -6,7 +6,7 @@ package openai
 import (
 	"encoding/json"
 
-	"tracelab/internal/normalize"
+	"agenttape/internal/normalize"
 )
 
 // respItem covers every Responses-API item variant (request input and response

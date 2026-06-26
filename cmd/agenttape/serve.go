@@ -7,17 +7,17 @@ import (
 	"net/http"
 	"os"
 
-	"tracelab/internal/normalize/providers"
-	"tracelab/internal/server"
-	"tracelab/internal/sink"
-	"tracelab/internal/store"
-	"tracelab/internal/web"
+	"agenttape/internal/normalize/providers"
+	"agenttape/internal/server"
+	"agenttape/internal/sink"
+	"agenttape/internal/store"
+	"agenttape/internal/web"
 )
 
 func runServe(args []string) error {
 	fs := flag.NewFlagSet("serve", flag.ExitOnError)
 	listen := fs.String("listen", "127.0.0.1:8787", "listen address")
-	data := fs.String("data", "tracelab-data", "data dir (SQLite db + raw files)")
+	data := fs.String("data", "agenttape-data", "data dir (SQLite db + raw files)")
 	jsonlOut := fs.String("jsonl", "", "use a JSONL file instead of SQLite (debug)")
 	viewer := fs.String("viewer", "", "serve the viewer from this dist dir instead of the embedded bundle (frontend dev only; empty = use the binary's embedded viewer)")
 	allowLaunch := fs.Bool("allow-launch", true, "allow the viewer to launch agents in a terminal (on by default; pass -allow-launch=false to disable — the page always still shows a copy-paste command)")
@@ -37,14 +37,14 @@ func runServe(args []string) error {
 		if err != nil {
 			return fmt.Errorf("open store: %w", err)
 		}
-		st, s, where = opened, opened, *data+"/ (tracelab.db + raw/)"
+		st, s, where = opened, opened, *data+"/ (agenttape.db + raw/)"
 	}
 	defer s.Close()
 
 	srv := server.New(s, providers.Registry())
 	srv.AllowLaunch = *allowLaunch
 
-	log.Printf("tracelab serve: listening on http://%s", *listen)
+	log.Printf("agenttape serve: listening on http://%s", *listen)
 	log.Printf("  proxy:    http://%s/s/<token>/...", *listen)
 	log.Printf("  hooks:    POST http://%s/_hook?runtime=..&event=..", *listen)
 	log.Printf("  register: POST http://%s/_register {client,upstream}", *listen)

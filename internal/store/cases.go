@@ -125,7 +125,7 @@ func (s *Store) DeleteCase(id string) error {
 // stores the digest in schema_meta under 'cases_seed_digest'. When the digest is
 // unchanged it does nothing — so for a released binary the built-in set is stable and
 // a user's in-place edits/deletions of built-ins persist across restarts. When the
-// embedded seeds change (a rebuild after editing seeds/*.json, or a new tracelab
+// embedded seeds change (a rebuild after editing seeds/*.json, or a new agenttape
 // version that adds/edits seeds) the digest differs and every seed row is reinstalled
 // via INSERT OR REPLACE — no manual SQL reset needed.
 //
