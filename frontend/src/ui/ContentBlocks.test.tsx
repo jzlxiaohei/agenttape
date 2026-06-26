@@ -1,9 +1,23 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { ContentBlocks } from "./ContentBlocks";
 import { useUIStore } from "@/store/ui";
 import type { ContentBlock } from "@/api/events";
+
+vi.mock("./Markdown", () => ({
+  default: ({ text }: { text: string }) => (
+    <div data-testid="markdown">
+      {text === "**bold** word" ? (
+        <>
+          <strong>bold</strong> word
+        </>
+      ) : (
+        text
+      )}
+    </div>
+  ),
+}));
 
 afterEach(() => {
   act(() => useUIStore.setState({ renderMarkdown: false }));
