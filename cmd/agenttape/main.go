@@ -8,6 +8,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
+)
+
+// Build metadata, overridden via -ldflags "-X main.version=... -X main.commit=... -X main.date=...".
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
 )
 
 func main() {
@@ -23,6 +31,9 @@ func main() {
 		err = runLaunch(os.Args[2:])
 	case "dump":
 		err = runDump(os.Args[2:])
+	case "version", "--version", "-version", "-v":
+		fmt.Printf("agenttape %s (commit %s, built %s, %s)\n",
+			version, commit, date, runtime.Version())
 	default:
 		usage()
 		os.Exit(2)
@@ -40,5 +51,6 @@ usage:
   agenttape serve  [-listen 127.0.0.1:8787] [-out traces.jsonl]
   agenttape launch -kind cc|codex [-server http://127.0.0.1:8787] [-upstream URL] -- <client args>
   agenttape dump   <traces.jsonl>
+  agenttape version
 `)
 }
