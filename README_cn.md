@@ -55,7 +55,23 @@ AgentTape 刻意把范围控制在 Claude Code 与 Codex——优先把执行流
 
 ## 快速开始
 
-源码编译（需要 Go 1.26+、Node 18+）：
+### 下载预编译二进制（推荐）
+
+从 [最新 Release](https://github.com/jzlxiaohei/agenttape/releases/latest) 下对应平台的压缩包 —— Viewer 已内嵌，**单文件即用**。
+
+```bash
+tar -xzf agenttape_*_darwin_arm64.tar.gz   # 或 agenttape_*_linux_amd64.tar.gz
+chmod +x agenttape
+./agenttape serve
+```
+
+> **macOS（Gatekeeper）：** 从网上下载的未签名二进制会被拦（“无法检查其是否包含恶意软件”）。解隔离一次即可（或右键文件 → 打开 → 确认）：
+>
+> ```bash
+> xattr -dr com.apple.quarantine ./agenttape
+> ```
+
+### 源码编译（需要 Go 1.26+、Node 18+）
 
 ```bash
 git clone <repo-url> agenttape && cd agenttape

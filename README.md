@@ -55,7 +55,23 @@ AgentTape deliberately keeps its scope to Claude Code and Codex — going deep o
 
 ## Quick start
 
-Build from source (requires Go 1.26+ and Node 18+):
+### Download a prebuilt binary (recommended)
+
+Grab the archive for your platform from the [latest release](https://github.com/jzlxiaohei/agenttape/releases/latest) — the Viewer is embedded, so it's a single self-contained file.
+
+```bash
+tar -xzf agenttape_*_darwin_arm64.tar.gz   # or agenttape_*_linux_amd64.tar.gz
+chmod +x agenttape
+./agenttape serve
+```
+
+> **macOS (Gatekeeper):** an unsigned binary downloaded from the web is blocked with "cannot verify it is free of malware". Clear the quarantine flag once (or right-click the file → Open → confirm):
+>
+> ```bash
+> xattr -dr com.apple.quarantine ./agenttape
+> ```
+
+### Build from source (requires Go 1.26+ and Node 18+)
 
 ```bash
 git clone <repo-url> agenttape && cd agenttape

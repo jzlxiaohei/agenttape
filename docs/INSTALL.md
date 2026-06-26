@@ -23,12 +23,10 @@ chmod +x agenttape
 **macOS 注意(Gatekeeper):** 从网上下载的未签名二进制会被拦("无法验证开发者")。解隔离一次即可:
 
 ```bash
-xattr -d com.apple.quarantine ./agenttape   # 或者:右键 → 打开 → 确认一次
+xattr -dr com.apple.quarantine ./agenttape   # 或者:右键 → 打开 → 确认一次
 ```
 
 把它放进 PATH(如 `/usr/local/bin` 或 `~/bin`)后就能直接 `agenttape serve` / `agenttape launch`。
-
-> 状态:发布渠道仍在搭建中。在二进制 Release 出来之前,用**方式二(源码编译)**。
 
 ---
 
