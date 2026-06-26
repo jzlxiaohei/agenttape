@@ -25,7 +25,7 @@ EXISTS`，幂等）→ `migrate`（加列等增量迁移）→ seed 内置 case 
 - `schema.sql`：全部表结构（一处定义，`Open` 时应用）。
 - `store.go` / `write.go` / `query.go`：打开、写入、查询。
 - `cases.go` + `seeds/*.json`：复盘库 case 模型 + 内置 seed（`go:embed`，按内容指纹刷新，
-  见 [`REPLAY_LIB.md`](../../REPLAY_LIB.md) §3）。
+  见 [`REPLAY_LIB.md`](../REPLAY_LIB.md) §3）。
 - `live_sessions.go`：跨重启的**非密** session 路由表。
 
 ## 安全
@@ -33,7 +33,7 @@ EXISTS`，幂等）→ `migrate`（加列等增量迁移）→ seed 内置 case 
 - 落库的 header 是**脱敏版**（采集层 `redactHeaders` 处理），库里**不含可用凭证**。
 - `live_sessions` 只存路由事实（id/token/上游/provider/mode），**没有一行是凭证**；
   token 只是路由句柄，不能向上游认证。
-- 内置 seed 来自真实捕获但已逐项脱敏（见 [`REPLAY_LIB.md`](../../REPLAY_LIB.md) §4 /
+- 内置 seed 来自真实捕获但已逐项脱敏（见 [`REPLAY_LIB.md`](../REPLAY_LIB.md) §4 /
   [`SECURITY.md`](../SECURITY.md) §6）。
 
 > 数据目录是普通文件，同用户进程可读、且可能被备份/同步带离本机——库里不含凭证正是为了
