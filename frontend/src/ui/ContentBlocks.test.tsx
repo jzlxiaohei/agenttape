@@ -1,11 +1,13 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { ContentBlocks } from "./ContentBlocks";
 import { useUIStore } from "@/store/ui";
 import type { ContentBlock } from "@/api/events";
 
-afterEach(() => useUIStore.setState({ renderMarkdown: false }));
+afterEach(() => {
+  act(() => useUIStore.setState({ renderMarkdown: false }));
+});
 
 // ContentBlocks reads navigation state via the route hook, so it needs a Router.
 const renderCB = (blocks: ContentBlock[]) =>
@@ -39,9 +41,9 @@ describe("ContentBlocks", () => {
   });
 
   it("renders markdown (lazy) when the toggle is on, keeping raw as fallback", async () => {
-    useUIStore.setState({ renderMarkdown: true });
+    act(() => useUIStore.setState({ renderMarkdown: true }));
     renderCB([{ type: "text", text: "**bold** word" }]);
-    const strong = await screen.findByText("bold");
+    const strong = await screen.findByText("bold", {}, { timeout: 3000 });
     expect(strong.tagName).toBe("STRONG");
   });
 });

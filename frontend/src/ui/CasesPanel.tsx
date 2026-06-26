@@ -56,6 +56,7 @@ import { Sheet, SheetContent, SheetA11y } from "@/components/ui/sheet";
 import CodeEditor from "./CodeEditor";
 import { ClientIcon } from "./ClientIcon";
 import { Popconfirm } from "./Popconfirm";
+import { ContentBlocks } from "./ContentBlocks";
 
 // Replay library: predefined + user-saved cases, shown as a card gallery grouped
 // into built-in / added, with a provider filter on top. Clicking a card opens the
@@ -688,9 +689,22 @@ function CaseRunner({ caseItem, onCreated }: { caseItem: ReplayCase; onCreated: 
                     </span>
                   </span>
                   <span>{t("detail.duration")}: {result.duration_ms}ms</span>
+                  {result.normalized?.response?.stop_reason && (
+                    <span>
+                      {t("cases.result_stop_reason")}:{" "}
+                      <span className="mono text-foreground">{result.normalized.response.stop_reason}</span>
+                    </span>
+                  )}
+                  {(result.normalized?.response?.tool_calls?.length ?? 0) > 0 && (
+                    <span>{t("cases.result_tool_calls", { count: result.normalized?.response?.tool_calls?.length })}</span>
+                  )}
                   {result.normalized?.response?.usage && (
                     <span className="mono">
-                      {t("detail.usage")}: out {result.normalized.response.usage.output_tokens ?? 0}
+                      {t("cases.result_usage", {
+                        input: result.normalized.response.usage.input_tokens ?? 0,
+                        output: result.normalized.response.usage.output_tokens ?? 0,
+                        total: result.normalized.response.usage.total_tokens ?? 0,
+                      })}
                     </span>
                   )}
                 </div>
@@ -703,6 +717,7 @@ function CaseRunner({ caseItem, onCreated }: { caseItem: ReplayCase; onCreated: 
                 </p>
               )}
               {result?.normalize_error && <p className="mb-2 text-xs text-error">{result.normalize_error}</p>}
+              {result?.truncated && <p className="mb-2 text-[11px] text-muted-foreground">{t("cases.truncated")}</p>}
               <ResultBody result={result} />
             </div>
           </div>
@@ -712,16 +727,19 @@ function CaseRunner({ caseItem, onCreated }: { caseItem: ReplayCase; onCreated: 
   );
 }
 
-// ResultBody renders the replay outcome: the assistant's final text on success,
-// or the raw upstream body on a non-2xx (or when nothing normalized) — so an
-// error like 401/insufficient_quota is actually visible instead of a blank "—".
+// ResultBody renders the replay outcome structurally when possible. `final_text`
+// is only a lossy text convenience; the authoritative normalized response is
+// `output`, which preserves reasoning/text/tool_call block order.
 function ResultBody({ result }: { result?: ReplayResult }) {
   const { t } = useTranslation();
   if (!result) return <pre className="whitespace-pre-wrap break-words text-xs leading-relaxed">—</pre>;
 
-  const finalText = result.normalized?.response?.final_text ?? "";
+  const response = result.normalized?.response;
+  const output = response?.output ?? [];
+  const hasOutput = output.some((message) => (message.content?.length ?? 0) > 0);
+  const finalText = response?.final_text ?? "";
   const isError = result.status >= 400;
-  const showRaw = (isError || finalText.trim() === "") && !!result.response_body;
+  const showRaw = (isError || (!hasOutput && finalText.trim() === "")) && !!result.response_body;
 
   if (showRaw) {
     return (
@@ -735,13 +753,24 @@ function ResultBody({ result }: { result?: ReplayResult }) {
         >
           {result.response_body}
         </pre>
-        {result.truncated && <p className="mt-1 text-[11px] text-muted-foreground">{t("cases.truncated")}</p>}
       </div>
     );
   }
-  return (
-    <pre className="whitespace-pre-wrap break-words text-xs leading-relaxed">{finalText || "—"}</pre>
-  );
+  if (hasOutput) {
+    return (
+      <div className="space-y-3">
+        {output.map((message, index) => (
+          <section key={index} className="rounded-lg border bg-card p-3">
+            <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {t(`role.${message.role}`, { defaultValue: message.role })}
+            </div>
+            <ContentBlocks blocks={message.content} />
+          </section>
+        ))}
+      </div>
+    );
+  }
+  return <pre className="whitespace-pre-wrap break-words text-xs leading-relaxed">{finalText || "—"}</pre>;
 }
 
 // CurlSheet builds a copy-pasteable curl for the case + selected session. Proxy
@@ -774,12 +803,19 @@ function CurlSheet({
   useEffect(() => setCopied(false), [curl.data?.curl]);
 
   const data = curl.data;
+  const curlReady = !!data?.curl && !(mode === "direct" && data.revealed !== reveal) && !curl.isPending;
+  const copyLabel =
+    mode === "direct"
+      ? data?.revealed
+        ? t("cases.curl_copy_revealed")
+        : t("cases.curl_copy_masked")
+      : t("launch.copy");
   const switchMode = (m: CurlMode) => {
     setMode(m);
     if (m === "proxy") setReveal(false); // direct always starts masked
   };
   const copy = () => {
-    if (!data?.curl) return;
+    if (!curlReady || !data?.curl) return;
     navigator.clipboard.writeText(data.curl).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
@@ -818,7 +854,7 @@ function CurlSheet({
               <div className="mb-3 space-y-2 rounded-md border border-error/40 bg-error/5 px-3 py-2">
                 <p className="flex items-start gap-1.5 text-xs text-error">
                   <AlertTriangle size={13} className="mt-0.5 shrink-0" />
-                  {t("cases.curl_direct_warning")}
+                  {reveal ? t("cases.curl_direct_warning_revealed") : t("cases.curl_direct_warning_masked")}
                 </p>
                 {data?.credential_kind === "subscription" && (
                   <p className="text-xs text-error/90">{t("cases.curl_subscription_note")}</p>
@@ -838,11 +874,11 @@ function CurlSheet({
               <button
                 type="button"
                 onClick={copy}
-                disabled={!data?.curl}
+                disabled={!curlReady}
                 className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-md border bg-card px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted disabled:opacity-50"
               >
                 {copied ? <Check size={12} /> : <Copy size={12} />}
-                {copied ? t("launch.copied") : t("launch.copy")}
+                {copied ? t("launch.copied") : copyLabel}
               </button>
               {curl.isPending && !data ? (
                 <p className="p-3 text-xs text-muted-foreground">{t("detail.loading")}</p>

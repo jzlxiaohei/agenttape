@@ -71,7 +71,7 @@ func (s *Server) handleCaseCurl(st *store.Store, w http.ResponseWriter, r *http.
 	if req.Mode == "direct" {
 		auth := s.Sessions.AuthFor(req.SessionID)
 		if auth == nil {
-			http.Error(w, "no in-memory credentials for that session; launch a session first", http.StatusConflict)
+			http.Error(w, replayCredentialConflictMessage(s, req.SessionID), http.StatusConflict)
 			return
 		}
 		kind := "subscription"

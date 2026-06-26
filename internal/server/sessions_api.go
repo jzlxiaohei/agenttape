@@ -8,8 +8,8 @@ import (
 	"tracelab/internal/store"
 )
 
-// handleRenameSession sets a user-chosen name (label) for a captured session,
-// overriding the title auto-derived from the first prompt. Body: {"title": "..."}.
+// handleRenameSession sets a user-chosen name (label) for a captured session.
+// Body: {"title": "..."}.
 func (s *Server) handleRenameSession(st *store.Store, w http.ResponseWriter, r *http.Request) {
 	id := r.PathValue("id")
 	if _, err := st.GetSession(id); err == store.ErrNoRows {

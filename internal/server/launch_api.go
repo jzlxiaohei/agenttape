@@ -247,6 +247,14 @@ func (s *Server) handleLaunch(w http.ResponseWriter, r *http.Request) {
 	if term == "" {
 		term = "Terminal"
 	}
+	// The terminal name is free-text (the UI lets users type any installed app), so
+	// validate it before launching — a typo otherwise surfaces as an opaque `open`
+	// failure. appLaunchable resolves via Launch Services, the same lookup `open -a`
+	// uses, so a pass here means the open below will find the app.
+	if !appLaunchable(term) {
+		http.Error(w, "terminal app not found: "+term+" — check the name (must match an installed .app), or install it", http.StatusBadRequest)
+		return
+	}
 	// open -a <App> <script>: exec args (not a shell), so the app name is safe.
 	if err := exec.Command("open", "-a", term, f.Name()).Run(); err != nil {
 		http.Error(w, "open "+term+": "+err.Error(), http.StatusInternalServerError)
@@ -307,6 +315,22 @@ func detectTerminals() []string {
 		}
 	}
 	return out
+}
+
+// appLaunchable reports whether macOS can resolve an app by the given name, using
+// the same Launch Services lookup that `open -a` performs (so it accepts display
+// names that don't match a /Applications/<name>.app path, which appInstalled would
+// miss). It has no side effects — it neither launches the app nor reveals it in
+// Finder. macOS only; returns false elsewhere.
+func appLaunchable(name string) bool {
+	if runtime.GOOS != "darwin" {
+		return false
+	}
+	// Embed the name into an AppleScript string literal; escape backslash and quote
+	// so a name containing either can't break out of the literal.
+	esc := strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(name)
+	script := `POSIX path of (path to application "` + esc + `")`
+	return exec.Command("osascript", "-e", script).Run() == nil
 }
 
 func appInstalled(name string) bool {

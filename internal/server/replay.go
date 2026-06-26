@@ -67,7 +67,7 @@ func (s *Server) handleReplay(st *store.Store, w http.ResponseWriter, r *http.Re
 	}
 	headers := s.Sessions.AuthFor(detail.SessionID)
 	if headers == nil {
-		http.Error(w, "no in-memory credentials for this session (captured before a restart or in another process); launch a new session to replay", http.StatusConflict)
+		http.Error(w, replayCredentialConflictMessage(s, detail.SessionID), http.StatusConflict)
 		return
 	}
 

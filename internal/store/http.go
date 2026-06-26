@@ -58,21 +58,6 @@ func (s *Store) writeHTTP(tx *sql.Tx, rec sink.Record) error {
 			return err
 		}
 	}
-	// Derive a human-friendly session title from the first user prompt, set once
-	// (the first completion to land wins; later ones leave it untouched).
-	if isCompletion(ev, env) {
-		if title := sessionTitle(env); title != "" {
-			sid := ev.Correlation.SessionID
-			if sid == "" {
-				sid = "_nosession"
-			}
-			if _, err := tx.Exec(
-				`UPDATE sessions SET label=? WHERE id=? AND (label IS NULL OR label='')`,
-				title, sid); err != nil {
-				return err
-			}
-		}
-	}
 	return nil
 }
 

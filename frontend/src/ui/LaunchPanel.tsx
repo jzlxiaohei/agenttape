@@ -154,6 +154,7 @@ export function LaunchPanel() {
 
       {/* Two clearly-separated start methods, each badged with what it captures. */}
       <MethodCard title={t("launch.method_spawn")} badge={t("launch.capture_full")} full>
+        <p className="text-xs text-muted-foreground">{t("launch.macos_only")}</p>
         <Field label={t("launch.workdir")}>
           <WorkdirInput
             value={workdir}
@@ -165,17 +166,19 @@ export function LaunchPanel() {
 
         {termList.length > 0 && (
           <Field label={t("launch.terminal")}>
-            <select
+            <input
+              list="launch-terminal-apps"
               value={effectiveTerminal}
               onChange={(e) => setTerminal(e.target.value)}
+              placeholder={t("launch.terminal_hint")}
               className="w-full rounded-md border bg-card px-2.5 py-1.5 text-sm"
-            >
+            />
+            <datalist id="launch-terminal-apps">
               {termList.map((tm) => (
-                <option key={tm} value={tm}>
-                  {tm}
-                </option>
+                <option key={tm} value={tm} />
               ))}
-            </select>
+            </datalist>
+            <p className="mt-1 text-xs text-muted-foreground">{t("launch.terminal_note")}</p>
           </Field>
         )}
 
@@ -237,6 +240,7 @@ export function LaunchPanel() {
           </button>
         </div>
         <p className="text-xs text-muted-foreground">{t("launch.run_yourself_note")}</p>
+        <p className="text-xs text-muted-foreground">{t("launch.run_yourself_os")}</p>
         {envCmd && generate.data?.session_id && (
           <p className="text-xs text-toolcall">
             {t("launch.run_yourself_registered", { id: generate.data.session_id.slice(0, 8) })}

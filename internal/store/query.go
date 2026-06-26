@@ -11,7 +11,7 @@ type SessionSummary struct {
 	ID         string `json:"id"`
 	Client     string `json:"client"`
 	Upstream   string `json:"upstream"`
-	Title      string `json:"title"` // derived from the first user prompt (may be empty)
+	Title      string `json:"title"` // user-chosen session name (empty until renamed; UI falls back to a short id)
 	StartedAt  string `json:"started_at"`
 	EventCount int    `json:"event_count"`
 	// HookCount is how many captured events are harness hooks. Zero on a session
@@ -58,9 +58,8 @@ func (s *Store) GetSession(id string) (*SessionSummary, error) {
 	return &ss, nil
 }
 
-// SetSessionLabel sets a user-chosen name for a session, overriding the title that
-// was auto-derived from the first prompt. An empty label clears it (the auto-fill
-// in http.go may re-derive one from a later completion). Idempotent.
+// SetSessionLabel sets a user-chosen name for a session. An empty label clears it,
+// leaving the session unnamed (the UI falls back to a short id). Idempotent.
 func (s *Store) SetSessionLabel(id, label string) error {
 	_, err := s.db.Exec(`UPDATE sessions SET label = ? WHERE id = ?`, label, id)
 	return err

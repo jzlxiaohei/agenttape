@@ -87,7 +87,7 @@ function SessionRow({ session, ordinal, onSelect }: { session: SessionVM; ordina
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
 
-  // Prefer the user-set / auto-derived name; fall back to a short id when unnamed.
+  // Prefer the user-set name; fall back to a short id when unnamed.
   const displayName = session.title || `#${session.id.slice(0, 8)}`;
 
   const startEdit = () => {

@@ -322,13 +322,7 @@ func (s *Server) handleRunCase(st *store.Store, w http.ResponseWriter, r *http.R
 	}
 	auth := s.Sessions.AuthFor(req.SessionID)
 	if auth == nil {
-		msg := "no in-memory credentials for that session; launch a session first"
-		if s.Sessions.NeedsKey(req.SessionID) {
-			// Key-mode session restored after a restart: routing is back but the key was
-			// never persisted. Re-supply it instead of relaunching the agent.
-			msg = "this API-key session lost its key on restart; re-enter the key for it, then run again"
-		}
-		http.Error(w, msg, http.StatusConflict)
+		http.Error(w, replayCredentialConflictMessage(s, req.SessionID), http.StatusConflict)
 		return
 	}
 	body := c.Body
